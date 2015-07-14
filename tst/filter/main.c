@@ -70,17 +70,19 @@ static int test_firf(struct harness_t *harness_p)
                          input,
                          coefficients,
                          ref_output);
-        std_printf(FSTR("%s\n"), description);
+        std_printk(STD_LOG_NOTICE, FSTR("enter: %s"), description);
 
-        BTASSERT(filter_firf(test->input,
+        BTASSERT(filter_firf(input,
                              NUMBER_OF_INPUT_SAMPLES,
-                             test->coefficients,
+                             coefficients,
                              NUMBER_OF_COEFFICIENTS,
                              output) == 0);
 
+        std_printk(STD_LOG_NOTICE, FSTR("exit: %s"), description);
+
         for (i = 0; i < membersof(output); i++) {
-            BTASSERT(float_close_to_zero(test->ref_output[i] - output[i]),
-                     "i = %d", i);
+            BTASSERT(float_close_to_zero(ref_output[i] - output[i]),
+                     FSTR("i = %d"), i);
         }
     }
 
