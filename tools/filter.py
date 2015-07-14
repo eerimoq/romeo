@@ -124,10 +124,10 @@ def create_signal(frequencies, amplitudes, number_of_samples, sample_rate):
     signal = zeros(len(timesamples))
     for frequency, amplitude in zip(frequencies, amplitudes):
         signal += amplitude * sin(2*pi*frequency*timesamples)
-    return signal
+    return signal, timesamples
 
 
-def plot_signals(sample_rate, numtaps, signal, filtered_signal):
+def plot_signals(sample_rate, numtaps, input_signal, output_signal, timesamples):
     from matplotlib.pylab import axes, plot, title, xlabel, show, figure, grid
 
     # The first N-1 samples are "corrupted" by the initial conditions
@@ -138,10 +138,10 @@ def plot_signals(sample_rate, numtaps, signal, filtered_signal):
 
     # Plot the signals
     figure(1)
-    plot(t, signal)
+    plot(timesamples, input_signal)
     # Plot just the "good" part of the filtered signal.  The first N-1
     # samples are "corrupted" by the initial conditions.
-    plot(t[warmup:]-delay, filtered_signal[warmup:], 'g', linewidth=4)
+    plot(timesamples[warmup:]-delay, output_signal, 'g', linewidth=4)
     grid(True)
     show()
 
@@ -169,10 +169,10 @@ def main(args):
     frequencies = [10, 9000]
     amplitudes = [1.0, 0.2]
     number_of_samples = 80
-    input_signal = create_signal(frequencies,
-                                 amplitudes,
-                                 number_of_samples,
-                                 sample_rate)
+    input_signal, timesamples = create_signal(frequencies,
+                                              amplitudes,
+                                              number_of_samples,
+                                              sample_rate)
     output_signal = lfilter(coefficients, 1.0, input_signal)[numtaps-1:]
 
     name = "low_pass_6000_hz"
@@ -194,7 +194,7 @@ def main(args):
                                         tests=tests))
 
     if args.plot:
-        plot_signals(sample_rate, numtaps, signal, filtered_signal)
+        plot_signals(sample_rate, numtaps, input_signal, output_signal, timesamples)
 
 
 if __name__ == "__main__":
