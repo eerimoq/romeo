@@ -8,6 +8,8 @@ libraries.
 The goal of the project is to create a simple lawn mower for my tiny
 garden of 10 m2, but it will not be limited to that size.
 
+![](doc/mower_first_sketch.jpg)
+
 HARDWARE
 ========
 
