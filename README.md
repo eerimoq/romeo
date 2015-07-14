@@ -30,4 +30,13 @@ SOFTWARE
 ========
 
 The software is written in c and uses the Simba microkernel and build
-framework. It can be found in the folder called 'src'.
+framework.
+
+The package robomower, located in src/, contains the source code the
+the RoboMower.
+
+Unit tests are in the folder called tst/.
+
+The robot application is in mower/.
+
+The charge station application is in charging_station/.

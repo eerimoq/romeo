@@ -35,3 +35,4 @@ deps
 obj
 run.log
 tst/*/fs
+*/fs
