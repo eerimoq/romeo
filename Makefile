@@ -18,8 +18,8 @@
 # This file is part of the Robomower project.
 #
 
-TESTS = $(addprefix tst/, filter)
-APPS = charging_station mower
+TESTS = $(addprefix robomower/tst/, filter)
+APPS = $(addprefix app/, charging_station mower)
 TESTS_AND_APPS = $(TESTS) $(APPS)
 
 all: $(TESTS_AND_APPS:%=%.all)

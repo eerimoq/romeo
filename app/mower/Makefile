@@ -18,12 +18,12 @@
 # This file is part of the RoboMower project.
 #
 
-NAME = charging_station
+NAME = mower
 BOARD = linux
 SRC += main.c
 DRIVERS_SRC = uart.c pin.c
 
-ROBOMOWER = ..
-include $(ROBOMOWER)/src/robomower.mk
-SIMBA = ../../archive/simba
+ROBOMOWER = ../../robomower/src
+include $(ROBOMOWER)/robomower.mk
+SIMBA = ../../../archive/simba
 include $(SIMBA)/make/app.mk

@@ -18,7 +18,7 @@
 # This file is part of the RoboMower project.
 #
 
-INC += $(ROBOMOWER)/src
+INC += $(ROBOMOWER)
 
 ROBOMOWER_SRC ?= filter.c \
 	perimiter_wire_tx.c \
@@ -26,4 +26,4 @@ ROBOMOWER_SRC ?= filter.c \
 	movement.c \
 	cutter.c
 
-SRC += $(ROBOMOWER_SRC:%=$(ROBOMOWER)/src/%)
+SRC += $(ROBOMOWER_SRC:%=$(ROBOMOWER)/%)
