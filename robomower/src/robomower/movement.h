@@ -22,45 +22,21 @@
 #define __ROBOMOWER_MOVEMENT_H__
 
 #include "simba.h"
-
-struct movement_motor_t {
-    struct pin_driver_t in1;
-    struct pin_driver_t in2;
-    struct pin_driver_t enable;
-};
-
-struct movement_t {
-    int speed;
-    int omega;
-    struct movement_motor_t left_motor;
-    struct movement_motor_t right_motor;
-};
+#include "robomower.h"
 
 /**
- * Initialize a movement instance from given data.
- * @param[out] movement_p Instance to be initialised.
- * @param[in] pin_dev_in1_p Pin device for in1.
- * @param[in] pin_dev_in2_p Pin device for in2.
- * @return zero(0) or negative error code.
- */
-int movement_init(struct movement_t *movement_p,
-                  struct pin_device_t *left_motor_in1_p,
-                  struct pin_device_t *left_motor_in2_p,
-                  struct pin_device_t *left_motor_enable_p,
-                  struct pin_device_t *right_motor_in1_p,
-                  struct pin_device_t *right_motor_in2_p,
-                  struct pin_device_t *right_motor_enable_p);
-
-/**
- * Set movement speed and turn rate.
+ * Calculate wheel turn rates from given robot speed and rotation.
  * @param[in] movement_p Movement instance.
  * @param[in] speed New speed in cm/s. A negative value
  *                  means going in reverse.
  * @param[in] omega New turn rate in rad/100*s.
+ * @param[out] left_wheel_omega Left wheel turn rate in rad/100*s.
+ * @param[out] right_wheel_omega Right wheel turn rate in rad/100*s.
  * @return zero(0) or negative error code.
  */
-int movement_set(struct movement_t *movement_p,
-                 int speed,
-                 int omega);
+int movement_calculate_wheels_omega(float speed,
+                                    float omega,
+                                    float *left_wheel_omega,
+                                    float *right_wheel_omega);
 
 #endif
