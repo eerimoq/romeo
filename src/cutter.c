@@ -1,5 +1,5 @@
 /**
- * @file robomower.h
+ * @file robomower/cutter.c
  * @version 0.1
  *
  * @section License
@@ -18,13 +18,23 @@
  * This file is part of the RoboMower project.
  */
 
-#ifndef __ROBOMOWER_H__
-#define __ROBOMOWER_H__
+#include "simba.h"
+#include "robomower.h"
 
-#include "robomower/filter.h"
-#include "robomower/perimiter_wire_tx.h"
-#include "robomower/perimiter_wire_rx.h"
-#include "robomower/movement.h"
-#include "robomower/cutter.h"
+int cutter_init(struct cutter_t *cutter_p,
+                struct pin_device_t *pin_dev_in1_p,
+                struct pin_device_t *pin_dev_in2_p,
+                struct pin_device_t *pin_dev_enable_p)
+{
+    return (0);
+}
 
-#endif
+int cutter_start(struct cutter_t *cutter_p)
+{
+    return (0);
+}
+
+int cutter_stop(struct cutter_t *cutter_p)
+{
+    return (0);
+}

@@ -21,7 +21,7 @@
 NAME = mower
 BOARD = linux
 SRC += main.c
-DRIVERS_SRC = uart.c
+DRIVERS_SRC = uart.c pin.c
 
 ROBOMOWER = ..
 include $(ROBOMOWER)/src/robomower.mk

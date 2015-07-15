@@ -20,6 +20,10 @@
 
 INC += $(ROBOMOWER)/src
 
-ROBOMOWER_SRC ?= filter.c perimiter_wire_tx.c
+ROBOMOWER_SRC ?= filter.c \
+	perimiter_wire_tx.c \
+	perimiter_wire_rx.c \
+	movement.c \
+	cutter.c
 
 SRC += $(ROBOMOWER_SRC:%=$(ROBOMOWER)/src/%)
