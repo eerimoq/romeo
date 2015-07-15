@@ -32,6 +32,7 @@ int main()
     sys_start();
     uart_module_init();
 
+    /* Setup UART. */
     uart_init(&uart, &uart_device[0], 38400, qinbuf, sizeof(qinbuf));
     uart_start(&uart);
     std_klog_set_output_channel(&uart.chout);
