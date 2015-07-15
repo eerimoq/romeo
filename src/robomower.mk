@@ -18,9 +18,8 @@
 # This file is part of the RoboMower project.
 #
 
-
 INC += $(ROBOMOWER)/src
 
-ROBOMOWER_SRC ?= filter.c
+ROBOMOWER_SRC ?= filter.c perimiter_wire_tx.c
 
 SRC += $(ROBOMOWER_SRC:%=$(ROBOMOWER)/src/%)
