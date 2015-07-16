@@ -27,11 +27,11 @@
 /**
  * Calculate wheel turn rates from given robot speed and rotation.
  * @param[in] movement_p Movement instance.
- * @param[in] speed New speed in cm/s. A negative value
+ * @param[in] speed New speed in m/s. A negative value
  *                  means going in reverse.
- * @param[in] omega New turn rate in rad/100*s.
- * @param[out] left_wheel_omega Left wheel turn rate in rad/100*s.
- * @param[out] right_wheel_omega Right wheel turn rate in rad/100*s.
+ * @param[in] omega New turn rate in rad/s.
+ * @param[out] left_wheel_omega Left wheel turn rate in rad/s.
+ * @param[out] right_wheel_omega Right wheel turn rate in rad/s.
  * @return zero(0) or negative error code.
  */
 int movement_calculate_wheels_omega(float speed,

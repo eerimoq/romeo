@@ -36,8 +36,8 @@ int movement_calculate_wheels_omega(float speed,
     float omega_wheel_speed;
 
     /* The base speed of the wheels. */
-    left_wheel_speed = (100.0f * speed);
-    right_wheel_speed = (100.0f * speed);
+    left_wheel_speed = speed;
+    right_wheel_speed = speed;
 
     /* Omega gives the difference in speed for the two motors. */
     omega_wheel_speed = (omega * WHEEL_DISTANCE_CM / 2.0f);
