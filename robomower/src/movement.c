@@ -21,10 +21,9 @@
 #include "simba.h"
 #include "robomower.h"
 
-/* Geometry. */
+/* Robot geometry. */
 #define WHEEL_DISTANCE_CM      30.0f
 #define WHEEL_CIRCUMFERENCE_CM 40.0f
-#define PI 3.14159f
 
 int movement_calculate_wheels_omega(float speed,
                                     float omega,
@@ -51,7 +50,7 @@ int movement_calculate_wheels_omega(float speed,
         right_wheel_speed += omega_wheel_speed;
     }
 
-    /* Calculate output values in radians/100*s*/
+    /* Calculate output values in radians/s. */
     *left_wheel_omega = (2.0f * PI * left_wheel_speed / WHEEL_CIRCUMFERENCE_CM);
     *right_wheel_omega = (2.0f * PI * right_wheel_speed / WHEEL_CIRCUMFERENCE_CM);
 

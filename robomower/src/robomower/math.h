@@ -1,5 +1,5 @@
 /**
- * @file robomower.h
+ * @file robomower/math.h
  * @version 0.1
  *
  * @section License
@@ -18,14 +18,9 @@
  * This file is part of the RoboMower project.
  */
 
-#ifndef __ROBOMOWER_H__
-#define __ROBOMOWER_H__
+#ifndef __ROBOMOWER_MATH_H__
+#define __ROBOMOWER_MATH_H__
 
-#include "robomower/math.h"
-#include "robomower/filter.h"
-#include "robomower/perimiter_wire_tx.h"
-#include "robomower/perimiter_wire_rx.h"
-#include "robomower/movement.h"
-#include "robomower/cutter.h"
+#define PI 3.14159f
 
 #endif

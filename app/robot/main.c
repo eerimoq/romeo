@@ -21,8 +21,9 @@
 #include "simba.h"
 #include "robomower.h"
 
-FS_COMMAND("/robot/mode/set", cmd_robot_mode_set);
-FS_COMMAND("/robot/manual/movement/set", cmd_robot_control_movement_set);
+FS_COMMAND("/robot/mode/set", robot_cmd_mode_set);
+FS_COMMAND("/robot/manual/movement/set", robot_cmd_manual_movement_set);
+FS_COMMAND("/robot/status", robot_cmd_status);
 
 FS_COUNTER(robot_processing_ticks);
 
@@ -32,14 +33,14 @@ FS_COUNTER(robot_processing_ticks);
 struct motor_t {
     struct pin_driver_t in1;
     struct pin_driver_t in2;
-    struct pin_driver_t enable;
+    struct pwm_driver_t enable;
 };
 
 struct robot_t {
     volatile int mode;
     volatile struct {
-        int speed;
-        int omega;
+        float speed;
+        float omega;
     } manual;
     struct timer_t ticker;
     struct motor_t left_motor;
@@ -48,9 +49,15 @@ struct robot_t {
 
 static struct robot_t robot;
 
-static char shell_stack[450];
+static struct uart_driver_t uart;
+static char qinbuf[32];
+static struct shell_args_t shell_args;
+static struct perimiter_wire_rx_t perimeter;
+static struct thrd_t *self_p;
 
-int cmd_robot_mode_set(int argc,
+static char shell_stack[350];
+
+int robot_cmd_mode_set(int argc,
                        const char *argv[],
                        void *out_p,
                        void *in_p,
@@ -75,11 +82,11 @@ int cmd_robot_mode_set(int argc,
     return (0);
 }
 
-int cmd_robot_control_movement_set(int argc,
-                                   const char *argv[],
-                                   void *out_p,
-                                   void *in_p,
-                                   char *name_p)
+int robot_cmd_manual_movement_set(int argc,
+                                  const char *argv[],
+                                  void *out_p,
+                                  void *in_p,
+                                  char *name_p)
 {
     UNUSED(in_p);
     UNUSED(name_p);
@@ -90,8 +97,35 @@ int cmd_robot_control_movement_set(int argc,
     std_strtol(argv[1], &speed);
     std_strtol(argv[2], &omega);
 
-    robot.manual.speed = speed;
-    robot.manual.omega = omega;
+    robot.manual.speed = ((float)speed) / 100.0f;
+    robot.manual.omega = ((float)omega) / 100.0f;
+
+    return (0);
+}
+
+int robot_cmd_status(int argc,
+                     const char *argv[],
+                     void *out_p,
+                     void *in_p,
+                     char *name_p)
+{
+    UNUSED(in_p);
+    UNUSED(name_p);
+
+    if (robot.mode == ROBOT_MODE_MANUAL) {
+        std_fprintf(out_p,
+                    FSTR("mode = manual\r\n"
+                         "{\r\n"
+                         "    speed = %d.%u m/s\r\n"
+                         "    omega = %d.%u rad/s\r\n"
+                         "}\r\n"),
+                    (int)(robot.manual.speed),
+                    ((unsigned int)(robot.manual.speed * 100.0f)) % 100,
+                    (int)(robot.manual.omega),
+                    ((unsigned int)(robot.manual.omega * 100.0f)) % 100);
+    } else {
+        std_fprintf(out_p, FSTR("mode = automatic\r\n"));
+    }
 
     return (0);
 }
@@ -104,41 +138,42 @@ static void timer_callback(void *arg_p)
 }
 
 static int motor_init(struct motor_t *motor_p,
-                      struct pin_device_t *in1_p,
-                      struct pin_device_t *in2_p,
-                      struct pin_device_t *enable_p)
+                      const struct pin_device_t *in1_p,
+                      const struct pin_device_t *in2_p,
+                      const struct pwm_device_t *enable_p)
 {
     /* Initialize all pins connected to the motor controllers. */
     pin_init(&motor_p->in1, in1_p, PIN_OUTPUT);
     pin_init(&motor_p->in2, in2_p, PIN_OUTPUT);
-    pin_init(&motor_p->enable, enable_p, PIN_OUTPUT);
+    pwm_init(&motor_p->enable, enable_p);
 
     return (0);
 }
 
+#define MOTOR_OMEGA_MAX PI
+
 static int motor_set_omega(struct motor_t *motor_p,
-                           int omega)
+                           float omega)
 {
+    unsigned int duty;
+
     /* Rotation direction pins. */
-    if (omega > 0) {
+    if (omega > 0.0f) {
         pin_write(&motor_p->in1, 1);
         pin_write(&motor_p->in2, 0);
     } else {
         pin_write(&motor_p->in1, 0);
         pin_write(&motor_p->in2, 1);
+        /* Positive omega for pwm duty calculation. */
+        omega *= -1.0f;
     }
 
-    /* PWM pin. */
-    pin_write(&motor_p->enable, 1);
+    /* Control the motor speed using PWM signal. */
+    duty = (256 * omega) / MOTOR_OMEGA_MAX;
+    pwm_set_duty(&motor_p->enable, duty);
 
     return (0);
 }
-
-static struct uart_driver_t uart;
-static char qinbuf[32];
-static struct shell_args_t shell_args;
-static struct perimiter_wire_rx_t perimeter;
-static struct thrd_t *self_p;
 
 static void robot_init()
 {
@@ -161,11 +196,11 @@ static void robot_init()
     motor_init(&robot.left_motor,
                &pin_d2_dev,
                &pin_d3_dev,
-               &pin_d4_dev);
+               &pwm_d9_dev);
     motor_init(&robot.right_motor,
                &pin_d5_dev,
                &pin_d6_dev,
-               &pin_d7_dev);
+               &pwm_d10_dev);
 
     perimiter_wire_rx_init(&perimeter, NULL, NULL);
     perimiter_wire_rx_start(&perimeter);
@@ -194,17 +229,16 @@ int main()
 {
     float left_wheel_omega;
     float right_wheel_omega;
-    int speed = 0;
-    int omega = 0;
+    float speed = 0.0f;
+    float omega = 0.0f;
 
     robot_init();
 
     /* Robot main loop. */
     while (1) {
-        /* Resume from timer callback. */
+        /* Timer callback resumes this thread. */
         thrd_suspend(NULL);
 
-        std_printk(STD_LOG_NOTICE, FSTR("Starting tick processing"));
         FS_COUNTER_INC(robot_processing_ticks, 1);
 
         if (robot.mode == ROBOT_MODE_MANUAL) {
@@ -219,13 +253,6 @@ int main()
                                         &right_wheel_omega);
         motor_set_omega(&robot.left_motor, left_wheel_omega);
         motor_set_omega(&robot.right_motor, right_wheel_omega);
-
-        std_printk(STD_LOG_NOTICE,
-                   FSTR("left_wheel_omega %d, right_wheel_omega %d [rad/100*s]"),
-                   (int)left_wheel_omega,
-                   (int)right_wheel_omega);
-
-        std_printk(STD_LOG_NOTICE, FSTR("Tick processing finished"));
     }
 
     return (0);
