@@ -192,8 +192,10 @@ static void robot_init()
 
 int main()
 {
-    int left_wheel_omega;
-    int right_wheel_omega;
+    float left_wheel_omega;
+    float right_wheel_omega;
+    int speed = 0;
+    int omega = 0;
 
     robot_init();
 
@@ -206,14 +208,22 @@ int main()
         FS_COUNTER_INC(robot_processing_ticks, 1);
 
         if (robot.mode == ROBOT_MODE_MANUAL) {
-            movement_calculate_wheels_omega(robot.manual.speed,
-                                            robot.manual.omega,
-                                            &left_wheel_omega,
-                                            &right_wheel_omega);
-            motor_set_omega(&robot.left_motor, left_wheel_omega);
-            motor_set_omega(&robot.right_motor, right_wheel_omega);
+            speed = robot.manual.speed;
+            omega = robot.manual.omega;
         } else {
         }
+
+        movement_calculate_wheels_omega(speed,
+                                        omega,
+                                        &left_wheel_omega,
+                                        &right_wheel_omega);
+        motor_set_omega(&robot.left_motor, left_wheel_omega);
+        motor_set_omega(&robot.right_motor, right_wheel_omega);
+
+        std_printk(STD_LOG_NOTICE,
+                   FSTR("left_wheel_omega %d, right_wheel_omega %d [rad/100*s]"),
+                   (int)left_wheel_omega,
+                   (int)right_wheel_omega);
 
         std_printk(STD_LOG_NOTICE, FSTR("Tick processing finished"));
     }
