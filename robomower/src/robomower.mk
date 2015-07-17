@@ -25,6 +25,7 @@ ROBOMOWER_SRC ?= filter.c \
 	perimiter_wire_rx.c \
 	motor.c \
 	movement.c \
-	cutter.c
+	cutter.c \
+	robot.c
 
 SRC += $(ROBOMOWER_SRC:%=$(ROBOMOWER)/%)

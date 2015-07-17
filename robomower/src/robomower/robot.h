@@ -1,5 +1,5 @@
 /**
- * @file robomower.h
+ * @file robomower/robot.h
  * @version 0.1
  *
  * @section License
@@ -18,16 +18,16 @@
  * This file is part of the RoboMower project.
  */
 
-#ifndef __ROBOMOWER_H__
-#define __ROBOMOWER_H__
+#ifndef __ROBOMOWER_ROBOT_H__
+#define __ROBOMOWER_ROBOT_H__
 
-#include "robomower/math.h"
-#include "robomower/filter.h"
-#include "robomower/perimiter_wire_tx.h"
-#include "robomower/perimiter_wire_rx.h"
-#include "robomower/movement.h"
-#include "robomower/motor.h"
-#include "robomower/cutter.h"
-#include "robomower/robot.h"
+#include "simba.h"
+#include "robomower.h"
+
+/**
+ * Robot main loop.
+ * @return zero(0) or negative error code
+ */
+int robot_entry();
 
 #endif
