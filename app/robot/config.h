@@ -1,9 +1,9 @@
 /**
- * @file robomower.h
- * @version 0.1
+ * @file config.h
+ * @version 1.0
  *
  * @section License
- * Copyright (C) 2015, Erik Moqvist
+ * Copyright (C) 2014-2015, Erik Moqvist
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -15,18 +15,13 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
  *
- * This file is part of the RoboMower project.
+ * This file is part of the Simba project.
  */
 
-#ifndef __ROBOMOWER_H__
-#define __ROBOMOWER_H__
+#ifndef __CONFIG_H__
+#define __CONFIG_H__
 
-#include "robomower/math.h"
-#include "robomower/filter.h"
-#include "robomower/perimiter_wire_tx.h"
-#include "robomower/perimiter_wire_rx.h"
-#include "robomower/movement.h"
-#include "robomower/motor.h"
-#include "robomower/cutter.h"
+/* Small system log buffer. */
+#define STD_KLOG_BUFFER_MAX 128
 
 #endif

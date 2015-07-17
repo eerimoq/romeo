@@ -30,12 +30,6 @@ FS_COUNTER(robot_processing_ticks);
 #define ROBOT_MODE_MANUAL    0
 #define ROBOT_MODE_AUTOMATIC 1
 
-struct motor_t {
-    struct pin_driver_t in1;
-    struct pin_driver_t in2;
-    struct pwm_driver_t enable;
-};
-
 struct robot_t {
     volatile int mode;
     volatile struct {
@@ -137,44 +131,6 @@ static void timer_callback(void *arg_p)
     thrd_resume_irq(thrd_p, 0);
 }
 
-static int motor_init(struct motor_t *motor_p,
-                      const struct pin_device_t *in1_p,
-                      const struct pin_device_t *in2_p,
-                      const struct pwm_device_t *enable_p)
-{
-    /* Initialize all pins connected to the motor controllers. */
-    pin_init(&motor_p->in1, in1_p, PIN_OUTPUT);
-    pin_init(&motor_p->in2, in2_p, PIN_OUTPUT);
-    pwm_init(&motor_p->enable, enable_p);
-
-    return (0);
-}
-
-#define MOTOR_OMEGA_MAX PI
-
-static int motor_set_omega(struct motor_t *motor_p,
-                           float omega)
-{
-    unsigned int duty;
-
-    /* Rotation direction pins. */
-    if (omega > 0.0f) {
-        pin_write(&motor_p->in1, 1);
-        pin_write(&motor_p->in2, 0);
-    } else {
-        pin_write(&motor_p->in1, 0);
-        pin_write(&motor_p->in2, 1);
-        /* Positive omega for pwm duty calculation. */
-        omega *= -1.0f;
-    }
-
-    /* Control the motor speed using PWM signal. */
-    duty = (256 * omega) / MOTOR_OMEGA_MAX;
-    pwm_set_duty(&motor_p->enable, duty);
-
-    return (0);
-}
-
 static void robot_init()
 {
     struct time_t timeout;
@@ -245,8 +201,12 @@ int main()
             speed = robot.manual.speed;
             omega = robot.manual.omega;
         } else {
+            /* Rotate the robot. */
+            speed = 0.0f;
+            omega = 0.1f;
         }
 
+        /* Calculate new driver motor speeds and set them. */
         movement_calculate_wheels_omega(speed,
                                         omega,
                                         &left_wheel_omega,
