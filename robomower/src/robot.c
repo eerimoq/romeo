@@ -72,11 +72,9 @@ static struct thrd_t *self_p;
 int robot_cmd_mode_set(int argc,
                        const char *argv[],
                        void *out_p,
-                       void *in_p,
-                       char *name_p)
+                       void *in_p)
 {
     UNUSED(in_p);
-    UNUSED(name_p);
 
     if (argc != 2) {
         std_fprintf(out_p, FSTR("Usage: set {manual,automatic}\r\n"));
@@ -97,11 +95,9 @@ int robot_cmd_mode_set(int argc,
 int robot_cmd_manual_state_set(int argc,
                                const char *argv[],
                                void *out_p,
-                               void *in_p,
-                               char *name_p)
+                               void *in_p)
 {
     UNUSED(in_p);
-    UNUSED(name_p);
 
     int next;
 
@@ -127,11 +123,9 @@ int robot_cmd_manual_state_set(int argc,
 int robot_cmd_manual_movement_set(int argc,
                                   const char *argv[],
                                   void *out_p,
-                                  void *in_p,
-                                  char *name_p)
+                                  void *in_p)
 {
     UNUSED(in_p);
-    UNUSED(name_p);
 
     long speed;
     long omega;
@@ -148,11 +142,9 @@ int robot_cmd_manual_movement_set(int argc,
 int robot_cmd_status(int argc,
                      const char *argv[],
                      void *out_p,
-                     void *in_p,
-                     char *name_p)
+                     void *in_p)
 {
     UNUSED(in_p);
-    UNUSED(name_p);
 
     std_fprintf(out_p, FSTR("mode = %d (0=manual, 1=automatic)\r\n"
                             "state = %d (0=off, 1=on)\r\n"
@@ -295,7 +287,7 @@ static int handle_state_transition(struct robot_t *robot_p)
                    FSTR("bad state transistion %d -> %d"),
                    current,
                    next);
-        return (1);
+        return (-1);
     }
 
     std_printk(STD_LOG_NOTICE,
@@ -310,7 +302,7 @@ static int handle_state_transition(struct robot_t *robot_p)
                    FSTR("failed state transistion %d -> %d"),
                    current,
                    next);
-        return (1);
+        return (-1);
     }
 
     /* Update state on successful state transition. */
