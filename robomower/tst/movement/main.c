@@ -21,55 +21,56 @@
 #include "simba.h"
 #include "robomower.h"
 
+struct testdata_t {
+    float speed;
+    float omega;
+    float left_wheel_omega;
+    float right_wheel_omega;
+};
+
 static int float_close_to_zero(float value)
 {
-    return ((value > -0.001) && (value < 0.001));
+    if (!((value > -0.001) && (value < 0.001))) {
+#ifdef ARCH_LINUX
+        /* No float support in std module. */
+        printf("%f\n", value);
+#endif
+        return (0);
+    }
+
+    return (1);
 }
 
 static int test_calculate_wheels_omega(struct harness_t *harness_p)
 {
     float left_wheel_omega;
     float right_wheel_omega;
+    int i;
 
-    /* Standing still. */
-    movement_calculate_wheels_omega(0.0f,
-                                    0.0f,
-                                    &left_wheel_omega,
-                                    &right_wheel_omega);
-    BTASSERT(left_wheel_omega == 0.0f);
-    BTASSERT(right_wheel_omega == 0.0f);
+    static struct testdata_t testdata[] = {
+        /* Standing still. */
+        { 0.0f, 0.0f, 0.0f, 0.0f },
+        /* Moving in a straight line with a speed of 0.2 m/s. */
+        { 0.2f, 0.0f, PI, PI },
+        /* Moving in a straight line with a speed of -0.2 m/s. */
+        { -0.2f, 0.0f, -PI, -PI },
+        /* Truning in place with the angular velocity 1.0 rad/s. */
+        { 0.0f, 1.0f, 2.356f, -2.356f },
+        /* Combined turning and speed. */
+        { 0.1f, 0.1f, 1.8064f, 1.3352f }
+    };
 
-    /* Moving in a straight line with a speed of 40 cm/s. */
-    movement_calculate_wheels_omega(0.4f,
-                                    0.0f,
-                                    &left_wheel_omega,
-                                    &right_wheel_omega);
-    BTASSERT(float_close_to_zero(left_wheel_omega - 6.28318f));
-    BTASSERT(float_close_to_zero(right_wheel_omega - 6.28318f));
-
-    /* Moving in a straight line with a speed of -40 cm/s. */
-    movement_calculate_wheels_omega(-0.4f,
-                                    0.0f,
-                                    &left_wheel_omega,
-                                    &right_wheel_omega);
-    BTASSERT(float_close_to_zero(left_wheel_omega + 6.28318f));
-    BTASSERT(float_close_to_zero(right_wheel_omega + 6.28318f));
-
-    /* Truning in place. A complete revolution in one second. */
-    movement_calculate_wheels_omega(0.0f,
-                                    6.28318f,
-                                    &left_wheel_omega,
-                                    &right_wheel_omega);
-    BTASSERT(float_close_to_zero(left_wheel_omega - 14.80438f));
-    BTASSERT(float_close_to_zero(right_wheel_omega + 14.80438f));
-
-    /* Combined turning and speed. */
-    movement_calculate_wheels_omega(0.4f,
-                                    6.28318f,
-                                    &left_wheel_omega,
-                                    &right_wheel_omega);
-    BTASSERT(float_close_to_zero(left_wheel_omega - 14.80438f - 6.28318f));
-    BTASSERT(float_close_to_zero(right_wheel_omega + 14.80438f - 6.28318f));
+    for (i = 0; i < membersof(testdata); i++) {
+        std_printf(FSTR("testdata index: %d\r\n"), i);
+        movement_calculate_wheels_omega(testdata[i].speed,
+                                        testdata[i].omega,
+                                        &left_wheel_omega,
+                                        &right_wheel_omega);
+        BTASSERT(float_close_to_zero(left_wheel_omega
+                                     - testdata[i].left_wheel_omega));
+        BTASSERT(float_close_to_zero(right_wheel_omega
+                                     - testdata[i].right_wheel_omega));
+    }
 
     return (0);
 }
