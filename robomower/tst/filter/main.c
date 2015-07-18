@@ -24,6 +24,12 @@
 
 #define DESCRIPTION_MAX 64
 
+static char description[64];
+static float input[NUMBER_OF_INPUT_SAMPLES];
+static float coefficients[NUMBER_OF_COEFFICIENTS];
+static float ref_output[NUMBER_OF_OUTPUT_SAMPLES];
+static float output[NUMBER_OF_OUTPUT_SAMPLES];
+
 static int float_close_to_zero(float value)
 {
     return ((value > -0.001) && (value < 0.001));
@@ -57,11 +63,6 @@ static void copy_test_to_ram(struct filter_test_t *test,
 static int test_firf(struct harness_t *harness_p)
 {
     int i;
-    char description[64];
-    float input[NUMBER_OF_INPUT_SAMPLES];
-    float coefficients[NUMBER_OF_COEFFICIENTS];
-    float ref_output[NUMBER_OF_OUTPUT_SAMPLES];
-    float output[NUMBER_OF_OUTPUT_SAMPLES];
     struct filter_test_t *test;
 
     for (test = &filter_test[0]; test->description != NULL; test++) {
