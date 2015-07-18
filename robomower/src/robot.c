@@ -35,6 +35,12 @@ FS_COUNTER(robot_state_searching_for_base_station);
 FS_COUNTER(robot_state_in_base_station);
 FS_COUNTER(number_of_state_changes);
 
+FS_COUNTER(robot_cutting_state_forward);
+FS_COUNTER(robot_cutting_state_backwards);
+FS_COUNTER(robot_cutting_state_rotating);
+
+FS_COUNTER(robot_odometer);
+
 /* The processing loop period in milliseconds. */
 #define PROCESS_PERIOD_MS 50L
 
@@ -48,6 +54,15 @@ FS_COUNTER(number_of_state_changes);
 #define ROBOT_STATE_CUTTING                    2
 #define ROBOT_STATE_SEARCHING_FOR_BASE_STATION 3
 #define ROBOT_STATE_IN_BASE_STATION            4
+
+/* Cutting states. */
+#define CUTTING_STATE_FORWARD   0
+#define CUTTING_STATE_BACKWARDS 1
+#define CUTTING_STATE_ROTATING  2
+
+/* Number of ticks in cutting states. */
+#define CUTTING_STATE_BACKWARDS_TICKS 40
+#define CUTTING_STATE_ROTATING_TICKS  40
 
 struct robot_t;
 
@@ -63,6 +78,10 @@ struct robot_state_t {
 struct robot_t {
     volatile int mode;
     struct robot_state_t state;
+    struct {
+        int state;
+        int ticks_left;
+    } cutting;
     volatile struct {
         float speed;
         float omega;
@@ -98,6 +117,17 @@ FAR const char FAR *state_as_string[] = {
     cutting_string,
     searching_for_base_station_string,
     in_base_station_string
+};
+
+/* Cutting states as strings. */
+static FAR const char cutting_forward_string[] = "forward";
+static FAR const char cutting_backwards_string[] = "backwards";
+static FAR const char cutting_rotating_string[] = "rotating";
+
+FAR const char FAR *cutting_state_as_string[] = {
+    cutting_forward_string,
+    cutting_backwards_string,
+    cutting_rotating_string
 };
 
 int robot_cmd_mode_set(int argc,
@@ -173,6 +203,8 @@ int robot_cmd_status(int argc,
     std_fprintf(out_p, mode_as_string[robot.mode]);
     std_fprintf(out_p, FSTR("\r\nstate = "));
     std_fprintf(out_p, state_as_string[robot.state.current]);
+    std_fprintf(out_p, FSTR("\r\ncutting.state = "));
+    std_fprintf(out_p, cutting_state_as_string[robot.cutting.state]);
     std_fprintf(out_p,
                 FSTR("\r\nprocess period = %ld ms\r\n"),
                 PROCESS_PERIOD_MS);
@@ -236,39 +268,113 @@ static int state_starting(struct robot_t *robot_p)
     return (0);
 }
 
+static int cutting_manual(struct robot_t *robot_p,
+                          float *speed,
+                          float *omega)
+{
+    *speed = robot_p->manual.speed;
+    *omega = robot_p->manual.omega;
+
+    return (0);
+}
+
+static int is_time_to_search_for_base_station(struct robot_t *robot_p)
+{
+    return (0);
+}
+
+static int is_inside_perimeter_wire(float signal)
+{
+    return (signal >= 0.0f);
+}
+
+static int cutting_automatic(struct robot_t *robot_p,
+                             float *speed,
+                             float *omega)
+{
+    float signal;
+
+    /* Default no movement. */
+    *speed = 0.0f;
+    *omega = 0.0f;
+
+    /* Search for base station if battery voltage is low. */
+    if (is_time_to_search_for_base_station(robot_p)) {
+        robot_p->state.next = ROBOT_STATE_SEARCHING_FOR_BASE_STATION;
+    } else {
+        robot_p->cutting.ticks_left--;
+
+        switch (robot_p->cutting.state) {
+
+        case CUTTING_STATE_FORWARD:
+            FS_COUNTER_INC(robot_cutting_state_forward, 1);
+
+            signal = perimeter_wire_rx_get_signal(&robot_p->perimeter);
+
+            if (is_inside_perimeter_wire(signal)) {
+                *speed = 0.1f;
+                *omega = 0.0f;
+            } else {
+                /* Enter backwards state. */
+                robot_p->cutting.ticks_left = CUTTING_STATE_BACKWARDS_TICKS;
+                robot_p->cutting.state = CUTTING_STATE_BACKWARDS;
+            }
+            break;
+
+        case CUTTING_STATE_BACKWARDS:
+            FS_COUNTER_INC(robot_cutting_state_backwards, 1);
+
+            *speed = -0.1f;
+            *omega = 0.0f;
+
+            if (robot_p->cutting.ticks_left == 0) {
+                /* Enter rotating state. */
+                /* TODO: number of ticks should be random. */
+                robot_p->cutting.ticks_left = CUTTING_STATE_ROTATING_TICKS;
+                robot_p->cutting.state = CUTTING_STATE_ROTATING;
+            }
+            break;
+
+        case CUTTING_STATE_ROTATING:
+            FS_COUNTER_INC(robot_cutting_state_rotating, 1);
+
+            if (robot_p->cutting.ticks_left == 0) {
+                /* Enter forward state. */
+                robot_p->cutting.state = CUTTING_STATE_FORWARD;
+            }
+            break;
+        }
+    }
+
+    return (0);
+}
+
 static int state_cutting(struct robot_t *robot_p)
 {
     float left_wheel_omega;
     float right_wheel_omega;
     float speed;
     float omega;
-    int res;
 
     FS_COUNTER_INC(robot_state_cutting, 1);
 
+    /* Calculate new motor speeds. */
     if (robot_p->mode == ROBOT_MODE_MANUAL) {
-        speed = robot_p->manual.speed;
-        omega = robot_p->manual.omega;
+        cutting_manual(robot_p, &speed, &omega);
     } else {
-        /* Rotate the robot. */
-        speed = 0.0f;
-        omega = 0.1f;
-#if 0
-        perimeter_
-        filter_fir();
-#endif
+        cutting_automatic(robot_p, &speed, &omega);
     }
 
     /* Calculate new driver motor speeds and set them. */
-    res = movement_calculate_wheels_omega(speed,
-                                          omega,
-                                          &left_wheel_omega,
-                                          &right_wheel_omega);
+    movement_calculate_wheels_omega(speed,
+                                    omega,
+                                    &left_wheel_omega,
+                                    &right_wheel_omega);
 
-    if (res == 0) {
-        motor_set_omega(&robot_p->left_motor, left_wheel_omega);
-        motor_set_omega(&robot_p->right_motor, right_wheel_omega);
-    }
+    motor_set_omega(&robot_p->left_motor, left_wheel_omega);
+    motor_set_omega(&robot_p->right_motor, right_wheel_omega);
+
+    FS_COUNTER_INC(robot_odometer, speed * PROCESS_PERIOD_MS);
 
     return (0);
 }
@@ -457,6 +563,8 @@ static int robot_init(struct robot_t *robot_p)
     robot_p->state.next = ROBOT_STATE_IDLE;
     robot_p->state.callback = state_idle;
     robot_p->mode = ROBOT_MODE_AUTOMATIC;
+
+    robot_p->cutting.state = CUTTING_STATE_FORWARD;
 
     motor_init(&robot_p->left_motor,
                &pin_d2_dev,

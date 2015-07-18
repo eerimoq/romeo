@@ -30,15 +30,15 @@
  * @param[in] speed New speed in m/s. A negative value
  *                  means going in reverse.
  * @param[in] omega New turn rate in rad/s.
- * @param[out] left_wheel_omega Left wheel turn rate in rad/s.
- * @param[out] right_wheel_omega Right wheel turn rate in rad/s.
+ * @param[out] left_wheel_omega_p Left wheel turn rate in rad/s.
+ * @param[out] right_wheel_omega_p Right wheel turn rate in rad/s.
  * @return zero(0) if the left and right wheel rotations speeds
  *         are successfully calculated and within allowed ranges,
  *         otherwise negative error code
  */
 int movement_calculate_wheels_omega(float speed,
                                     float omega,
-                                    float *left_wheel_omega,
-                                    float *right_wheel_omega);
+                                    float *left_wheel_omega_p,
+                                    float *right_wheel_omega_p);
 
 #endif

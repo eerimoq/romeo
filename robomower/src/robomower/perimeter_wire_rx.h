@@ -44,10 +44,17 @@ int perimeter_wire_rx_init(struct perimeter_wire_rx_t *pwire_p,
                            struct pin_device_t *pin_dev_in2_p);
 
 /**
- * Start transmitting the signal on the perimeter wire.
- * @param[out] pwire_p Perimiter wire instance.
+ * Start to raed the signal picked up by the inductor.
+ * @param[in] pwire_p Perimiter wire instance.
  * @return zero(0) or negative error code.
  */
 int perimeter_wire_rx_start(struct perimeter_wire_rx_t *pwire_p);
+
+/**
+ * Get the signal on the wire.
+ * @param[in] pwire_p Perimiter wire instance.
+ * @return the signal level
+ */
+float perimeter_wire_rx_get_signal(struct perimeter_wire_rx_t *pwire_p);
 
 #endif

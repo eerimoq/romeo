@@ -21,12 +21,37 @@
 #include "simba.h"
 #include "robomower.h"
 
+FS_COMMAND("/perimeter/signal/set", perimeter_wire_rx_cmd_set_signal);
+
 /* The coefficients used as a reference in the matched filter. */
 static int8_t coefficients[] = {
     1, 1, -1, -1, 1, -1, 1, -1,
     -1, 1, -1, 1, 1, -1, -1, 1,
     -1, -1, 1, -1, -1, 1, 1, -1
 };
+
+static float signal_level = 0.0f;
+
+int perimeter_wire_rx_cmd_set_signal(int argc,
+                                     const char *argv[],
+                                     void *out_p,
+                                     void *in_p)
+{
+    UNUSED(in_p);
+
+    long level;
+
+    if (argc != 2) {
+        std_fprintf(out_p, FSTR("Usage: set <level>\r\n"));
+        return (1);
+    }
+
+    std_strtol(argv[1], &level);
+
+    signal_level = level;
+
+    return (0);
+}
 
 int perimeter_wire_rx_init(struct perimeter_wire_rx_t *pwire_p,
                            struct pin_device_t *pin_dev_in1_p,
@@ -45,4 +70,11 @@ int perimeter_wire_rx_start(struct perimeter_wire_rx_t *pwire_p)
     /* adc_start(&pwire_p->adc.drv); */
 
     return (0);
+}
+
+float perimeter_wire_rx_get_signal(struct perimeter_wire_rx_t *pwire_p)
+{
+    /* adc_start(&pwire_p->adc.drv); */
+
+    return (signal_level);
 }

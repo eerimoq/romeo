@@ -44,13 +44,17 @@ static int is_omega_in_range(float omega)
 
 int movement_calculate_wheels_omega(float speed,
                                     float omega,
-                                    float *left_wheel_omega,
-                                    float *right_wheel_omega)
+                                    float *left_wheel_omega_p,
+                                    float *right_wheel_omega_p)
 {
     float left_wheel_speed;
     float right_wheel_speed;
+    float left_wheel_omega;
+    float right_wheel_omega;
     float omega_wheel_speed;
-    int res = 0;
+
+    *left_wheel_omega_p = 0.0f;
+    *right_wheel_omega_p = 0.0f;
 
     /* The base speed of the wheels. */
     left_wheel_speed = speed;
@@ -69,17 +73,17 @@ int movement_calculate_wheels_omega(float speed,
     }
 
     /* Calculate output values in radians/s. */
-    *left_wheel_omega = (2.0f * PI * left_wheel_speed / WHEEL_CIRCUMFERENCE_M);
-    *right_wheel_omega = (2.0f * PI * right_wheel_speed / WHEEL_CIRCUMFERENCE_M);
+    left_wheel_omega = (2.0f * PI * left_wheel_speed / WHEEL_CIRCUMFERENCE_M);
+    right_wheel_omega = (2.0f * PI * right_wheel_speed / WHEEL_CIRCUMFERENCE_M);
 
     /* range checks. */
-    if (!is_omega_in_range(*left_wheel_omega)) {
-        res = -1;
+    if (!is_omega_in_range(left_wheel_omega)
+        || !is_omega_in_range(right_wheel_omega)) {
+        return (1);
     }
 
-    if (!is_omega_in_range(*right_wheel_omega)) {
-        res = -1;
-    }
+    *left_wheel_omega_p = left_wheel_omega;
+    *right_wheel_omega_p = right_wheel_omega;
 
-    return (res);
+    return (0);
 }
