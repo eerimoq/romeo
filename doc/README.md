@@ -11,20 +11,16 @@ TOP STATE MACHINE
 ### State descriptions
 
 #### idle
-The robot is starting up.
-
-#### panic
-The robot is confused and paniced. It will stand still and waiting for
-someone to take care of it.
+The robot is idle, waiting to be started manually.
 
 #### cutting
 The robot is driving around and cuts the grass.
 
-#### searching_charging_station
-The robot is searching for the charging station.
+#### searching_for_base_station
+The robot is searching for the base station.
 
-#### in_charging_station
-The robot is charging.
+#### in_base_station
+The robot is in the base station.
 
 CUTTING STATE MACHINE
 ---------------------

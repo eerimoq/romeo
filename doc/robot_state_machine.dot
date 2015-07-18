@@ -1,11 +1,12 @@
 digraph robot_state_diagram {
   off [style=filled];
   off -> idle [label="power on"];
-  idle -> cutting [label="timeout"];
-  cutting -> idle [label="panic"];
-  cutting -> searching_charging_station [label="battery low or scheduled"];
-  searching_charging_station -> in_charging_station [label="station found"];
-  searching_charging_station -> idle [label="panic"];
-  in_charging_station -> cutting [label="battery charged and scheduled"];
-  in_charging_station -> idle [label="panic"];
+  idle -> cutting [label="manual start"];
+  idle -> in_base_station [label="manual start"];
+  cutting -> idle [label="error"];
+  cutting -> searching_for_base_station [label="battery low or scheduled"];
+  searching_for_base_station -> in_base_station [label="station found"];
+  searching_for_base_station -> idle [label="error"];
+  in_base_station -> cutting [label="battery charged and scheduled"];
+  in_base_station -> idle [label="error"];
 }
