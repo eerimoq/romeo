@@ -1,5 +1,5 @@
 digraph robot_state_diagram_moving {
-  driving_forward -> driving_backwards;
-  driving_backwards -> rotating;
-  rotating -> driving_forward;
+  forward -> backwards;
+  backwards -> rotating;
+  rotating -> forward;
 }

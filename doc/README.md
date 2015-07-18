@@ -13,6 +13,9 @@ TOP STATE MACHINE
 #### idle
 The robot is idle, waiting to be started manually.
 
+#### starting
+The robot is starting.
+
 #### cutting
 The robot is driving around and cuts the grass.
 
@@ -31,10 +34,10 @@ This is the state diagram for the cutting state.
 
 ### State descriptions
 
-#### driving_forward
+#### forward
 The robot is driving forward.
 
-#### driving_backwards
+#### backwards
 The robot is driving backwards.
 
 #### rotating
