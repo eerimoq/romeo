@@ -202,6 +202,7 @@ static int state_on(struct robot_t *robot_p)
     float right_wheel_omega;
     float speed;
     float omega;
+    int res;
 
     FS_COUNTER_INC(robot_process_state_on, 1);
 
@@ -215,12 +216,14 @@ static int state_on(struct robot_t *robot_p)
     }
 
     /* Calculate new driver motor speeds and set them. */
-    movement_calculate_wheels_omega(speed,
-                                    omega,
-                                    &left_wheel_omega,
-                                    &right_wheel_omega);
-    motor_set_omega(&robot_p->left_motor, left_wheel_omega);
-    motor_set_omega(&robot_p->right_motor, right_wheel_omega);
+    res = movement_calculate_wheels_omega(speed,
+                                          omega,
+                                          &left_wheel_omega,
+                                          &right_wheel_omega);
+    if (res == 0) {
+        motor_set_omega(&robot_p->left_motor, left_wheel_omega);
+        motor_set_omega(&robot_p->right_motor, right_wheel_omega);
+    }
 
     return (0);
 }
