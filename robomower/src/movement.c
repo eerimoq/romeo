@@ -22,8 +22,8 @@
 #include "robomower.h"
 
 /* Robot geometry. */
-#define WHEEL_DISTANCE_CM      30.0f
-#define WHEEL_CIRCUMFERENCE_CM 40.0f
+#define WHEEL_DISTANCE_M      0.3f
+#define WHEEL_CIRCUMFERENCE_M 0.4f
 
 int movement_calculate_wheels_omega(float speed,
                                     float omega,
@@ -39,7 +39,7 @@ int movement_calculate_wheels_omega(float speed,
     right_wheel_speed = speed;
 
     /* Omega gives the difference in speed for the two motors. */
-    omega_wheel_speed = (omega * WHEEL_DISTANCE_CM / 2.0f);
+    omega_wheel_speed = (omega * WHEEL_DISTANCE_M / 2.0f);
 
     /* Add/subtract the speed component from omega. */
     if (omega > 0) {
@@ -51,8 +51,8 @@ int movement_calculate_wheels_omega(float speed,
     }
 
     /* Calculate output values in radians/s. */
-    *left_wheel_omega = (2.0f * PI * left_wheel_speed / WHEEL_CIRCUMFERENCE_CM);
-    *right_wheel_omega = (2.0f * PI * right_wheel_speed / WHEEL_CIRCUMFERENCE_CM);
+    *left_wheel_omega = (2.0f * PI * left_wheel_speed / WHEEL_CIRCUMFERENCE_M);
+    *right_wheel_omega = (2.0f * PI * right_wheel_speed / WHEEL_CIRCUMFERENCE_M);
 
     return (0);
 }

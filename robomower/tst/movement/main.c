@@ -40,7 +40,7 @@ static int test_calculate_wheels_omega(struct harness_t *harness_p)
     BTASSERT(right_wheel_omega == 0.0f);
 
     /* Moving in a straight line with a speed of 40 cm/s. */
-    movement_calculate_wheels_omega(40.0f,
+    movement_calculate_wheels_omega(0.4f,
                                     0.0f,
                                     &left_wheel_omega,
                                     &right_wheel_omega);
@@ -48,7 +48,7 @@ static int test_calculate_wheels_omega(struct harness_t *harness_p)
     BTASSERT(float_close_to_zero(right_wheel_omega - 6.28318f));
 
     /* Moving in a straight line with a speed of -40 cm/s. */
-    movement_calculate_wheels_omega(-40.0f,
+    movement_calculate_wheels_omega(-0.4f,
                                     0.0f,
                                     &left_wheel_omega,
                                     &right_wheel_omega);
@@ -64,7 +64,7 @@ static int test_calculate_wheels_omega(struct harness_t *harness_p)
     BTASSERT(float_close_to_zero(right_wheel_omega + 14.80438f));
 
     /* Combined turning and speed. */
-    movement_calculate_wheels_omega(40.0f,
+    movement_calculate_wheels_omega(0.4f,
                                     6.28318f,
                                     &left_wheel_omega,
                                     &right_wheel_omega);

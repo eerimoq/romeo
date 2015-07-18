@@ -342,11 +342,11 @@ static int robot_init(struct robot_t *robot_p)
     motor_init(&robot_p->left_motor,
                &pin_d2_dev,
                &pin_d3_dev,
-               &pwm_d9_dev);
+               &pwm_d10_dev);
     motor_init(&robot_p->right_motor,
                &pin_d5_dev,
                &pin_d6_dev,
-               &pwm_d10_dev);
+               &pwm_d11_dev);
 
     perimiter_wire_rx_init(&robot_p->perimeter, NULL, NULL);
 

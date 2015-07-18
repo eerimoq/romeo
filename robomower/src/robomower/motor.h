@@ -44,9 +44,9 @@ struct motor_t {
  * @return zero(0) or negative error code
  */
 int motor_init(struct motor_t *motor_p,
-               const struct pin_device_t *in1_p,
-               const struct pin_device_t *in2_p,
-               const struct pwm_device_t *enable_p);
+               struct pin_device_t *in1_p,
+               struct pin_device_t *in2_p,
+               struct pwm_device_t *enable_p);
 
 /**
  * Set motor rotation direction.

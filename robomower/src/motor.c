@@ -22,9 +22,9 @@
 #include "robomower.h"
 
 int motor_init(struct motor_t *motor_p,
-               const struct pin_device_t *in1_p,
-               const struct pin_device_t *in2_p,
-               const struct pwm_device_t *enable_p)
+               struct pin_device_t *in1_p,
+               struct pin_device_t *in2_p,
+               struct pwm_device_t *enable_p)
 {
     /* Initialize all pins connected to the motor controllers. */
     pin_init(&motor_p->in1, in1_p, PIN_OUTPUT);
@@ -66,7 +66,7 @@ int motor_set_omega(struct motor_t *motor_p,
     motor_set_direction(motor_p, direction);
 
     /* Control the motor speed using PWM signal. */
-    duty = (256 * omega) / MOTOR_OMEGA_MAX;
+    duty = (256.0f * omega) / MOTOR_OMEGA_MAX;
     pwm_set_duty(&motor_p->enable, duty);
 
     return (0);
