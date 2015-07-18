@@ -37,6 +37,8 @@ static int init()
     uart_start(&uart);
     sys_set_stdout(&uart.chout);
 
+    robot_init();
+
     /* Start the shell. */
     shell_args.chin_p = &uart.chin;
     shell_args.chout_p = &uart.chout;
@@ -53,5 +55,7 @@ int main()
 {
     init();
 
-    return (robot_entry());
+    robot_entry(NULL);
+
+    return (0);
 }

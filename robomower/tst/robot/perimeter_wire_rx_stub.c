@@ -24,7 +24,7 @@
 /* Those are defined and set in main.c.*/
 extern int perimeter_testdata_index;
 extern int perimeter_testdata_max;
-extern const float *perimeter_testdata_signal_level;
+extern FAR const float *perimeter_testdata_signal_level;
 
 int perimeter_wire_rx_init(struct perimeter_wire_rx_t *pwire_p,
                            struct pin_device_t *pin_dev_in1_p,
