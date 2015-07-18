@@ -38,7 +38,7 @@ Folder structure:
 
     -- {root}
        +-- app/
-       |   +-- charging_station/         - charging station application
+       |   +-- base_station/             - base station application
        |   +-- robot/                    - robot application
        +-- doc/                          - documenatation
        +-- LICENSE

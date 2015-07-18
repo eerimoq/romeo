@@ -21,14 +21,18 @@
 #include "simba.h"
 #include "robomower.h"
 
-FS_COMMAND("/robot/mode/set", robot_cmd_mode_set);
-FS_COMMAND("/robot/manual/state/set", robot_cmd_manual_state_set);
-FS_COMMAND("/robot/manual/movement/set", robot_cmd_manual_movement_set);
 FS_COMMAND("/robot/status", robot_cmd_status);
+FS_COMMAND("/robot/start", robot_cmd_start);
+FS_COMMAND("/robot/stop", robot_cmd_stop);
+FS_COMMAND("/robot/mode/set", robot_cmd_mode_set);
+FS_COMMAND("/robot/manual/movement/set", robot_cmd_manual_movement_set);
 
 FS_COUNTER(robot_process);
-FS_COUNTER(robot_process_state_on);
-FS_COUNTER(robot_process_state_off);
+FS_COUNTER(robot_state_idle);
+FS_COUNTER(robot_state_starting);
+FS_COUNTER(robot_state_cutting);
+FS_COUNTER(robot_state_searching_for_base_station);
+FS_COUNTER(robot_state_in_base_station);
 FS_COUNTER(number_of_state_changes);
 
 /* The processing loop period in milliseconds. */
@@ -38,9 +42,12 @@ FS_COUNTER(number_of_state_changes);
 #define ROBOT_MODE_MANUAL    0
 #define ROBOT_MODE_AUTOMATIC 1
 
-/* Robot state. */
-#define ROBOT_STATE_OFF   0
-#define ROBOT_STATE_ON    1
+/* Robot states. */
+#define ROBOT_STATE_IDLE                       0
+#define ROBOT_STATE_STARTING                   1
+#define ROBOT_STATE_CUTTING                    2
+#define ROBOT_STATE_SEARCHING_FOR_BASE_STATION 3
+#define ROBOT_STATE_IN_BASE_STATION            4
 
 struct robot_t;
 
@@ -69,6 +76,30 @@ struct robot_t {
 static struct robot_t robot;
 static struct thrd_t *self_p;
 
+/* Modes as strings. */
+static FAR const char manual_string[] = "manual";
+static FAR const char automatic_string[] = "automatic";
+
+FAR const char FAR *mode_as_string[] = {
+    manual_string,
+    automatic_string
+};
+
+/* States as strings. */
+static FAR const char idle_string[] = "idle";
+static FAR const char starting_string[] = "starting";
+static FAR const char cutting_string[] = "cutting";
+static FAR const char searching_for_base_station_string[] = "searching_for_base_station";
+static FAR const char in_base_station_string[] = "in_base_station";
+
+FAR const char FAR *state_as_string[] = {
+    idle_string,
+    starting_string,
+    cutting_string,
+    searching_for_base_station_string,
+    in_base_station_string
+};
+
 int robot_cmd_mode_set(int argc,
                        const char *argv[],
                        void *out_p,
@@ -92,30 +123,22 @@ int robot_cmd_mode_set(int argc,
     return (0);
 }
 
-int robot_cmd_manual_state_set(int argc,
-                               const char *argv[],
-                               void *out_p,
-                               void *in_p)
+int robot_cmd_start(int argc,
+                    const char *argv[],
+                    void *out_p,
+                    void *in_p)
 {
-    UNUSED(in_p);
+    robot.state.next = ROBOT_STATE_STARTING;
 
-    int next;
+    return (0);
+}
 
-    if (argc != 2) {
-        std_fprintf(out_p, FSTR("Usage: set {on,off}\r\n"));
-        return (1);
-    }
-
-    if (std_strcmp(argv[1], FSTR("on")) == 0) {
-        next = ROBOT_STATE_ON;
-    } else if (std_strcmp(argv[1], FSTR("off")) == 0) {
-        next = ROBOT_STATE_OFF;
-    } else {
-        std_fprintf(out_p, FSTR("Bad state '%s'\r\n"), argv[1]);
-        return (1);
-    }
-
-    robot.state.next = next;
+int robot_cmd_stop(int argc,
+                   const char *argv[],
+                   void *out_p,
+                   void *in_p)
+{
+    robot.state.next = ROBOT_STATE_IDLE;
 
     return (0);
 }
@@ -146,11 +169,12 @@ int robot_cmd_status(int argc,
 {
     UNUSED(in_p);
 
-    std_fprintf(out_p, FSTR("mode = %d (0=manual, 1=automatic)\r\n"
-                            "state = %d (0=off, 1=on)\r\n"
-                            "process period = %ld ms\r\n"),
-                robot.mode,
-                robot.state.current,
+    std_fprintf(out_p, FSTR("mode = "));
+    std_fprintf(out_p, mode_as_string[robot.mode]);
+    std_fprintf(out_p, FSTR("\r\nstate = "));
+    std_fprintf(out_p, state_as_string[robot.state.current]);
+    std_fprintf(out_p,
+                FSTR("\r\nprocess period = %ld ms\r\n"),
                 PROCESS_PERIOD_MS);
 
     if (robot.mode == ROBOT_MODE_MANUAL) {
@@ -178,7 +202,7 @@ static int robot_start(struct robot_t *robot_p)
 {
     std_printk(STD_LOG_NOTICE, FSTR("starting robot"));
 
-    robot_p->state.next = ROBOT_STATE_ON;
+    robot_p->state.next = ROBOT_STATE_STARTING;
 
     perimiter_wire_rx_start(&robot_p->perimeter);
 
@@ -189,14 +213,30 @@ static int robot_stop(struct robot_t *robot_p)
 {
     std_printk(STD_LOG_NOTICE, FSTR("stopping robot"));
 
-    robot_p->state.next = ROBOT_STATE_OFF;
+    robot_p->state.next = ROBOT_STATE_IDLE;
 
     //perimiter_wire_rx_stop(&robot_p->perimeter);
 
     return (0);
 }
 
-static int state_on(struct robot_t *robot_p)
+static int state_idle(struct robot_t *robot_p)
+{
+    FS_COUNTER_INC(robot_state_idle, 1);
+
+    return (0);
+}
+
+static int state_starting(struct robot_t *robot_p)
+{
+    FS_COUNTER_INC(robot_state_starting, 1);
+
+    robot_p->state.next = ROBOT_STATE_CUTTING;
+
+    return (0);
+}
+
+static int state_cutting(struct robot_t *robot_p)
 {
     float left_wheel_omega;
     float right_wheel_omega;
@@ -204,7 +244,7 @@ static int state_on(struct robot_t *robot_p)
     float omega;
     int res;
 
-    FS_COUNTER_INC(robot_process_state_on, 1);
+    FS_COUNTER_INC(robot_state_cutting, 1);
 
     if (robot_p->mode == ROBOT_MODE_MANUAL) {
         speed = robot_p->manual.speed;
@@ -228,29 +268,61 @@ static int state_on(struct robot_t *robot_p)
     return (0);
 }
 
-static int state_off(struct robot_t *robot_p)
+static int state_searching_for_base_station(struct robot_t *robot_p)
 {
-    FS_COUNTER_INC(robot_process_state_off, 1);
+    FS_COUNTER_INC(robot_state_searching_for_base_station, 1);
 
     return (0);
 }
 
-static state_callback_t transition_off_on(struct robot_t *robot_p)
+static int state_in_base_station(struct robot_t *robot_p)
+{
+    FS_COUNTER_INC(robot_state_in_base_station, 1);
+
+    return (0);
+}
+
+static state_callback_t transition_idle_starting(struct robot_t *robot_p)
 {
     if (robot_start(robot_p) != 0) {
         return (NULL);
     }
 
-    return (state_on);
+    return (state_starting);
 }
 
-static state_callback_t transition_on_off(struct robot_t *robot_p)
+static state_callback_t transition_starting_cutting(struct robot_t *robot_p)
+{
+    return (state_cutting);
+}
+
+static state_callback_t transition_starting_in_base_station(struct robot_t *robot_p)
+{
+    return (state_in_base_station);
+}
+
+static state_callback_t transition_cutting_idle(struct robot_t *robot_p)
 {
     if (robot_stop(robot_p) != 0) {
         return (NULL);
     }
 
-    return (state_off);
+    return (state_idle);
+}
+
+static state_callback_t transition_cutting_searching_for_base_station(struct robot_t *robot_p)
+{
+    return (state_searching_for_base_station);
+}
+
+static state_callback_t transition_searching_for_base_station_idle(struct robot_t *robot_p)
+{
+    return (state_idle);
+}
+
+static state_callback_t transition_in_base_station_idle(struct robot_t *robot_p)
+{
+    return (state_idle);
 }
 
 /**
@@ -268,16 +340,55 @@ static int handle_state_transition(struct robot_t *robot_p)
 
     switch (current) {
 
-    case ROBOT_STATE_OFF:
+    case ROBOT_STATE_IDLE:
         switch (next) {
-        case ROBOT_STATE_ON: callback = transition_off_on; break;
-        default: break;
+        case ROBOT_STATE_STARTING:
+            callback = transition_idle_starting;
+            break;
+        default:
+            break;
         }
 
-    case ROBOT_STATE_ON:
+    case ROBOT_STATE_STARTING:
         switch (next) {
-        case ROBOT_STATE_OFF: callback = transition_on_off; break;
-        default: break;
+        case ROBOT_STATE_CUTTING:
+            callback = transition_starting_cutting;
+            break;
+        case ROBOT_STATE_IN_BASE_STATION:
+            callback = transition_starting_in_base_station;
+            break;
+        default:
+            break;
+        }
+
+    case ROBOT_STATE_CUTTING:
+        switch (next) {
+        case ROBOT_STATE_SEARCHING_FOR_BASE_STATION:
+            callback = transition_cutting_searching_for_base_station;
+            break;
+        case ROBOT_STATE_IDLE:
+            callback = transition_cutting_idle;
+            break;
+        default:
+            break;
+        }
+
+    case ROBOT_STATE_SEARCHING_FOR_BASE_STATION:
+        switch (next) {
+        case ROBOT_STATE_IDLE:
+            callback = transition_searching_for_base_station_idle;
+            break;
+        default:
+            break;
+        }
+
+    case ROBOT_STATE_IN_BASE_STATION:
+        switch (next) {
+        case ROBOT_STATE_IDLE:
+            callback = transition_in_base_station_idle;
+            break;
+        default:
+            break;
         }
 
     default:
@@ -337,9 +448,9 @@ static int robot_init(struct robot_t *robot_p)
 
     std_printk(STD_LOG_NOTICE, FSTR("initializing robot"));
 
-    robot_p->state.current = ROBOT_STATE_OFF;
-    robot_p->state.next = ROBOT_STATE_OFF;
-    robot_p->state.callback = state_off;
+    robot_p->state.current = ROBOT_STATE_IDLE;
+    robot_p->state.next = ROBOT_STATE_IDLE;
+    robot_p->state.callback = state_idle;
     robot_p->mode = ROBOT_MODE_AUTOMATIC;
 
     motor_init(&robot_p->left_motor,

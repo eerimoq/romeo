@@ -19,7 +19,7 @@
 #
 
 TESTS = $(addprefix robomower/tst/, filter)
-APPS = $(addprefix app/, charging_station robot)
+APPS = $(addprefix app/, base_station robot)
 TESTS_AND_APPS = $(TESTS) $(APPS)
 
 all: $(TESTS_AND_APPS:%=%.all)

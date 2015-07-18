@@ -18,7 +18,7 @@
 # This file is part of the RoboMower project.
 #
 
-NAME = charging_station
+NAME = base_station
 BOARD = linux
 SRC += main.c
 DRIVERS_SRC = uart.c pin.c

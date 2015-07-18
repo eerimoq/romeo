@@ -1,8 +1,9 @@
 digraph robot_state_diagram {
   off [style=filled];
   off -> idle [label="power on"];
-  idle -> cutting [label="manual start"];
-  idle -> in_base_station [label="manual start"];
+  idle -> starting [label="manual start"];
+  starting -> cutting;
+  starting -> in_base_station;
   cutting -> idle [label="error"];
   cutting -> searching_for_base_station [label="battery low or scheduled"];
   searching_for_base_station -> in_base_station [label="station found"];
