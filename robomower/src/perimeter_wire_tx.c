@@ -1,5 +1,5 @@
 /**
- * @file robomower/perimiter_wire_tx.c
+ * @file robomower/perimeter_wire_tx.c
  * @version 0.1
  *
  * @section License
@@ -21,7 +21,7 @@
 #include "simba.h"
 #include "robomower.h"
 
-FS_COUNTER(perimiter_timer_callback);
+FS_COUNTER(perimeter_timer_callback);
 
 /* The signal transmitted on the wire. */
 static uint8_t output_signal[] = {
@@ -31,13 +31,13 @@ static uint8_t output_signal[] = {
 };
 
 static struct timer_t timer;
-static struct perimiter_wire_tx_t pwires[PERIMITER_WIRE_TX_MAX];
+static struct perimeter_wire_tx_t pwires[PERIMITER_WIRE_TX_MAX];
 
 static void timer_callback(void *arg_p)
 {
     int i;
     uint8_t value;
-    struct perimiter_wire_tx_t *pwire_p;
+    struct perimeter_wire_tx_t *pwire_p;
 
     for (i = 0; i < membersof(pwires); i++) {
         pwire_p = &pwires[i];
@@ -58,10 +58,10 @@ static void timer_callback(void *arg_p)
         }
     }
 
-    FS_COUNTER_INC(perimiter_timer_callback, 1);
+    FS_COUNTER_INC(perimeter_timer_callback, 1);
 }
 
-int perimiter_wire_tx_module_init(void)
+int perimeter_wire_tx_module_init(void)
 {
     int i;
     struct time_t timeout;
@@ -70,7 +70,7 @@ int perimiter_wire_tx_module_init(void)
         pwires[i].state = PERIMITER_WIRE_TX_STATE_UNUSED;
     }
 
-    /* Start the perimiter wire sender timer. */
+    /* Start the perimeter wire sender timer. */
     timeout.seconds = 0;
     timeout.nanoseconds = 1000000L;
 
@@ -81,7 +81,7 @@ int perimiter_wire_tx_module_init(void)
                       TIMER_PERIODIC));
 }
 
-int perimiter_wire_tx_init(struct perimiter_wire_tx_t *pwire_p,
+int perimeter_wire_tx_init(struct perimeter_wire_tx_t *pwire_p,
                            struct pin_device_t *pin_dev_in1_p,
                            struct pin_device_t *pin_dev_in2_p)
 {
@@ -95,10 +95,10 @@ int perimiter_wire_tx_init(struct perimiter_wire_tx_t *pwire_p,
     return (0);
 }
 
-int perimiter_wire_tx_start(struct perimiter_wire_tx_t *pwire_p)
+int perimeter_wire_tx_start(struct perimeter_wire_tx_t *pwire_p)
 {
     std_printk(STD_LOG_NOTICE,
-               FSTR("Starting transmitting signal on perimiter wire"));
+               FSTR("Starting transmitting signal on perimeter wire"));
 
     pwire_p->state = PERIMITER_WIRE_TX_STATE_ON;
 

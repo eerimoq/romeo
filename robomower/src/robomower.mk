@@ -21,8 +21,8 @@
 INC += $(ROBOMOWER)
 
 ROBOMOWER_SRC ?= filter.c \
-	perimiter_wire_tx.c \
-	perimiter_wire_rx.c \
+	perimeter_wire_tx.c \
+	perimeter_wire_rx.c \
 	motor.c \
 	movement.c \
 	cutter.c \

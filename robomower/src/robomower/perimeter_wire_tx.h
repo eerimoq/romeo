@@ -1,5 +1,5 @@
 /**
- * @file robomower/perimiter_wire_tx.h
+ * @file robomower/perimeter_wire_tx.h
  * @version 0.1
  *
  * @section License
@@ -30,31 +30,31 @@
 /* Maximum number of instances. */
 #define PERIMITER_WIRE_TX_MAX 1
 
-struct perimiter_wire_tx_t {
+struct perimeter_wire_tx_t {
     uint8_t state;
     uint8_t pos;
     struct pin_driver_t pin_in1;
     struct pin_driver_t pin_in2;
 };
 
-int perimiter_wire_tx_module_init(void);
+int perimeter_wire_tx_module_init(void);
 
 /**
- * Initialize a perimiter wire instance from given data.
+ * Initialize a perimeter wire instance from given data.
  * @param[out] pwire_p Instance to be initialised.
  * @param[in] pin_dev_in1_p Pin device for in1.
  * @param[in] pin_dev_in2_p Pin device for in2.
  * @return zero(0) or negative error code.
  */
-int perimiter_wire_tx_init(struct perimiter_wire_tx_t *pwire_p,
+int perimeter_wire_tx_init(struct perimeter_wire_tx_t *pwire_p,
                            struct pin_device_t *pin_dev_in1_p,
                            struct pin_device_t *pin_dev_in2_p);
 
 /**
- * Start transmitting the signal on the perimiter wire.
+ * Start transmitting the signal on the perimeter wire.
  * @param[out] pwire_p Perimiter wire instance.
  * @return zero(0) or negative error code.
  */
-int perimiter_wire_tx_start(struct perimiter_wire_tx_t *pwire_p);
+int perimeter_wire_tx_start(struct perimeter_wire_tx_t *pwire_p);
 
 #endif

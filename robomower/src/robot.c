@@ -70,7 +70,7 @@ struct robot_t {
     struct timer_t ticker;
     struct motor_t left_motor;
     struct motor_t right_motor;
-    struct perimiter_wire_rx_t perimeter;
+    struct perimeter_wire_rx_t perimeter;
 };
 
 static struct robot_t robot;
@@ -204,7 +204,7 @@ static int robot_start(struct robot_t *robot_p)
 
     robot_p->state.next = ROBOT_STATE_STARTING;
 
-    perimiter_wire_rx_start(&robot_p->perimeter);
+    perimeter_wire_rx_start(&robot_p->perimeter);
 
     return (0);
 }
@@ -215,7 +215,7 @@ static int robot_stop(struct robot_t *robot_p)
 
     robot_p->state.next = ROBOT_STATE_IDLE;
 
-    //perimiter_wire_rx_stop(&robot_p->perimeter);
+    //perimeter_wire_rx_stop(&robot_p->perimeter);
 
     return (0);
 }
@@ -253,6 +253,10 @@ static int state_cutting(struct robot_t *robot_p)
         /* Rotate the robot. */
         speed = 0.0f;
         omega = 0.1f;
+#if 0
+        perimeter_
+        filter_fir();
+#endif
     }
 
     /* Calculate new driver motor speeds and set them. */
@@ -260,6 +264,7 @@ static int state_cutting(struct robot_t *robot_p)
                                           omega,
                                           &left_wheel_omega,
                                           &right_wheel_omega);
+
     if (res == 0) {
         motor_set_omega(&robot_p->left_motor, left_wheel_omega);
         motor_set_omega(&robot_p->right_motor, right_wheel_omega);
@@ -282,7 +287,7 @@ static int state_in_base_station(struct robot_t *robot_p)
     return (0);
 }
 
-static state_callback_t transition_idle_starting(struct robot_t *robot_p)
+static state_callback_t transition__idle__starting(struct robot_t *robot_p)
 {
     if (robot_start(robot_p) != 0) {
         return (NULL);
@@ -291,17 +296,17 @@ static state_callback_t transition_idle_starting(struct robot_t *robot_p)
     return (state_starting);
 }
 
-static state_callback_t transition_starting_cutting(struct robot_t *robot_p)
+static state_callback_t transition__starting__cutting(struct robot_t *robot_p)
 {
     return (state_cutting);
 }
 
-static state_callback_t transition_starting_in_base_station(struct robot_t *robot_p)
+static state_callback_t transition__starting__in_base_station(struct robot_t *robot_p)
 {
     return (state_in_base_station);
 }
 
-static state_callback_t transition_cutting_idle(struct robot_t *robot_p)
+static state_callback_t transition__cutting__idle(struct robot_t *robot_p)
 {
     if (robot_stop(robot_p) != 0) {
         return (NULL);
@@ -310,17 +315,17 @@ static state_callback_t transition_cutting_idle(struct robot_t *robot_p)
     return (state_idle);
 }
 
-static state_callback_t transition_cutting_searching_for_base_station(struct robot_t *robot_p)
+static state_callback_t transition__cutting__searching_for_base_station(struct robot_t *robot_p)
 {
     return (state_searching_for_base_station);
 }
 
-static state_callback_t transition_searching_for_base_station_idle(struct robot_t *robot_p)
+static state_callback_t transition__searching_for_base_station__idle(struct robot_t *robot_p)
 {
     return (state_idle);
 }
 
-static state_callback_t transition_in_base_station_idle(struct robot_t *robot_p)
+static state_callback_t transition__in_base_station__idle(struct robot_t *robot_p)
 {
     return (state_idle);
 }
@@ -343,7 +348,7 @@ static int handle_state_transition(struct robot_t *robot_p)
     case ROBOT_STATE_IDLE:
         switch (next) {
         case ROBOT_STATE_STARTING:
-            callback = transition_idle_starting;
+            callback = transition__idle__starting;
             break;
         default:
             break;
@@ -352,10 +357,10 @@ static int handle_state_transition(struct robot_t *robot_p)
     case ROBOT_STATE_STARTING:
         switch (next) {
         case ROBOT_STATE_CUTTING:
-            callback = transition_starting_cutting;
+            callback = transition__starting__cutting;
             break;
         case ROBOT_STATE_IN_BASE_STATION:
-            callback = transition_starting_in_base_station;
+            callback = transition__starting__in_base_station;
             break;
         default:
             break;
@@ -364,10 +369,10 @@ static int handle_state_transition(struct robot_t *robot_p)
     case ROBOT_STATE_CUTTING:
         switch (next) {
         case ROBOT_STATE_SEARCHING_FOR_BASE_STATION:
-            callback = transition_cutting_searching_for_base_station;
+            callback = transition__cutting__searching_for_base_station;
             break;
         case ROBOT_STATE_IDLE:
-            callback = transition_cutting_idle;
+            callback = transition__cutting__idle;
             break;
         default:
             break;
@@ -376,7 +381,7 @@ static int handle_state_transition(struct robot_t *robot_p)
     case ROBOT_STATE_SEARCHING_FOR_BASE_STATION:
         switch (next) {
         case ROBOT_STATE_IDLE:
-            callback = transition_searching_for_base_station_idle;
+            callback = transition__searching_for_base_station__idle;
             break;
         default:
             break;
@@ -385,7 +390,7 @@ static int handle_state_transition(struct robot_t *robot_p)
     case ROBOT_STATE_IN_BASE_STATION:
         switch (next) {
         case ROBOT_STATE_IDLE:
-            callback = transition_in_base_station_idle;
+            callback = transition__in_base_station__idle;
             break;
         default:
             break;
@@ -462,7 +467,7 @@ static int robot_init(struct robot_t *robot_p)
                &pin_d6_dev,
                &pwm_d11_dev);
 
-    perimiter_wire_rx_init(&robot_p->perimeter, NULL, NULL);
+    perimeter_wire_rx_init(&robot_p->perimeter, NULL, NULL);
 
     /* Start the robot periodic timer with a 50ms period. */
     timeout.seconds = 0;

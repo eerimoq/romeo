@@ -23,8 +23,8 @@
 
 #include "robomower/math.h"
 #include "robomower/filter.h"
-#include "robomower/perimiter_wire_tx.h"
-#include "robomower/perimiter_wire_rx.h"
+#include "robomower/perimeter_wire_tx.h"
+#include "robomower/perimeter_wire_rx.h"
 #include "robomower/movement.h"
 #include "robomower/motor.h"
 #include "robomower/cutter.h"

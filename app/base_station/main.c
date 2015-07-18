@@ -27,7 +27,7 @@ static struct shell_args_t shell_args;
 
 int main()
 {
-    struct perimiter_wire_tx_t pwire;
+    struct perimeter_wire_tx_t pwire;
 
     sys_start();
     uart_module_init();
@@ -38,12 +38,12 @@ int main()
     std_klog_set_output_channel(&uart.chout);
     sys_set_stdout(&uart.chout);
 
-    /* Start transmitting the signal on the perimiter wire. */
-    perimiter_wire_tx_module_init();
-    perimiter_wire_tx_init(&pwire,
+    /* Start transmitting the signal on the perimeter wire. */
+    perimeter_wire_tx_module_init();
+    perimeter_wire_tx_init(&pwire,
                            &pin_d7_dev,
                            &pin_d8_dev);
-    perimiter_wire_tx_start(&pwire);
+    perimeter_wire_tx_start(&pwire);
 
     /* Start the shell. */
     shell_args.chin_p = &uart.chin;

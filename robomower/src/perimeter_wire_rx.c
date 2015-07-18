@@ -1,5 +1,5 @@
 /**
- * @file robomower/perimiter_wire_rx.c
+ * @file robomower/perimeter_wire_rx.c
  * @version 0.1
  *
  * @section License
@@ -28,7 +28,7 @@ static int8_t coefficients[] = {
     -1, -1, 1, -1, -1, 1, 1, -1
 };
 
-int perimiter_wire_rx_init(struct perimiter_wire_rx_t *pwire_p,
+int perimeter_wire_rx_init(struct perimeter_wire_rx_t *pwire_p,
                            struct pin_device_t *pin_dev_in1_p,
                            struct pin_device_t *pin_dev_in2_p)
 {
@@ -40,7 +40,7 @@ int perimiter_wire_rx_init(struct perimiter_wire_rx_t *pwire_p,
     return (0);
 }
 
-int perimiter_wire_rx_start(struct perimiter_wire_rx_t *pwire_p)
+int perimeter_wire_rx_start(struct perimeter_wire_rx_t *pwire_p)
 {
     /* adc_start(&pwire_p->adc.drv); */
 
