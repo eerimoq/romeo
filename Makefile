@@ -18,7 +18,7 @@
 # This file is part of the Robomower project.
 #
 
-TESTS = $(addprefix robomower/tst/, filter)
+TESTS = $(addprefix robomower/tst/, filter robot movement)
 APPS = $(addprefix app/, base_station robot)
 TESTS_AND_APPS = $(TESTS) $(APPS)
 
