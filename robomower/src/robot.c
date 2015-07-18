@@ -86,6 +86,7 @@ struct robot_t {
         float speed;
         float omega;
     } manual;
+    struct thrd_t *self_p;
     struct timer_t ticker;
     struct motor_t left_motor;
     struct motor_t right_motor;
@@ -93,7 +94,6 @@ struct robot_t {
 };
 
 static struct robot_t robot;
-static struct thrd_t *self_p;
 
 /* Modes as strings. */
 static FAR const char manual_string[] = "manual";
@@ -228,28 +228,6 @@ static void timer_callback(void *arg_p)
     struct thrd_t *thrd_p = arg_p;
 
     thrd_resume_irq(thrd_p, 0);
-}
-
-static int robot_start(struct robot_t *robot_p)
-{
-    std_printk(STD_LOG_NOTICE, FSTR("starting robot"));
-
-    robot_p->state.next = ROBOT_STATE_STARTING;
-
-    perimeter_wire_rx_start(&robot_p->perimeter);
-
-    return (0);
-}
-
-static int robot_stop(struct robot_t *robot_p)
-{
-    std_printk(STD_LOG_NOTICE, FSTR("stopping robot"));
-
-    robot_p->state.next = ROBOT_STATE_IDLE;
-
-    //perimeter_wire_rx_stop(&robot_p->perimeter);
-
-    return (0);
 }
 
 static int state_idle(struct robot_t *robot_p)
@@ -395,10 +373,6 @@ static int state_in_base_station(struct robot_t *robot_p)
 
 static state_callback_t transition__idle__starting(struct robot_t *robot_p)
 {
-    if (robot_start(robot_p) != 0) {
-        return (NULL);
-    }
-
     return (state_starting);
 }
 
@@ -414,10 +388,6 @@ static state_callback_t transition__starting__in_base_station(struct robot_t *ro
 
 static state_callback_t transition__cutting__idle(struct robot_t *robot_p)
 {
-    if (robot_stop(robot_p) != 0) {
-        return (NULL);
-    }
-
     return (state_idle);
 }
 
@@ -550,49 +520,45 @@ static int robot_process(struct robot_t *robot_p)
     }
 }
 
-static int robot_init(struct robot_t *robot_p)
+int robot_init()
 {
-    struct time_t timeout;
+    robot.state.current = ROBOT_STATE_IDLE;
+    robot.state.next = ROBOT_STATE_IDLE;
+    robot.state.callback = state_idle;
+    robot.mode = ROBOT_MODE_AUTOMATIC;
 
-    self_p = thrd_self();
-    thrd_set_name("robot");
+    robot.cutting.state = CUTTING_STATE_FORWARD;
 
-    std_printk(STD_LOG_NOTICE, FSTR("initializing robot"));
-
-    robot_p->state.current = ROBOT_STATE_IDLE;
-    robot_p->state.next = ROBOT_STATE_IDLE;
-    robot_p->state.callback = state_idle;
-    robot_p->mode = ROBOT_MODE_AUTOMATIC;
-
-    robot_p->cutting.state = CUTTING_STATE_FORWARD;
-
-    motor_init(&robot_p->left_motor,
+    motor_init(&robot.left_motor,
                &pin_d2_dev,
                &pin_d3_dev,
                &pwm_d10_dev);
-    motor_init(&robot_p->right_motor,
+    motor_init(&robot.right_motor,
                &pin_d5_dev,
                &pin_d6_dev,
                &pwm_d11_dev);
 
-    perimeter_wire_rx_init(&robot_p->perimeter, NULL, NULL);
+    perimeter_wire_rx_init(&robot.perimeter, NULL, NULL);
+
+    return (0);
+}
+
+void *robot_entry(void *arg_p)
+{
+    struct time_t timeout;
+
+    robot.self_p = thrd_self();
+    thrd_set_name("robot");
 
     /* Start the robot periodic timer with a 50ms period. */
     timeout.seconds = 0;
     timeout.nanoseconds = PROCESS_PERIOD_MS * 1000000L;
 
-    timer_set(&robot_p->ticker,
+    timer_set(&robot.ticker,
               &timeout,
               timer_callback,
-              self_p,
+              robot.self_p,
               TIMER_PERIODIC);
-
-    return (0);
-}
-
-int robot_entry()
-{
-    robot_init(&robot);
 
     /* Robot main loop. */
     while (1) {
@@ -601,6 +567,13 @@ int robot_entry()
 
         robot_process(&robot);
     }
+
+    return (0);
+}
+
+int robot_manual_start()
+{
+    robot.state.next = ROBOT_STATE_STARTING;
 
     return (0);
 }

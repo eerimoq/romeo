@@ -1,5 +1,5 @@
 /**
- * @file robomower/robot.h
+ * @file motor_stub.c
  * @version 0.1
  *
  * @section License
@@ -18,28 +18,36 @@
  * This file is part of the RoboMower project.
  */
 
-#ifndef __ROBOMOWER_ROBOT_H__
-#define __ROBOMOWER_ROBOT_H__
-
 #include "simba.h"
 #include "robomower.h"
 
-/**
- * Initialize robot.
- * @return zero(0) or negative error code
- */
-int robot_init();
+extern struct queue_t motor_queue;
+
+int motor_init(struct motor_t *motor_p,
+               struct pin_device_t *in1_p,
+               struct pin_device_t *in2_p,
+               struct pwm_device_t *enable_p)
+{
+    return (0);
+}
 
 /**
- * Robot main loop.
+ * Set motor direction.
+ * @param[in] direction 0 for CW, 1 for CCW
  * @return zero(0) or negative error code
  */
-void *robot_entry(void *arg_p);
+int motor_set_direction(struct motor_t *motor_p,
+                        int direction)
+{
+    chan_write(&motor_queue, &direction, sizeof(direction));
 
-/**
- * Manual start of the robot. Do from idle to cutting state.
- * @return zero(0) or negative error code
- */
-int robot_manual_start();
+    return (0);
+}
 
-#endif
+int motor_set_omega(struct motor_t *motor_p,
+                    float omega)
+{
+    chan_write(&motor_queue, &omega, sizeof(omega));
+
+    return (0);
+}
