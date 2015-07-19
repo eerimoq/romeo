@@ -28,7 +28,7 @@
 #include "robomower/movement.h"
 #include "robomower/motor.h"
 #include "robomower/cutter.h"
-#include "robomower/robot.h"
 #include "robomower/power.h"
+#include "robomower/robot.h"
 
 #endif
