@@ -34,25 +34,58 @@ int perimeter_testdata_index;
 int perimeter_testdata_max;
 const float *perimeter_testdata_signal_level;
 
+/* Input signal to robot. */
 FAR static const float test_automatic_testdata_signal_level[] = {
+    /* 0 */
     1.0f,
     1.0f,
     1.0f,
     -1.0f, /* Outside perimeter wire. */
     0.0f,
+
+    /* 5 */
     0.5f,
+    1.0f,
+    1.0f,
+    1.0f,
+    1.0f,
+
+    /* 10 */
 };
 
 /* Reference data that the motor stub module receives. */
 FAR static const struct motors_data_t test_automatic_testdata_direction[] = {
-    { .left_wheel_omega = 1.570795f, .right_wheel_omega = 1.570795f },
-    { .left_wheel_omega = 1.570795f, .right_wheel_omega = 1.570795f },
-    { .left_wheel_omega = 1.570795f, .right_wheel_omega = 1.570795f },
-    { .left_wheel_omega = 0.0f, .right_wheel_omega = 0.0f },
+    /* 0 */
+    { .left_wheel_omega =  1.570795f, .right_wheel_omega =  1.570795f },
+    { .left_wheel_omega =  1.570795f, .right_wheel_omega =  1.570795f },
+    { .left_wheel_omega =  1.570795f, .right_wheel_omega =  1.570795f },
+    { .left_wheel_omega =  0.0f,      .right_wheel_omega =  0.0f      },
     { .left_wheel_omega = -1.570795f, .right_wheel_omega = -1.570795f },
+
+    /* 5 */
+    { .left_wheel_omega =  0.0f,      .right_wheel_omega =  0.0f      },
+    { .left_wheel_omega =  0.235619f, .right_wheel_omega = -0.235619f },
+    { .left_wheel_omega =  0.0f,      .right_wheel_omega =  0.0f      },
+    { .left_wheel_omega =  1.570795f, .right_wheel_omega =  1.570795f },
+    { .left_wheel_omega =  1.570795f, .right_wheel_omega =  1.570795f },
+
+    /* 10 */
 };
 
 struct queue_t motor_queue;
+
+static int float_close_to_zero(float value)
+{
+    if (!((value > -0.001) && (value < 0.001))) {
+#ifdef ARCH_LINUX
+        /* No float support in std module. */
+        printf("%f\n", value);
+#endif
+        return (0);
+    }
+
+    return (1);
+}
 
 static int test_automatic(struct harness_t *harness_p)
 {
@@ -82,11 +115,19 @@ static int test_automatic(struct harness_t *harness_p)
 
         BTASSERT(chan_read(&motor_queue, &omega, sizeof(omega)) == sizeof(omega));
         std_printk(STD_LOG_NOTICE, FSTR("omega = %d"), (int)omega);
-        BTASSERT(omega == test_automatic_testdata_direction[i].left_wheel_omega);
+#ifdef ARCH_LINUX
+        printf("omega = %f\n", omega);
+#endif
+        BTASSERT(float_close_to_zero(omega
+                                     - test_automatic_testdata_direction[i].left_wheel_omega));
 
         BTASSERT(chan_read(&motor_queue, &omega, sizeof(omega)) == sizeof(omega));
         std_printk(STD_LOG_NOTICE, FSTR("omega = %d"), (int)omega);
-        BTASSERT(omega == test_automatic_testdata_direction[i].right_wheel_omega);
+#ifdef ARCH_LINUX
+        printf("omega = %f\n", omega);
+#endif
+        BTASSERT(float_close_to_zero(omega -
+                                     test_automatic_testdata_direction[i].right_wheel_omega));
     }
 
     return (0);

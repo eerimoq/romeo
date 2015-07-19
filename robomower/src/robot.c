@@ -61,8 +61,12 @@ FS_COUNTER(robot_odometer);
 #define CUTTING_STATE_ROTATING  2
 
 /* Number of ticks in cutting states. */
-#define CUTTING_STATE_BACKWARDS_TICKS 40
-#define CUTTING_STATE_ROTATING_TICKS  40
+#ifndef CUTTING_STATE_BACKWARDS_TICKS
+#    define CUTTING_STATE_BACKWARDS_TICKS 40
+#endif
+#ifndef CUTTING_STATE_ROTATING_TICKS
+#    define CUTTING_STATE_ROTATING_TICKS  40
+#endif
 
 struct robot_t;
 
@@ -308,6 +312,7 @@ static int cutting_automatic(struct robot_t *robot_p,
             if (robot_p->cutting.ticks_left == 0) {
                 /* Enter rotating state. */
                 /* TODO: number of ticks should be random. */
+                *speed = 0.0f;
                 robot_p->cutting.ticks_left = CUTTING_STATE_ROTATING_TICKS;
                 robot_p->cutting.state = CUTTING_STATE_ROTATING;
             }
@@ -316,8 +321,12 @@ static int cutting_automatic(struct robot_t *robot_p,
         case CUTTING_STATE_ROTATING:
             FS_COUNTER_INC(robot_cutting_state_rotating, 1);
 
+            *speed = 0.0f;
+            *omega = 0.1f;
+
             if (robot_p->cutting.ticks_left == 0) {
                 /* Enter forward state. */
+                *omega = 0.0f;
                 robot_p->cutting.state = CUTTING_STATE_FORWARD;
             }
             break;

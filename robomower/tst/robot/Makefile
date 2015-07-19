@@ -24,6 +24,8 @@ SRC += main.c perimeter_wire_rx_stub.c motor_stub.c
 SLIB_SRC = harness.c
 DRIVERS_SRC = uart.c
 ROBOMOWER_SRC = robot.c movement.c
+CFLAGS_EXTRA = -DCUTTING_STATE_BACKWARDS_TICKS=2 \
+	-DCUTTING_STATE_ROTATING_TICKS=2
 
 ROBOMOWER = ../../src
 include $(ROBOMOWER)/robomower.mk
