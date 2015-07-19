@@ -1,44 +1,46 @@
 ROBOT
 =====
 
+SCHEMATICS
+----------
+![](robot_signal_wiring_schematics.jpg)
+
+STATE MACHINE
+-------------
 The robot has a two level state machine.
 
-TOP STATE MACHINE
------------------
-
+### Top level state machine
 ![](robot_state_machine.png)
 
-### State descriptions
+#### State descriptions
 
-#### idle
+##### idle
 The robot is idle, waiting to be started manually.
 
-#### starting
+##### starting
 The robot is starting.
 
-#### cutting
+##### cutting
 The robot is driving around and cuts the grass.
 
-#### searching_for_base_station
+##### searching_for_base_station
 The robot is searching for the base station.
 
-#### in_base_station
+##### in_base_station
 The robot is in the base station.
 
-CUTTING STATE MACHINE
----------------------
-
+### Cutting state machine
 This is the state diagram for the cutting state.
 
 ![](robot_state_machine_cutting.png)
 
-### State descriptions
+#### State descriptions
 
-#### forward
+##### forward
 The robot is driving forward.
 
-#### backwards
+##### backwards
 The robot is driving backwards.
 
-#### rotating
+##### rotating
 The robot is rotating.
