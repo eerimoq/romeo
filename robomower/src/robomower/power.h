@@ -28,6 +28,7 @@
 #define POWER_STORED_ENERGY_LEVEL_MAX 100
 
 struct power_t {
+    struct adc_driver_t adc;
 };
 
 /**
@@ -35,7 +36,9 @@ struct power_t {
  * @param[out] power_p Object to initialize.
  * @return zero(0) or negative error code
  */
-int power_init(struct power_t *power_p);
+int power_init(struct power_t *power_p,
+               struct adc_device_t *dev_p,
+               struct pin_device_t *pin_dev_p);
 
 /**
  * Get current stored energy level in the power supply.

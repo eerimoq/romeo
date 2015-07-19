@@ -21,7 +21,7 @@
 NAME = robot
 BOARD = linux
 SRC += main.c
-DRIVERS_SRC = uart.c pin.c pwm.c
+DRIVERS_SRC = uart.c pin.c pwm.c adc.c
 
 ROBOMOWER = ../../robomower/src
 include $(ROBOMOWER)/robomower.mk

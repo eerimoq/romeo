@@ -123,7 +123,17 @@ static int cutting_automatic(struct robot_t *robot_p,
 
 int state_idle(struct robot_t *robot_p)
 {
+    float left_wheel_omega;
+    float right_wheel_omega;
+
     FS_COUNTER_INC(robot_state_idle, 1);
+
+    /* Robot standing still in idle state. */
+    left_wheel_omega = 0.0f;
+    right_wheel_omega = 0.0f;
+
+    motor_set_omega(&robot_p->left_motor, left_wheel_omega);
+    motor_set_omega(&robot_p->right_motor, right_wheel_omega);
 
     return (0);
 }
@@ -203,6 +213,7 @@ int state_in_base_station(struct robot_t *robot_p)
     /* Wait until plenty of energy is available. */
     if (power_get_stored_energy_level(&robot_p->power)
         == POWER_STORED_ENERGY_LEVEL_MAX) {
+        robot_p->substate.cutting.ticks_left = CUTTING_STATE_BACKWARDS_TICKS;
         robot_p->substate.cutting.state = CUTTING_STATE_BACKWARDS;
         robot_p->state.next = ROBOT_STATE_CUTTING;
     }

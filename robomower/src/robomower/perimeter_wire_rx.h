@@ -24,6 +24,7 @@
 #include "simba.h"
 
 struct perimeter_wire_rx_t {
+    struct adc_driver_t adc;
     uint8_t state;
     uint8_t pos;
     struct pin_driver_t pin_in1;
@@ -40,8 +41,8 @@ int perimeter_wire_rx_module_init(void);
  * @return zero(0) or negative error code.
  */
 int perimeter_wire_rx_init(struct perimeter_wire_rx_t *pwire_p,
-                           struct pin_device_t *pin_dev_in1_p,
-                           struct pin_device_t *pin_dev_in2_p);
+                           struct adc_device_t *dev_p,
+                           struct pin_device_t *pin_dev_p);
 
 /**
  * Start to raed the signal picked up by the inductor.

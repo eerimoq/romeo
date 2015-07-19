@@ -329,8 +329,12 @@ int robot_init()
                &pin_d6_dev,
                &pwm_d11_dev);
 
-    perimeter_wire_rx_init(&robot.perimeter, NULL, NULL);
-    power_init(&robot.power);
+    perimeter_wire_rx_init(&robot.perimeter,
+                           &adc_0_dev,
+                           &pin_a0_dev);
+    power_init(&robot.power,
+               &adc_0_dev,
+               &pin_a1_dev);
 
     return (0);
 }

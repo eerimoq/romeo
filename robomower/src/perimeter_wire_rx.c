@@ -21,8 +21,6 @@
 #include "simba.h"
 #include "robomower.h"
 
-FS_COMMAND("/perimeter/signal/set", perimeter_wire_rx_cmd_set_signal);
-
 #if 0
 /* The coefficients used as a reference in the matched filter. */
 static int8_t coefficients[] = {
@@ -32,51 +30,29 @@ static int8_t coefficients[] = {
 };
 #endif
 
-static float signal_level = 0.0f;
-
-int perimeter_wire_rx_cmd_set_signal(int argc,
-                                     const char *argv[],
-                                     void *out_p,
-                                     void *in_p)
-{
-    UNUSED(in_p);
-
-    long level;
-
-    if (argc != 2) {
-        std_fprintf(out_p, FSTR("Usage: set <level>\r\n"));
-        return (1);
-    }
-
-    std_strtol(argv[1], &level);
-
-    signal_level = level;
-
-    return (0);
-}
-
 int perimeter_wire_rx_init(struct perimeter_wire_rx_t *pwire_p,
-                           struct pin_device_t *pin_dev_in1_p,
-                           struct pin_device_t *pin_dev_in2_p)
+                           struct adc_device_t *dev_p,
+                           struct pin_device_t *pin_dev_p)
 {
-    /* adc_init(&pwire_p->adc.drv, */
-    /*          1000, */
-    /*          pwire_p->adc.buf, */
-    /*          membersof(pwire_p->adc.buf), */
-    /*          ADC_MODE_CIRCULAR); */
+    adc_init(&pwire_p->adc,
+             dev_p,
+             pin_dev_p,             
+             ADC_REFERENCE_VCC,
+             1000);
+
     return (0);
 }
 
 int perimeter_wire_rx_start(struct perimeter_wire_rx_t *pwire_p)
 {
-    /* adc_start(&pwire_p->adc.drv); */
-
     return (0);
 }
 
 float perimeter_wire_rx_get_signal(struct perimeter_wire_rx_t *pwire_p)
 {
-    /* adc_start(&pwire_p->adc.drv); */
+    int samples[1];
 
-    return (signal_level);
+    adc_convert(&pwire_p->adc, samples, membersof(samples));
+    
+    return (samples[0] - 512);
 }
