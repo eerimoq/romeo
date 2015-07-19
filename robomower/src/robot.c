@@ -211,6 +211,7 @@ static int handle_state_transition(struct robot_t *robot_p)
         default:
             break;
         }
+        break;
 
     case ROBOT_STATE_STARTING:
         switch (next) {
@@ -223,6 +224,7 @@ static int handle_state_transition(struct robot_t *robot_p)
         default:
             break;
         }
+        break;
 
     case ROBOT_STATE_CUTTING:
         switch (next) {
@@ -235,6 +237,7 @@ static int handle_state_transition(struct robot_t *robot_p)
         default:
             break;
         }
+        break;
 
     case ROBOT_STATE_SEARCHING_FOR_BASE_STATION:
         switch (next) {
@@ -247,6 +250,7 @@ static int handle_state_transition(struct robot_t *robot_p)
         default:
             break;
         }
+        break;
 
     case ROBOT_STATE_IN_BASE_STATION:
         switch (next) {
@@ -259,6 +263,7 @@ static int handle_state_transition(struct robot_t *robot_p)
         default:
             break;
         }
+        break;
 
     default:
         break;

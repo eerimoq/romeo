@@ -37,3 +37,6 @@ run.log
 robomower/tst/*/fs
 app/*/fs
 size.log
+*.gcov
+index.*html
+coverage.log
