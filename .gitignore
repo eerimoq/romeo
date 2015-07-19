@@ -36,3 +36,4 @@ obj
 run.log
 robomower/tst/*/fs
 app/*/fs
+size.log

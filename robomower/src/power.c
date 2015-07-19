@@ -1,5 +1,5 @@
 /**
- * @file robomower.h
+ * @file power.c
  * @version 0.1
  *
  * @section License
@@ -18,17 +18,15 @@
  * This file is part of the RoboMower project.
  */
 
-#ifndef __ROBOMOWER_H__
-#define __ROBOMOWER_H__
+#include "simba.h"
+#include "robomower.h"
 
-#include "robomower/math.h"
-#include "robomower/filter.h"
-#include "robomower/perimeter_wire_tx.h"
-#include "robomower/perimeter_wire_rx.h"
-#include "robomower/movement.h"
-#include "robomower/motor.h"
-#include "robomower/cutter.h"
-#include "robomower/robot.h"
-#include "robomower/power.h"
+int power_init(struct power_t *power_p)
+{
+    return (0);
+}
 
-#endif
+int power_get_stored_energy_level(struct power_t *power_p)
+{
+    return (100);
+}

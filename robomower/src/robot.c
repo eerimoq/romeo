@@ -60,6 +60,10 @@ FS_COUNTER(robot_odometer);
 #define CUTTING_STATE_BACKWARDS 1
 #define CUTTING_STATE_ROTATING  2
 
+/* Searching for base station states. */
+#define SEARCHING_STATE_SEARCHING_FOR_PERIMETER_WIRE 0
+#define SEARCHING_STATE_PERIMETER_WIRE_FOUND         1
+
 /* Number of ticks in cutting states. */
 #ifndef CUTTING_STATE_BACKWARDS_TICKS
 #    define CUTTING_STATE_BACKWARDS_TICKS 40
@@ -79,13 +83,22 @@ struct robot_state_t {
     int (*callback)(struct robot_t *);
 };
 
+struct cutting_state_t {
+    int state;
+    int ticks_left;
+};
+ 
+struct searching_for_base_station_state_t {
+    int state;
+};
+
 struct robot_t {
     volatile int mode;
     struct robot_state_t state;
-    struct {
-        int state;
-        int ticks_left;
-    } cutting;
+    union {
+        struct cutting_state_t cutting;
+        struct searching_for_base_station_state_t searching;
+    } substate;
     volatile struct {
         float speed;
         float omega;
@@ -95,6 +108,7 @@ struct robot_t {
     struct motor_t left_motor;
     struct motor_t right_motor;
     struct perimeter_wire_rx_t perimeter;
+    struct power_t power;
 };
 
 static struct robot_t robot;
@@ -132,6 +146,17 @@ FAR const char FAR *cutting_state_as_string[] = {
     cutting_forward_string,
     cutting_backwards_string,
     cutting_rotating_string
+};
+
+/* Searching for base station states as strings. */
+static FAR const char searching_state_searching_for_perimeter_wire_string[] =
+    "searching_for_perimeter_wire";
+static FAR const char searching_state_perimeter_wire_found_string[] =
+    "perimeter_wire_found";
+
+FAR const char FAR *searching_state_as_string[] = {
+    searching_state_searching_for_perimeter_wire_string,
+    searching_state_perimeter_wire_found_string,
 };
 
 int robot_cmd_mode_set(int argc,
@@ -207,8 +232,17 @@ int robot_cmd_status(int argc,
     std_fprintf(out_p, mode_as_string[robot.mode]);
     std_fprintf(out_p, FSTR("\r\nstate = "));
     std_fprintf(out_p, state_as_string[robot.state.current]);
-    std_fprintf(out_p, FSTR("\r\ncutting.state = "));
-    std_fprintf(out_p, cutting_state_as_string[robot.cutting.state]);
+
+    switch (robot.state.current) {
+    case ROBOT_STATE_CUTTING:
+        std_fprintf(out_p, FSTR("\r\ncutting.state = "));
+        std_fprintf(out_p, cutting_state_as_string[robot.substate.cutting.state]);
+        break;
+    case ROBOT_STATE_SEARCHING_FOR_BASE_STATION:
+        std_fprintf(out_p, FSTR("\r\nsearching_for_base_station.state = "));
+        std_fprintf(out_p, searching_state_as_string[robot.substate.searching.state]);
+        break;
+    }
     std_fprintf(out_p,
                 FSTR("\r\nprocess period = %ld ms\r\n"),
                 PROCESS_PERIOD_MS);
@@ -262,7 +296,7 @@ static int cutting_manual(struct robot_t *robot_p,
 
 static int is_time_to_search_for_base_station(struct robot_t *robot_p)
 {
-    return (0);
+    return (power_get_stored_energy_level(&robot_p->power) <= 20);
 }
 
 static int is_inside_perimeter_wire(float signal)
@@ -271,22 +305,23 @@ static int is_inside_perimeter_wire(float signal)
 }
 
 static int cutting_automatic(struct robot_t *robot_p,
-                             float *speed,
-                             float *omega)
+                             float *speed_p,
+                             float *omega_p)
 {
     float signal;
+    struct cutting_state_t *cutting_p = &robot_p->substate.cutting;
 
     /* Default no movement. */
-    *speed = 0.0f;
-    *omega = 0.0f;
+    *speed_p = 0.0f;
+    *omega_p = 0.0f;
 
     /* Search for base station if battery voltage is low. */
     if (is_time_to_search_for_base_station(robot_p)) {
         robot_p->state.next = ROBOT_STATE_SEARCHING_FOR_BASE_STATION;
     } else {
-        robot_p->cutting.ticks_left--;
+        cutting_p->ticks_left--;
 
-        switch (robot_p->cutting.state) {
+        switch (cutting_p->state) {
 
         case CUTTING_STATE_FORWARD:
             FS_COUNTER_INC(robot_cutting_state_forward, 1);
@@ -294,40 +329,40 @@ static int cutting_automatic(struct robot_t *robot_p,
             signal = perimeter_wire_rx_get_signal(&robot_p->perimeter);
 
             if (is_inside_perimeter_wire(signal)) {
-                *speed = 0.1f;
-                *omega = 0.0f;
+                *speed_p = 0.1f;
+                *omega_p = 0.0f;
             } else {
                 /* Enter backwards state. */
-                robot_p->cutting.ticks_left = CUTTING_STATE_BACKWARDS_TICKS;
-                robot_p->cutting.state = CUTTING_STATE_BACKWARDS;
+                cutting_p->ticks_left = CUTTING_STATE_BACKWARDS_TICKS;
+                cutting_p->state = CUTTING_STATE_BACKWARDS;
             }
             break;
 
         case CUTTING_STATE_BACKWARDS:
             FS_COUNTER_INC(robot_cutting_state_backwards, 1);
 
-            *speed = -0.1f;
-            *omega = 0.0f;
+            *speed_p = -0.1f;
+            *omega_p = 0.0f;
 
-            if (robot_p->cutting.ticks_left == 0) {
+            if (cutting_p->ticks_left == 0) {
                 /* Enter rotating state. */
                 /* TODO: number of ticks should be random. */
-                *speed = 0.0f;
-                robot_p->cutting.ticks_left = CUTTING_STATE_ROTATING_TICKS;
-                robot_p->cutting.state = CUTTING_STATE_ROTATING;
+                *speed_p = 0.0f;
+                cutting_p->ticks_left = CUTTING_STATE_ROTATING_TICKS;
+                cutting_p->state = CUTTING_STATE_ROTATING;
             }
             break;
 
         case CUTTING_STATE_ROTATING:
             FS_COUNTER_INC(robot_cutting_state_rotating, 1);
 
-            *speed = 0.0f;
-            *omega = 0.1f;
+            *speed_p = 0.0f;
+            *omega_p = 0.1f;
 
-            if (robot_p->cutting.ticks_left == 0) {
+            if (cutting_p->ticks_left == 0) {
                 /* Enter forward state. */
-                *omega = 0.0f;
-                robot_p->cutting.state = CUTTING_STATE_FORWARD;
+                *omega_p = 0.0f;
+                cutting_p->state = CUTTING_STATE_FORWARD;
             }
             break;
         }
@@ -368,7 +403,29 @@ static int state_cutting(struct robot_t *robot_p)
 
 static int state_searching_for_base_station(struct robot_t *robot_p)
 {
+    float left_wheel_omega;
+    float right_wheel_omega;
+    struct searching_for_base_station_state_t *searching_p =
+        &robot_p->substate.searching;
+
     FS_COUNTER_INC(robot_state_searching_for_base_station, 1);
+
+    /* TODO: Implement searching and following algorithms. */
+    if (searching_p->state == SEARCHING_STATE_SEARCHING_FOR_PERIMETER_WIRE) {
+        /* Find the perimeter wire. */
+        left_wheel_omega = 0.05f;
+        right_wheel_omega = 0.05f;
+        searching_p->state = SEARCHING_STATE_PERIMETER_WIRE_FOUND;
+    } else {
+        /* Follow the perimeter wire to the base station. */
+        left_wheel_omega = 0.0f;
+        right_wheel_omega = 0.0f;
+        robot_p->state.next = ROBOT_STATE_IN_BASE_STATION;
+    }
+
+    /* Find the perimeter wire. */
+    motor_set_omega(&robot_p->left_motor, left_wheel_omega);
+    motor_set_omega(&robot_p->right_motor, right_wheel_omega);
 
     return (0);
 }
@@ -376,6 +433,13 @@ static int state_searching_for_base_station(struct robot_t *robot_p)
 static int state_in_base_station(struct robot_t *robot_p)
 {
     FS_COUNTER_INC(robot_state_in_base_station, 1);
+
+    /* Wait until plenty of energy is available. */
+    if (power_get_stored_energy_level(&robot_p->power)
+        == POWER_STORED_ENERGY_LEVEL_MAX) {
+        robot_p->substate.cutting.state = CUTTING_STATE_BACKWARDS;
+        robot_p->state.next = ROBOT_STATE_CUTTING;
+    }
 
     return (0);
 }
@@ -387,6 +451,8 @@ static state_callback_t transition__idle__starting(struct robot_t *robot_p)
 
 static state_callback_t transition__starting__cutting(struct robot_t *robot_p)
 {
+    robot.substate.cutting.state = CUTTING_STATE_FORWARD;
+
     return (state_cutting);
 }
 
@@ -402,12 +468,24 @@ static state_callback_t transition__cutting__idle(struct robot_t *robot_p)
 
 static state_callback_t transition__cutting__searching_for_base_station(struct robot_t *robot_p)
 {
+    robot.substate.searching.state = SEARCHING_STATE_SEARCHING_FOR_PERIMETER_WIRE;
+
     return (state_searching_for_base_station);
+}
+
+static state_callback_t transition__searching_for_base_station__in_base_station(struct robot_t *robot_p)
+{
+    return (state_in_base_station);
 }
 
 static state_callback_t transition__searching_for_base_station__idle(struct robot_t *robot_p)
 {
     return (state_idle);
+}
+
+static state_callback_t transition__in_base_station__cutting(struct robot_t *robot_p)
+{
+    return (state_cutting);
 }
 
 static state_callback_t transition__in_base_station__idle(struct robot_t *robot_p)
@@ -465,6 +543,9 @@ static int handle_state_transition(struct robot_t *robot_p)
 
     case ROBOT_STATE_SEARCHING_FOR_BASE_STATION:
         switch (next) {
+        case ROBOT_STATE_IN_BASE_STATION:
+            callback = transition__searching_for_base_station__in_base_station;
+            break;
         case ROBOT_STATE_IDLE:
             callback = transition__searching_for_base_station__idle;
             break;
@@ -474,6 +555,9 @@ static int handle_state_transition(struct robot_t *robot_p)
 
     case ROBOT_STATE_IN_BASE_STATION:
         switch (next) {
+        case ROBOT_STATE_CUTTING:
+            callback = transition__in_base_station__cutting;
+            break;
         case ROBOT_STATE_IDLE:
             callback = transition__in_base_station__idle;
             break;
@@ -536,8 +620,6 @@ int robot_init()
     robot.state.callback = state_idle;
     robot.mode = ROBOT_MODE_AUTOMATIC;
 
-    robot.cutting.state = CUTTING_STATE_FORWARD;
-
     motor_init(&robot.left_motor,
                &pin_d2_dev,
                &pin_d3_dev,
@@ -548,6 +630,7 @@ int robot_init()
                &pwm_d11_dev);
 
     perimeter_wire_rx_init(&robot.perimeter, NULL, NULL);
+    power_init(&robot.power);
 
     return (0);
 }

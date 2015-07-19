@@ -20,7 +20,7 @@
 
 NAME = robot
 BOARD = linux
-SRC += main.c perimeter_wire_rx_stub.c motor_stub.c
+SRC += main.c perimeter_wire_rx_stub.c motor_stub.c power_stub.c
 SLIB_SRC = harness.c
 DRIVERS_SRC = uart.c
 ROBOMOWER_SRC = robot.c movement.c

@@ -1,5 +1,5 @@
 /**
- * @file robomower.h
+ * @file power_stub.c
  * @version 0.1
  *
  * @section License
@@ -18,17 +18,24 @@
  * This file is part of the RoboMower project.
  */
 
-#ifndef __ROBOMOWER_H__
-#define __ROBOMOWER_H__
+#include "simba.h"
+#include "robomower.h"
 
-#include "robomower/math.h"
-#include "robomower/filter.h"
-#include "robomower/perimeter_wire_tx.h"
-#include "robomower/perimeter_wire_rx.h"
-#include "robomower/movement.h"
-#include "robomower/motor.h"
-#include "robomower/cutter.h"
-#include "robomower/robot.h"
-#include "robomower/power.h"
+/* Those are defined and set in main.c.*/
+extern int power_testdata_index;
+extern int power_testdata_max;
+extern const int8_t FAR *power_testdata_stored_energy_level;
 
-#endif
+int power_init(struct power_t *power_p)
+{
+    return (0);
+}
+
+int power_get_stored_energy_level(struct power_t *power_p)
+{
+    if (power_testdata_index < power_testdata_max) {
+        return (power_testdata_stored_energy_level[power_testdata_index++]);
+    } else {
+        return (0);
+    }
+}

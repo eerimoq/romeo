@@ -28,11 +28,31 @@ struct motors_data_t {
 
 static char robot_stack[300];
 
+/* Testdata fed into the robot from the power stub module.*/
+int power_testdata_index;
+int power_testdata_max;
+const int8_t FAR *power_testdata_stored_energy_level;
+
+/* Input signal to robot. */
+FAR static const int8_t test_automatic_testdata_stored_energy_level[] = {
+    /* 0 */
+    100, 90, 80, 70, 60,
+
+    /* 5 */
+    50, 40, 30, 30, 30,
+
+    /* 10 */
+    20, 20, 20, 20, 40,
+
+    /* 15 */
+    60, 80, 90, 100, 100,
+};
+
 /* Testdata fed into the robot from the perimeter_wire_rx stub
    module.*/
 int perimeter_testdata_index;
 int perimeter_testdata_max;
-const float *perimeter_testdata_signal_level;
+const float FAR *perimeter_testdata_signal_level;
 
 /* Input signal to robot. */
 FAR static const float test_automatic_testdata_signal_level[] = {
@@ -51,25 +71,52 @@ FAR static const float test_automatic_testdata_signal_level[] = {
     1.0f,
 
     /* 10 */
+    1.0f,
+    1.0f,
+    1.0f,
+    1.0f,
+    1.0f,
+
+    /* 15 */
+    1.0f,
+    1.0f,
+    1.0f,
+    1.0f,
+    1.0f,
 };
 
 /* Reference data that the motor stub module receives. */
 FAR static const struct motors_data_t test_automatic_testdata_direction[] = {
     /* 0 */
+    /* cutting forward */
     { .left_wheel_omega =  1.570795f, .right_wheel_omega =  1.570795f },
     { .left_wheel_omega =  1.570795f, .right_wheel_omega =  1.570795f },
     { .left_wheel_omega =  1.570795f, .right_wheel_omega =  1.570795f },
+    /* perimeter found. stop.*/
     { .left_wheel_omega =  0.0f,      .right_wheel_omega =  0.0f      },
+    /* cutting backwards.*/
     { .left_wheel_omega = -1.570795f, .right_wheel_omega = -1.570795f },
 
     /* 5 */
+    /* stop.*/
     { .left_wheel_omega =  0.0f,      .right_wheel_omega =  0.0f      },
+    /* cutting rotate.*/
     { .left_wheel_omega =  0.235619f, .right_wheel_omega = -0.235619f },
     { .left_wheel_omega =  0.0f,      .right_wheel_omega =  0.0f      },
+    /* cutting forward.*/
     { .left_wheel_omega =  1.570795f, .right_wheel_omega =  1.570795f },
     { .left_wheel_omega =  1.570795f, .right_wheel_omega =  1.570795f },
 
     /* 10 */
+    /* no power available.*/
+    { .left_wheel_omega =  0.0f,      .right_wheel_omega =  0.0f      },
+    /* find perimeter wire.*/
+    { .left_wheel_omega =  0.05f,     .right_wheel_omega =  0.05f     },
+    /* perimeter wire found.*/
+    { .left_wheel_omega =  0.0f,      .right_wheel_omega =  0.0f      },
+    /* charging in base station.*/
+    /* leaving base station. cutting backwards.*/
+    { .left_wheel_omega = -1.570795f, .right_wheel_omega = -1.570795f },
 };
 
 struct queue_t motor_queue;
@@ -91,6 +138,10 @@ static int test_automatic(struct harness_t *harness_p)
 {
     int i;
     float omega;
+
+    power_testdata_index = 0;
+    power_testdata_max = membersof(test_automatic_testdata_stored_energy_level);
+    power_testdata_stored_energy_level = test_automatic_testdata_stored_energy_level;
 
     perimeter_testdata_index = 0;
     perimeter_testdata_max = membersof(test_automatic_testdata_signal_level);

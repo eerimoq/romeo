@@ -23,12 +23,14 @@
 
 FS_COMMAND("/perimeter/signal/set", perimeter_wire_rx_cmd_set_signal);
 
+#if 0
 /* The coefficients used as a reference in the matched filter. */
 static int8_t coefficients[] = {
     1, 1, -1, -1, 1, -1, 1, -1,
     -1, 1, -1, 1, 1, -1, -1, 1,
     -1, -1, 1, -1, -1, 1, 1, -1
 };
+#endif
 
 static float signal_level = 0.0f;
 
