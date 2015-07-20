@@ -31,8 +31,8 @@ Folder structure:
            +-- tst/                      - test suites
            +-- tools/                    - various tools
 
-STATE MACHINE
--------------
+ROBOT STATE MACHINE
+-------------------
 The robot has a two level state machine.
 
 ### Top level state machine
@@ -87,9 +87,13 @@ The robot is following the perimeter wire to the base station.
 HARDWARE
 ========
 
-SCHEMATICS
-----------
-![](doc/robot_signal_wiring_schematics.jpg)
+ROBOT SCHEMATICS
+----------------
+![](doc/robot_schematics.jpg)
+
+BASE STATION SCHEMATICS
+-----------------------
+![](doc/base_station_schematics.jpg)
 
 PARTS
 -----
