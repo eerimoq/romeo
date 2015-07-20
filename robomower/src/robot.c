@@ -147,6 +147,7 @@ int robot_cmd_status(int argc,
                      void *in_p)
 {
     UNUSED(in_p);
+    struct time_t time;
 
     std_fprintf(out_p, FSTR("mode = "));
     std_fprintf(out_p, mode_as_string[robot.mode]);
@@ -163,11 +164,14 @@ int robot_cmd_status(int argc,
         std_fprintf(out_p, searching_state_as_string[robot.substate.searching.state]);
         break;
     }
+
+    time.seconds = 0;
+    time.nanoseconds = PROCESS_PERIOD_NS;
     std_fprintf(out_p,
-                FSTR("\r\nprocess period = %ld ms\r\n"
-                     "process time = %d ticks\r\n"),
-                PROCESS_PERIOD_MS,
-                robot.debug.process_time);
+                FSTR("\r\nprocess period = %d ticks\r\n"
+                     "processing time = %d ticks\r\n"),
+                (int)T2ST(&time),
+                robot.debug.processing_time);
 
     if (robot.mode == ROBOT_MODE_MANUAL) {
         std_fprintf(out_p,
@@ -350,7 +354,7 @@ void *robot_entry(void *arg_p)
 
     /* Start the robot periodic timer with a 50ms period. */
     timeout.seconds = 0;
-    timeout.nanoseconds = PROCESS_PERIOD_MS * 1000000L;
+    timeout.nanoseconds = PROCESS_PERIOD_NS;
 
     timer_set(&robot.ticker,
               &timeout,
@@ -366,7 +370,7 @@ void *robot_entry(void *arg_p)
         time_get(&start_time);
         robot_process(&robot);
         time_get(&timeout);
-        robot.debug.process_time = (timeout.seconds - start_time.seconds);
+        robot.debug.processing_time = (timeout.seconds - start_time.seconds);
     }
 
     return (0);

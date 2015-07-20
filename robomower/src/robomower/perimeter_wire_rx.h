@@ -23,7 +23,7 @@
 
 #include "simba.h"
 
-#define PERIMETER_WIRE_RX_SAMPLES_MAX 30
+#define PERIMETER_WIRE_RX_SAMPLES_MAX 40
 
 struct perimeter_wire_rx_t {
     struct adc_driver_t adc;

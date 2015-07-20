@@ -26,6 +26,7 @@
 
 /* The processing loop period in milliseconds. */
 #define PROCESS_PERIOD_MS 50L
+#define PROCESS_PERIOD_NS (PROCESS_PERIOD_MS * 1000000L)
 
 /* Robot modes. */
 #define ROBOT_MODE_MANUAL    0
@@ -93,7 +94,7 @@ struct robot_t {
     struct perimeter_wire_rx_t perimeter;
     struct power_t power;
     struct {
-        int process_time;
+        int processing_time;
     } debug;
 };
 
