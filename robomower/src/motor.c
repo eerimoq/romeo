@@ -26,6 +26,8 @@ int motor_init(struct motor_t *motor_p,
                struct pin_device_t *in2_p,
                struct pwm_device_t *enable_p)
 {
+    motor_p->omega = 0.0f;
+
     /* Initialize all pins connected to the motor controllers. */
     pin_init(&motor_p->in1, in1_p, PIN_OUTPUT);
     pin_init(&motor_p->in2, in2_p, PIN_OUTPUT);
@@ -64,6 +66,11 @@ int motor_set_omega(struct motor_t *motor_p,
     }
 
     motor_set_direction(motor_p, direction);
+
+    /* Low pass filtering of the angular velocity. */
+    omega = (2.0f * motor_p->omega + 1.0f * omega) / 3.0f;
+
+    motor_p->omega = omega;
 
     /* Control the motor speed using PWM signal. */
     duty = (255.0f * omega) / MOTOR_OMEGA_MAX;

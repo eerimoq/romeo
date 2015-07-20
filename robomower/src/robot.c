@@ -169,9 +169,11 @@ int robot_cmd_status(int argc,
     time.nanoseconds = PROCESS_PERIOD_NS;
     std_fprintf(out_p,
                 FSTR("\r\nprocess period = %d ticks\r\n"
-                     "processing time = %d ticks\r\n"),
+                     "processing time = %d ticks\r\n"
+                     "perimeter signal level = %d\r\n"),
                 (int)T2ST(&time),
-                robot.debug.processing_time);
+                robot.debug.processing_time,
+                (int)perimeter_wire_rx_get_cached_signal(&robot.perimeter));
 
     if (robot.mode == ROBOT_MODE_MANUAL) {
         std_fprintf(out_p,

@@ -18,15 +18,16 @@
  * This file is part of the RoboMower project.
  */
 
-#ifndef __ROBOMOWER_PERIMITER_WIRE_RX_H__
-#define __ROBOMOWER_PERIMITER_WIRE_RX_H__
+#ifndef __ROBOMOWER_PERIMETER_WIRE_RX_H__
+#define __ROBOMOWER_PERIMETER_WIRE_RX_H__
 
 #include "simba.h"
 
-#define PERIMETER_WIRE_RX_SAMPLES_MAX 40
+#define PERIMETER_WIRE_RX_SAMPLES_MAX 24
 
 struct perimeter_wire_rx_t {
     struct adc_driver_t adc;
+    float signal;
     int samples[PERIMETER_WIRE_RX_SAMPLES_MAX];
 };
 
@@ -34,27 +35,40 @@ int perimeter_wire_rx_module_init(void);
 
 /**
  * Initialize a perimeter wire instance from given data.
- * @param[out] pwire_p Instance to be initialised.
+ * @param[out] perimeter_wire_p Instance to be initialised.
  * @param[in] pin_dev_in1_p Pin device for in1.
  * @param[in] pin_dev_in2_p Pin device for in2.
  * @return zero(0) or negative error code.
  */
-int perimeter_wire_rx_init(struct perimeter_wire_rx_t *pwire_p,
+int perimeter_wire_rx_init(struct perimeter_wire_rx_t *perimeter_wire_p,
                            struct adc_device_t *dev_p,
                            struct pin_device_t *pin_dev_p);
 
 /**
  * Start to raed the signal picked up by the inductor.
- * @param[in] pwire_p Perimiter wire instance.
+ * @param[in] perimeter_wire_p Perimeter wire instance.
  * @return zero(0) or negative error code.
  */
-int perimeter_wire_rx_start(struct perimeter_wire_rx_t *pwire_p);
+int perimeter_wire_rx_start(struct perimeter_wire_rx_t *perimeter_wire_p);
 
 /**
  * Get the signal on the wire.
- * @param[in] pwire_p Perimiter wire instance.
- * @return the signal level
+ * @param[in] perimeter_wire_p Perimeter wire instance.
+ * @param[out] value The signal level.
+ * @return zero(0) or negative error code.
  */
-float perimeter_wire_rx_get_signal(struct perimeter_wire_rx_t *pwire_p);
+int perimeter_wire_rx_get_signal(struct perimeter_wire_rx_t *perimeter_wire_p,
+                                 float *value);
+
+/**
+ * Get the cached signal.
+ * @param[in] perimeter_wire_p Perimeter wire instance.
+ * @return Cached signal level.
+ */
+static inline float
+perimeter_wire_rx_get_cached_signal(struct perimeter_wire_rx_t *perimeter_wire_p)
+{
+    return (perimeter_wire_p->signal);
+}
 
 #endif

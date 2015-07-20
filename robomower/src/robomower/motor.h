@@ -30,6 +30,7 @@
 #define MOTOR_DIRECTION_CCW 1
 
 struct motor_t {
+    float omega;
     struct pin_driver_t in1;
     struct pin_driver_t in2;
     struct pwm_driver_t enable;

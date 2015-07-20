@@ -26,23 +26,26 @@ extern int perimeter_testdata_index;
 extern int perimeter_testdata_max;
 extern FAR const float *perimeter_testdata_signal_level;
 
-int perimeter_wire_rx_init(struct perimeter_wire_rx_t *pwire_p,
+int perimeter_wire_rx_init(struct perimeter_wire_rx_t *perimeter_wire_p,
                            struct adc_device_t *dev_p,
                            struct pin_device_t *pin_dev_p)
 {
     return (0);
 }
 
-int perimeter_wire_rx_start(struct perimeter_wire_rx_t *pwire_p)
+int perimeter_wire_rx_start(struct perimeter_wire_rx_t *perimeter_wire_p)
 {
     return (0);
 }
 
-float perimeter_wire_rx_get_signal(struct perimeter_wire_rx_t *pwire_p)
+int perimeter_wire_rx_get_signal(struct perimeter_wire_rx_t *perimeter_wire_p,
+                                 float *value)
 {
     if (perimeter_testdata_index < perimeter_testdata_max) {
-        return (perimeter_testdata_signal_level[perimeter_testdata_index++]);
+        *value = perimeter_testdata_signal_level[perimeter_testdata_index++];
+        return (0);
     } else {
-        return (0.0f);
+        *value = 0.0f;
+        return (0);
     }
 }

@@ -22,6 +22,6 @@
 #define __CONFIG_H__
 
 /* System tick period of 1ms. */
-#define SYS_TICK_FREQUENCY 1000
+#define SYS_TICK_FREQUENCY 960
 
 #endif

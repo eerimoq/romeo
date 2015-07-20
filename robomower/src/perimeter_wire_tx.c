@@ -23,6 +23,8 @@
 
 FS_COUNTER(perimeter_timer_callback);
 
+#define PERIOD_NS 1000000L
+
 /* The signal transmitted on the wire. */
 static uint8_t output_signal[] = {
     1, 1, 0, 0, 1, 0, 1, 0,
@@ -31,30 +33,30 @@ static uint8_t output_signal[] = {
 };
 
 static struct timer_t timer;
-static struct perimeter_wire_tx_t pwires[PERIMITER_WIRE_TX_MAX];
+static struct perimeter_wire_tx_t *perimeter_wires[PERIMITER_WIRE_TX_MAX];
 
 static void timer_callback(void *arg_p)
 {
     int i;
     uint8_t value;
-    struct perimeter_wire_tx_t *pwire_p;
+    struct perimeter_wire_tx_t *perimeter_wire_p;
 
-    for (i = 0; i < membersof(pwires); i++) {
-        pwire_p = &pwires[i];
+    for (i = 0; i < membersof(perimeter_wires); i++) {
+        perimeter_wire_p = perimeter_wires[i];
 
-        if (pwire_p->state != PERIMITER_WIRE_TX_STATE_ON) {
+        if (perimeter_wire_p == NULL) {
             continue;
         }
 
         /* Set signal level on wire. */
-        value = output_signal[pwire_p->pos];
-        pin_write(&pwire_p->pin_in1, !value);
-        pin_write(&pwire_p->pin_in2, value);
+        value = output_signal[perimeter_wire_p->pos];
+        pin_write(&perimeter_wire_p->pin_in1, !value);
+        pin_write(&perimeter_wire_p->pin_in2, value);
 
         /* Update pos for next timeout. */
-        pwire_p->pos++;
-        if (pwire_p->pos == membersof(output_signal)) {
-            pwire_p->pos = 0;
+        perimeter_wire_p->pos++;
+        if (perimeter_wire_p->pos == membersof(output_signal)) {
+            perimeter_wire_p->pos = 0;
         }
     }
 
@@ -66,13 +68,13 @@ int perimeter_wire_tx_module_init(void)
     int i;
     struct time_t timeout;
 
-    for (i = 0; i < membersof(pwires); i++) {
-        pwires[i].state = PERIMITER_WIRE_TX_STATE_UNUSED;
+    for (i = 0; i < membersof(perimeter_wires); i++) {
+        perimeter_wires[i] = NULL;
     }
 
     /* Start the perimeter wire sender timer. */
     timeout.seconds = 0;
-    timeout.nanoseconds = 1000000L;
+    timeout.nanoseconds = PERIOD_NS;
 
     return (timer_set(&timer,
                       &timeout,
@@ -81,26 +83,25 @@ int perimeter_wire_tx_module_init(void)
                       TIMER_PERIODIC));
 }
 
-int perimeter_wire_tx_init(struct perimeter_wire_tx_t *pwire_p,
+int perimeter_wire_tx_init(struct perimeter_wire_tx_t *perimeter_wire_p,
                            struct pin_device_t *pin_dev_in1_p,
                            struct pin_device_t *pin_dev_in2_p)
 {
-    pwire_p->state = PERIMITER_WIRE_TX_STATE_OFF;
-    pwire_p->pos = 0;
+    perimeter_wire_p->pos = 0;
 
     /* Setup the pins. */
-    pin_init(&pwire_p->pin_in1, pin_dev_in1_p, PIN_OUTPUT);
-    pin_init(&pwire_p->pin_in2, pin_dev_in2_p, PIN_OUTPUT);
+    pin_init(&perimeter_wire_p->pin_in1, pin_dev_in1_p, PIN_OUTPUT);
+    pin_init(&perimeter_wire_p->pin_in2, pin_dev_in2_p, PIN_OUTPUT);
 
     return (0);
 }
 
-int perimeter_wire_tx_start(struct perimeter_wire_tx_t *pwire_p)
+int perimeter_wire_tx_start(struct perimeter_wire_tx_t *perimeter_wire_p)
 {
     std_printk(STD_LOG_NOTICE,
                FSTR("Starting transmitting signal on perimeter wire"));
 
-    pwire_p->state = PERIMITER_WIRE_TX_STATE_ON;
+    perimeter_wires[0] = perimeter_wire_p;
 
     return (0);
 }

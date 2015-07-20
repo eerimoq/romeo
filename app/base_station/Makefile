@@ -22,6 +22,7 @@ NAME = base_station
 BOARD = linux
 SRC += main.c
 DRIVERS_SRC = uart.c pin.c
+ROBOMOWER_SRC = perimeter_wire_tx.c
 
 ROBOMOWER = ../../robomower/src
 include $(ROBOMOWER)/robomower.mk

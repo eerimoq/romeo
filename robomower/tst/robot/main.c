@@ -83,6 +83,13 @@ FAR static const float test_automatic_testdata_signal_level[] = {
     1.0f,
     1.0f,
     1.0f,
+
+    /* 20 */
+    1.0f,
+    1.0f,
+    1.0f,
+    1.0f,
+    1.0f,
 };
 
 /* Reference data that the motor stub module receives. */
@@ -115,6 +122,18 @@ FAR static const struct motors_data_t test_automatic_testdata_direction[] = {
     /* perimeter wire found.*/
     { .left_wheel_omega =  0.0f,      .right_wheel_omega =  0.0f      },
     /* charging in base station.*/
+    { .left_wheel_omega =  0.0f,      .right_wheel_omega = 0.0f       },
+    { .left_wheel_omega =  0.0f,      .right_wheel_omega = 0.0f       },
+
+    /* 15 */
+    { .left_wheel_omega =  0.0f,      .right_wheel_omega = 0.0f       },
+    { .left_wheel_omega =  0.0f,      .right_wheel_omega = 0.0f       },
+    { .left_wheel_omega =  0.0f,      .right_wheel_omega = 0.0f       },
+    { .left_wheel_omega =  0.0f,      .right_wheel_omega = 0.0f       },
+    { .left_wheel_omega =  0.0f,      .right_wheel_omega = 0.0f       },
+
+    /* 20 */
+    { .left_wheel_omega =  0.0f,      .right_wheel_omega = 0.0f       },
     /* leaving base station. cutting backwards.*/
     { .left_wheel_omega = -1.570795f, .right_wheel_omega = -1.570795f },
 };

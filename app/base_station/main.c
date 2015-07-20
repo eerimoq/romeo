@@ -21,13 +21,15 @@
 #include "simba.h"
 #include "robomower.h"
 
+#define VERSION_STR "0.1.0"
+
 static struct uart_driver_t uart;
 static char qinbuf[32];
 static struct shell_args_t shell_args;
 
 int main()
 {
-    struct perimeter_wire_tx_t pwire;
+    struct perimeter_wire_tx_t perimeter_wire;
 
     sys_start();
     uart_module_init();
@@ -35,15 +37,16 @@ int main()
     /* Setup UART. */
     uart_init(&uart, &uart_device[0], 38400, qinbuf, sizeof(qinbuf));
     uart_start(&uart);
-    std_klog_set_output_channel(&uart.chout);
     sys_set_stdout(&uart.chout);
+
+    std_printf(FSTR("RoboMower base station v" VERSION_STR "\r\n"));
 
     /* Start transmitting the signal on the perimeter wire. */
     perimeter_wire_tx_module_init();
-    perimeter_wire_tx_init(&pwire,
+    perimeter_wire_tx_init(&perimeter_wire,
                            &pin_d7_dev,
                            &pin_d8_dev);
-    perimeter_wire_tx_start(&pwire);
+    perimeter_wire_tx_start(&perimeter_wire);
 
     /* Start the shell. */
     shell_args.chin_p = &uart.chin;

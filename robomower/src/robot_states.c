@@ -34,6 +34,8 @@ FS_COUNTER(robot_cutting_state_rotating);
 
 FS_COUNTER(robot_odometer);
 
+FS_COUNTER(robot_perimeter_no_signal);
+
 static int is_time_to_search_for_base_station(struct robot_t *robot_p)
 {
     return (power_get_stored_energy_level(&robot_p->power) <= 20);
@@ -65,13 +67,18 @@ static int cutting_automatic(struct robot_t *robot_p,
     *speed_p = 0.0f;
     *omega_p = 0.0f;
 
+    /* Don't do anything if the perimeter wire signal cannot be found. */
+    if (perimeter_wire_rx_get_signal(&robot_p->perimeter,
+                                     &signal) != 0) {
+        FS_COUNTER_INC(robot_perimeter_no_signal, 1);
+        return (0);
+    }
+
     /* Search for base station if battery voltage is low. */
     if (is_time_to_search_for_base_station(robot_p)) {
         robot_p->state.next = ROBOT_STATE_SEARCHING_FOR_BASE_STATION;
     } else {
         cutting_p->ticks_left--;
-
-        signal = perimeter_wire_rx_get_signal(&robot_p->perimeter);
 
         switch (cutting_p->state) {
 
@@ -176,7 +183,10 @@ int state_cutting(struct robot_t *robot_p)
     motor_set_omega(&robot_p->left_motor, left_wheel_omega);
     motor_set_omega(&robot_p->right_motor, right_wheel_omega);
 
-    FS_COUNTER_INC(robot_odometer, speed * PROCESS_PERIOD_MS);
+    /* Only measure when driving forwards. */
+    if (speed > 0.0f) {
+        FS_COUNTER_INC(robot_odometer, speed * PROCESS_PERIOD_MS);
+    }
 
     return (0);
 }
@@ -221,6 +231,10 @@ int state_in_base_station(struct robot_t *robot_p)
         robot_p->substate.cutting.state = CUTTING_STATE_BACKWARDS;
         robot_p->state.next = ROBOT_STATE_CUTTING;
     }
+
+    /* Stand still. */
+    motor_set_omega(&robot_p->left_motor, 0.0f);
+    motor_set_omega(&robot_p->right_motor, 0.0f);
 
     return (0);
 }

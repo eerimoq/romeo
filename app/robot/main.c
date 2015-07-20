@@ -58,7 +58,7 @@ int main()
 {
     init();
 
-    std_printf(FSTR("RoboMower v" VERSION_STR "\r\n"));
+    std_printf(FSTR("RoboMower robot v" VERSION_STR "\r\n"));
 
     robot_entry(NULL);
 
