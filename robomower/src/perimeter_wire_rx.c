@@ -21,14 +21,16 @@
 #include "simba.h"
 #include "robomower.h"
 
-#if 0
+#define COEFFICIENTS_MAX 24
+#define INPUT_MAX PERIMETER_WIRE_RX_SAMPLES_MAX
+#define OUTPUT_MAX (INPUT_MAX - COEFFICIENTS_MAX + 1)
+
 /* The coefficients used as a reference in the matched filter. */
-static int8_t coefficients[] = {
-    1, 1, -1, -1, 1, -1, 1, -1,
-    -1, 1, -1, 1, 1, -1, -1, 1,
-    -1, -1, 1, -1, -1, 1, 1, -1
+static float coefficients[COEFFICIENTS_MAX] = {
+    1.0f, 1.0f, -1.0f, -1.0f, 1.0f, -1.0f, 1.0f, -1.0f,
+    -1.0f, 1.0f, -1.0f, 1.0f, 1.0f, -1.0f, -1.0f, 1.0f,
+    -1.0f, -1.0f, 1.0f, -1.0f, -1.0f, 1.0f, 1.0f, -1.0f
 };
-#endif
 
 int perimeter_wire_rx_init(struct perimeter_wire_rx_t *pwire_p,
                            struct adc_device_t *dev_p,
@@ -36,7 +38,7 @@ int perimeter_wire_rx_init(struct perimeter_wire_rx_t *pwire_p,
 {
     adc_init(&pwire_p->adc,
              dev_p,
-             pin_dev_p,             
+             pin_dev_p,
              ADC_REFERENCE_VCC,
              1000);
 
@@ -45,14 +47,41 @@ int perimeter_wire_rx_init(struct perimeter_wire_rx_t *pwire_p,
 
 int perimeter_wire_rx_start(struct perimeter_wire_rx_t *pwire_p)
 {
+    /* Start first asynchronous convertion. */
+    adc_async_convert(&pwire_p->adc,
+                      pwire_p->samples,
+                      membersof(pwire_p->samples));
+
     return (0);
 }
 
 float perimeter_wire_rx_get_signal(struct perimeter_wire_rx_t *pwire_p)
 {
-    int samples[1];
+    int i;
+    float input[INPUT_MAX];
+    float output[OUTPUT_MAX];
 
-    adc_convert(&pwire_p->adc, samples, membersof(samples));
-    
-    return (samples[0] - 512);
+    /* Wait for ongoing asynchronous convertion to finish. */
+    if (!adc_async_wait(&pwire_p->adc)) {
+        std_printk(STD_LOG_WARNING, FSTR("convertion has not finished"));
+    }
+
+    /* Copy samples to filter input buffer. */
+    for (i = 0; i < INPUT_MAX; i++) {
+        input[i] = (pwire_p->samples[i] - 512);
+    }
+
+    /* Start next asynchronous convertion. */
+    adc_async_convert(&pwire_p->adc,
+                      pwire_p->samples,
+                      membersof(pwire_p->samples));
+
+    filter_firf(input,
+                membersof(input),
+                coefficients,
+                membersof(coefficients),
+                output);
+
+    /* TODO: should be calculated from output array. */
+    return (input[0]);
 }

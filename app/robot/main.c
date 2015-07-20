@@ -21,6 +21,8 @@
 #include "simba.h"
 #include "robomower.h"
 
+#define VERSION_STR "0.1.0"
+
 static struct uart_driver_t uart;
 static char qinbuf[32];
 static struct shell_args_t shell_args;
@@ -31,6 +33,7 @@ static int init()
 {
     sys_start();
     uart_module_init();
+    adc_module_init();
 
     /* Setup UART. */
     uart_init(&uart, &uart_device[0], 38400, qinbuf, sizeof(qinbuf));
@@ -54,6 +57,8 @@ static int init()
 int main()
 {
     init();
+
+    std_printf(FSTR("RoboMower v" VERSION_STR "\r\n"));
 
     robot_entry(NULL);
 

@@ -29,6 +29,7 @@
 
 struct power_t {
     struct adc_driver_t adc;
+    int sample;
 };
 
 /**
@@ -41,8 +42,15 @@ int power_init(struct power_t *power_p,
                struct pin_device_t *pin_dev_p);
 
 /**
+ * Start power object.
+ * @param[in] power_p Initialized power object.
+ * @return zero(0) or negative error code
+ */
+int power_start(struct power_t *power_p);
+
+/**
  * Get current stored energy level in the power supply.
- * @param[in] power_p Object to initialize.
+ * @param[in] power_p Initialized power object.
  * @return Linerar scale from 0 to 100, where 0 means no energy stored
  *         and 100 means that the maximum amount of energy is stored.
  *         Otherwise negative error code.

@@ -92,6 +92,9 @@ struct robot_t {
     struct motor_t right_motor;
     struct perimeter_wire_rx_t perimeter;
     struct power_t power;
+    struct {
+        int process_time;
+    } debug;
 };
 
 int state_idle(struct robot_t *robot_p);

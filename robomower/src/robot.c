@@ -164,8 +164,10 @@ int robot_cmd_status(int argc,
         break;
     }
     std_fprintf(out_p,
-                FSTR("\r\nprocess period = %ld ms\r\n"),
-                PROCESS_PERIOD_MS);
+                FSTR("\r\nprocess period = %ld ms\r\n"
+                     "process time = %d ticks\r\n"),
+                PROCESS_PERIOD_MS,
+                robot.debug.process_time);
 
     if (robot.mode == ROBOT_MODE_MANUAL) {
         std_fprintf(out_p,
@@ -175,7 +177,6 @@ int robot_cmd_status(int argc,
                     ((unsigned int)(robot.manual.speed * 100.0f)) % 100,
                     (int)(robot.manual.omega),
                     ((unsigned int)(robot.manual.omega * 100.0f)) % 100);
-    } else {
     }
 
     return (0);
@@ -342,6 +343,7 @@ int robot_init()
 void *robot_entry(void *arg_p)
 {
     struct time_t timeout;
+    struct time_t start_time;
 
     robot.self_p = thrd_self();
     thrd_set_name("robot");
@@ -361,7 +363,10 @@ void *robot_entry(void *arg_p)
         /* Timer callback resumes this thread. */
         thrd_suspend(NULL);
 
+        time_get(&start_time);
         robot_process(&robot);
+        time_get(&timeout);
+        robot.debug.process_time = (timeout.seconds - start_time.seconds);
     }
 
     return (0);

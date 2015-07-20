@@ -66,8 +66,13 @@ int motor_set_omega(struct motor_t *motor_p,
     motor_set_direction(motor_p, direction);
 
     /* Control the motor speed using PWM signal. */
-    duty = (256.0f * omega) / MOTOR_OMEGA_MAX;
+    duty = (255.0f * omega) / MOTOR_OMEGA_MAX;
     pwm_set_duty(&motor_p->enable, duty);
+
+    std_printk(STD_LOG_DEBUG,
+               FSTR("direction = %d, duty = %u"),
+               direction,
+               duty);
 
     return (0);
 }

@@ -71,12 +71,12 @@ static int cutting_automatic(struct robot_t *robot_p,
     } else {
         cutting_p->ticks_left--;
 
+        signal = perimeter_wire_rx_get_signal(&robot_p->perimeter);
+
         switch (cutting_p->state) {
 
         case CUTTING_STATE_FORWARD:
             FS_COUNTER_INC(robot_cutting_state_forward, 1);
-
-            signal = perimeter_wire_rx_get_signal(&robot_p->perimeter);
 
             if (is_inside_perimeter_wire(signal)) {
                 *speed_p = 0.1f;
@@ -141,6 +141,10 @@ int state_idle(struct robot_t *robot_p)
 int state_starting(struct robot_t *robot_p)
 {
     FS_COUNTER_INC(robot_state_starting, 1);
+
+    /* Start sampling the perimeter wire signal. */
+    perimeter_wire_rx_start(&robot_p->perimeter);
+    power_start(&robot_p->power);
 
     robot_p->state.next = ROBOT_STATE_CUTTING;
 

@@ -26,7 +26,14 @@ extern int power_testdata_index;
 extern int power_testdata_max;
 extern const int8_t FAR *power_testdata_stored_energy_level;
 
-int power_init(struct power_t *power_p)
+int power_init(struct power_t *power_p,
+               struct adc_device_t *dev_p,
+               struct pin_device_t *pin_dev_p)
+{
+    return (0);
+}
+
+int power_start(struct power_t *power_p)
 {
     return (0);
 }

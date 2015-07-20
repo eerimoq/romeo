@@ -23,12 +23,11 @@
 
 #include "simba.h"
 
+#define PERIMETER_WIRE_RX_SAMPLES_MAX 30
+
 struct perimeter_wire_rx_t {
     struct adc_driver_t adc;
-    uint8_t state;
-    uint8_t pos;
-    struct pin_driver_t pin_in1;
-    struct pin_driver_t pin_in2;
+    int samples[PERIMETER_WIRE_RX_SAMPLES_MAX];
 };
 
 int perimeter_wire_rx_module_init(void);

@@ -27,8 +27,8 @@ extern int perimeter_testdata_max;
 extern FAR const float *perimeter_testdata_signal_level;
 
 int perimeter_wire_rx_init(struct perimeter_wire_rx_t *pwire_p,
-                           struct pin_device_t *pin_dev_in1_p,
-                           struct pin_device_t *pin_dev_in2_p)
+                           struct adc_device_t *dev_p,
+                           struct pin_device_t *pin_dev_p)
 {
     return (0);
 }
