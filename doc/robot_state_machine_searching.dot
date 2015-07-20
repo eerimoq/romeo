@@ -1,0 +1,3 @@
+digraph robot_state_diagram_searching {
+  searching_for_perimeter_wire -> following_perimeter_wire;
+}

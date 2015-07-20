@@ -1,4 +1,4 @@
-digraph robot_state_diagram_moving {
+digraph robot_state_diagram_cutting {
   forward -> backwards;
   backwards -> rotating;
   rotating -> forward;

@@ -71,6 +71,19 @@ The robot is driving backwards.
 ##### rotating
 The robot is rotating.
 
+### Searching for base station state machine
+This is the state diagram for the searching_for_base_station state.
+
+![](doc/robot_state_machine_searching.png)
+
+#### State descriptions
+
+##### searching_for_perimeter_wire
+The robot is searching for the perimeter wire.
+
+##### following_perimeter_wire
+The robot is following the perimeter wire to the base station.
+
 HARDWARE
 ========
 

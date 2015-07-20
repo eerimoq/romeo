@@ -4,5 +4,4 @@ set -e
 
 dot -Tpng -Gsize=15\! -Gdpi=100 -o robot_state_machine.png robot_state_machine.dot
 dot -Tpng -Gsize=3.5\! -Gdpi=100 -o robot_state_machine_cutting.png robot_state_machine_cutting.dot
-
-dot -Tpng -o robot_schematics.png robot_schematics.dot
+dot -Tpng -Gsize=3.5\! -Gdpi=100 -o robot_state_machine_searching.png robot_state_machine_searching.dot

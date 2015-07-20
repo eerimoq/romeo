@@ -205,7 +205,7 @@ int state_searching_for_base_station(struct robot_t *robot_p)
         /* Find the perimeter wire. */
         left_wheel_omega = 0.05f;
         right_wheel_omega = 0.05f;
-        searching_p->state = SEARCHING_STATE_PERIMETER_WIRE_FOUND;
+        searching_p->state = SEARCHING_STATE_FOLLOWING_PERIMETER_WIRE;
     } else {
         /* Follow the perimeter wire to the base station. */
         left_wheel_omega = 0.0f;

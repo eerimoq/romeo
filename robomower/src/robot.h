@@ -46,7 +46,7 @@
 
 /* Searching for base station states. */
 #define SEARCHING_STATE_SEARCHING_FOR_PERIMETER_WIRE 0
-#define SEARCHING_STATE_PERIMETER_WIRE_FOUND         1
+#define SEARCHING_STATE_FOLLOWING_PERIMETER_WIRE     1
 
 /* Number of ticks in cutting states. */
 #ifndef CUTTING_STATE_BACKWARDS_TICKS
