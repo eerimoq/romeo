@@ -25,19 +25,19 @@
 #define SIGNAL_THRESHOLD_MAX 10.0f
 #define SIGNAL_THRESHOLD_MIN -10.0f
 
-FS_COUNTER(robot_state_idle);
-FS_COUNTER(robot_state_starting);
-FS_COUNTER(robot_state_cutting);
-FS_COUNTER(robot_state_searching_for_base_station);
-FS_COUNTER(robot_state_in_base_station);
+FS_COUNTER_DEFINE(robot_state_idle);
+FS_COUNTER_DEFINE(robot_state_starting);
+FS_COUNTER_DEFINE(robot_state_cutting);
+FS_COUNTER_DEFINE(robot_state_searching_for_base_station);
+FS_COUNTER_DEFINE(robot_state_in_base_station);
 
-FS_COUNTER(robot_cutting_state_forward);
-FS_COUNTER(robot_cutting_state_backwards);
-FS_COUNTER(robot_cutting_state_rotating);
+FS_COUNTER_DEFINE(robot_cutting_state_forward);
+FS_COUNTER_DEFINE(robot_cutting_state_backwards);
+FS_COUNTER_DEFINE(robot_cutting_state_rotating);
 
-FS_COUNTER(robot_odometer);
+FS_COUNTER_DEFINE(robot_odometer);
 
-FS_COUNTER(robot_perimeter_no_signal);
+FS_COUNTER_DEFINE(robot_perimeter_no_signal);
 
 static int is_time_to_search_for_base_station(struct robot_t *robot_p)
 {

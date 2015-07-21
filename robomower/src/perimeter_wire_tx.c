@@ -21,7 +21,7 @@
 #include "simba.h"
 #include "robomower.h"
 
-FS_COUNTER(perimeter_timer_callback);
+FS_COUNTER_DEFINE(perimeter_timer_callback);
 
 #define PERIOD_NS 1000000L
 

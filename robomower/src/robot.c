@@ -22,14 +22,14 @@
 #include "robomower.h"
 #include "robot.h"
 
-FS_COMMAND("/robot/status", robot_cmd_status);
-FS_COMMAND("/robot/start", robot_cmd_start);
-FS_COMMAND("/robot/stop", robot_cmd_stop);
-FS_COMMAND("/robot/mode/set", robot_cmd_mode_set);
-FS_COMMAND("/robot/manual/movement/set", robot_cmd_manual_movement_set);
+FS_COMMAND_DEFINE("/robot/status", robot_cmd_status);
+FS_COMMAND_DEFINE("/robot/start", robot_cmd_start);
+FS_COMMAND_DEFINE("/robot/stop", robot_cmd_stop);
+FS_COMMAND_DEFINE("/robot/mode/set", robot_cmd_mode_set);
+FS_COMMAND_DEFINE("/robot/manual/movement/set", robot_cmd_manual_movement_set);
 
-FS_COUNTER(robot_process);
-FS_COUNTER(number_of_state_transitions);
+FS_COUNTER_DEFINE(robot_process);
+FS_COUNTER_DEFINE(number_of_state_transitions);
 
 static struct robot_t robot;
 

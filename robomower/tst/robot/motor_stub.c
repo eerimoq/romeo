@@ -31,11 +31,6 @@ int motor_init(struct motor_t *motor_p,
     return (0);
 }
 
-/**
- * Set motor direction.
- * @param[in] direction 0 for CW, 1 for CCW
- * @return zero(0) or negative error code
- */
 int motor_set_direction(struct motor_t *motor_p,
                         int direction)
 {
