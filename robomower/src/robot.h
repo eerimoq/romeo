@@ -71,7 +71,7 @@ struct cutting_state_t {
     int state;
     int ticks_left;
 };
- 
+
 struct searching_for_base_station_state_t {
     int state;
 };

@@ -39,7 +39,6 @@ FS_COUNTER_DEFINE(robot_odometer);
 
 FS_COUNTER_DEFINE(robot_perimeter_no_signal);
 
-FS_PARAMETER_DEFINE("/robot/parameters/stuck", robot_parameter_stuck, int, 0);
 FS_PARAMETER_DEFINE("/robot/parameters/charging", robot_parameter_charging, int, 0);
 
 static int is_time_to_search_for_base_station(struct robot_t *robot_p)
@@ -54,7 +53,15 @@ static int is_inside_perimeter_wire(float signal)
 
 static int is_stuck(struct robot_t *robot_p)
 {
-    return (FS_PARAMETER(robot_parameter_stuck));
+    int left_current;
+    int right_current;
+
+    left_current = motor_get_current(&robot_p->left_motor);
+    right_current = motor_get_current(&robot_p->right_motor);
+
+    std_printk(STD_LOG_INFO, FSTR("%d %d"), left_current, right_current);
+
+    return ((left_current > 500) || (right_current > 500));
 }
 
 static int is_charging(struct robot_t *robot_p)
@@ -194,7 +201,11 @@ int state_starting(struct robot_t *robot_p)
 
     /* Start sampling the perimeter wire signal. */
     perimeter_wire_rx_start(&robot_p->perimeter);
+
     power_start(&robot_p->power);
+
+    motor_start(&robot_p->left_motor);
+    motor_start(&robot_p->right_motor);
 
     robot_p->state.next = ROBOT_STATE_CUTTING;
 

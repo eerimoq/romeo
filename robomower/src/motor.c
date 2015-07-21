@@ -24,14 +24,33 @@
 int motor_init(struct motor_t *motor_p,
                struct pin_device_t *in1_p,
                struct pin_device_t *in2_p,
-               struct pwm_device_t *enable_p)
+               struct pwm_device_t *enable_p,
+               struct adc_device_t *current_adc_p,
+               struct pin_device_t *current_dev_p)
 {
     motor_p->omega = 0.0f;
 
     /* Initialize all pins connected to the motor controllers. */
     pin_init(&motor_p->in1, in1_p, PIN_OUTPUT);
     pin_init(&motor_p->in2, in2_p, PIN_OUTPUT);
+
     pwm_init(&motor_p->enable, enable_p);
+
+    adc_init(&motor_p->current.adc,
+             current_adc_p,
+             current_dev_p,
+             ADC_REFERENCE_VCC,
+             1000);
+
+    return (0);
+}
+
+int motor_start(struct motor_t *motor_p)
+{
+    /* Start first asynchronous convertion. */
+    adc_async_convert(&motor_p->current.adc,
+                      &motor_p->current.sample,
+                      1);
 
     return (0);
 }
@@ -82,4 +101,24 @@ int motor_set_omega(struct motor_t *motor_p,
                duty);
 
     return (0);
+}
+
+float motor_get_current(struct motor_t *motor_p)
+{
+    int sample;
+
+    /* Wait for ongoing asynchronous convertion to finish. */
+    if (!adc_async_wait(&motor_p->current.adc)) {
+        std_printk(STD_LOG_WARNING, FSTR("motor convertion has not finished"));
+    }
+
+    /* Copy sample to local variable. */
+    sample = motor_p->current.sample;
+
+    /* Start next asynchronous convertion. */
+    adc_async_convert(&motor_p->current.adc,
+                      &motor_p->current.sample,
+                      1);
+
+    return (sample);
 }

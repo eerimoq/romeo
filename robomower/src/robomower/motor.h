@@ -34,6 +34,10 @@ struct motor_t {
     struct pin_driver_t in1;
     struct pin_driver_t in2;
     struct pwm_driver_t enable;
+    struct {
+        struct adc_driver_t adc;
+        int sample;
+    } current;
 };
 
 /**
@@ -42,12 +46,23 @@ struct motor_t {
  * @param[in] in1_p IN1 pin device.
  * @param[in] in2_p IN2 pin device.
  * @param[in] enable_p EN pwm device.
+ * @param[in] current_adc_p ADC for current measurement.
+ * @param[in] current_dev_p Analog pin to read current on.
  * @return zero(0) or negative error code
  */
 int motor_init(struct motor_t *motor_p,
                struct pin_device_t *in1_p,
                struct pin_device_t *in2_p,
-               struct pwm_device_t *enable_p);
+               struct pwm_device_t *enable_p,
+               struct adc_device_t *current_adc_p,
+               struct pin_device_t *current_dev_p);
+
+/**
+ * Start motor object.
+ * @param[in] motor_p Initialized motor object.
+ * @return zero(0) or negative error code
+ */
+int motor_start(struct motor_t *motor_p);
 
 /**
  * Set motor rotation direction.
@@ -66,5 +81,12 @@ int motor_set_direction(struct motor_t *motor_p,
  */
 int motor_set_omega(struct motor_t *motor_p,
                     float omega);
+
+/**
+ * Set motor rotation speed.
+ * @param[in] motor_p Initialized motor object.
+ * @return Motor current consumption.
+ */
+float motor_get_current(struct motor_t *motor_p);
 
 #endif

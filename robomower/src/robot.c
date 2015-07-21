@@ -330,15 +330,20 @@ int robot_init()
     motor_init(&robot.left_motor,
                &pin_d2_dev,
                &pin_d3_dev,
-               &pwm_d10_dev);
+               &pwm_d10_dev,
+               &adc_0_dev,
+               &pin_a2_dev);
     motor_init(&robot.right_motor,
                &pin_d5_dev,
                &pin_d6_dev,
-               &pwm_d11_dev);
+               &pwm_d11_dev,
+               &adc_0_dev,
+               &pin_a3_dev);
 
     perimeter_wire_rx_init(&robot.perimeter,
                            &adc_0_dev,
                            &pin_a0_dev);
+
     power_init(&robot.power,
                &adc_0_dev,
                &pin_a1_dev);
