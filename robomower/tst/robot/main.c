@@ -20,7 +20,6 @@
 
 #include "simba.h"
 
-extern int FS_PARAMETER(robot_parameter_stuck);
 extern int FS_PARAMETER(robot_parameter_charging);
 
 #include "simba.h"
@@ -55,7 +54,6 @@ static int test_automatic(struct harness_t *harness_p)
                robot_stack,
                sizeof(robot_stack));
 
-    FS_PARAMETER(robot_parameter_stuck) = 1;
     FS_PARAMETER(robot_parameter_charging) = 1;
 
     robot_manual_start();

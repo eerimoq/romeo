@@ -26,7 +26,14 @@ extern struct queue_t motor_queue;
 int motor_init(struct motor_t *motor_p,
                struct pin_device_t *in1_p,
                struct pin_device_t *in2_p,
-               struct pwm_device_t *enable_p)
+               struct pwm_device_t *enable_p,
+               struct adc_device_t *current_adc_p,
+               struct pin_device_t *current_dev_p)
+{
+    return (0);
+}
+
+int motor_start(struct motor_t *motor_p)
 {
     return (0);
 }
@@ -43,4 +50,9 @@ int motor_set_omega(struct motor_t *motor_p,
     chan_write(&motor_queue, &omega, sizeof(omega));
 
     return (0);
+}
+
+float motor_get_current(struct motor_t *motor_p)
+{
+    return (1000.0f);
 }

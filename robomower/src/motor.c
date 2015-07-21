@@ -96,7 +96,7 @@ int motor_set_omega(struct motor_t *motor_p,
     pwm_set_duty(&motor_p->enable, duty);
 
     std_printk(STD_LOG_DEBUG,
-               FSTR("direction = %d, duty = %u"),
+               FSTR("motor: direction = %d, duty = %u"),
                direction,
                duty);
 

@@ -21,9 +21,12 @@
 #include "simba.h"
 #include "robomower.h"
 #include "robot.h"
+#include <math.h>
 
 #define SIGNAL_THRESHOLD_MAX 10.0f
 #define SIGNAL_THRESHOLD_MIN -10.0f
+
+#define CONTROL_ROTATE_THRESHOLD 1.0f
 
 FS_COUNTER_DEFINE(robot_state_idle);
 FS_COUNTER_DEFINE(robot_state_starting);
@@ -59,8 +62,6 @@ static int is_stuck(struct robot_t *robot_p)
     left_current = motor_get_current(&robot_p->left_motor);
     right_current = motor_get_current(&robot_p->right_motor);
 
-    std_printk(STD_LOG_INFO, FSTR("%d %d"), left_current, right_current);
-
     return ((left_current > 500) || (right_current > 500));
 }
 
@@ -74,22 +75,57 @@ static int is_arriving_to_base_station(struct robot_t *robot_p)
     return (is_stuck(robot_p) && is_charging(robot_p));
 }
 
+/**
+ * Track the wire clockwise. The signal on the left hand side of the
+ * robot should be negative, while the signal on the right hand side
+ * should be positive.
+ */
 static int track_perimeter_wire(struct robot_t *robot_p,
-                                float *left_wheel_omega,
-                                float *right_wheel_omega)
+                                float *left_wheel_omega_p,
+                                float *right_wheel_omega_p)
 {
     float signal, control;
+    float speed, omega;
 
     signal = perimeter_wire_rx_get_signal(&robot_p->perimeter);
 
-    control = controller_pid_calculate(&robot_p->pid,
+    /* Try to stay on top of the wire, hence set the actual value to
+       0.0f. The returned control value is used to calculate motor
+       speeds. */
+    control = controller_pid_calculate(&robot_p->track_pid_controller,
                                        0.0f,
                                        signal);
 
-    std_printk(STD_LOG_DEBUG, FSTR("%d %d\r\n"), (int)signal, (int)control);
+    std_printk(STD_LOG_INFO,
+               FSTR("track: signal = %d, control = %d"),
+               (int)signal,
+               (int)(100 * control));
 
-    *left_wheel_omega = 0.2f;
-    *right_wheel_omega = 0.2f;
+    /* A big control value indicates the robot is off track, so just
+       rotate the robot. Start driving forward when the control value
+       is sufficiantly small. */
+    speed = 0.0f;
+
+    if (control > CONTROL_ROTATE_THRESHOLD) {
+        /* The robot is inside the perimeter wire, turn left towards
+           the wire.*/
+        omega = -0.2f;
+    } else if (control < -CONTROL_ROTATE_THRESHOLD) {
+        /* The robot is outside the perimeter wire, turn right towards
+           the wire.*/
+        omega = 0.2f;
+    } else {
+        /* Give the robot some speed forwards and try to track the
+           line. */
+        speed = 0.1f;
+        omega = -control / 4.0f;
+    }
+
+    /* Calculate new driver motor speeds and set them. */
+    movement_calculate_wheels_omega(speed,
+                                    omega,
+                                    left_wheel_omega_p,
+                                    right_wheel_omega_p);
 
     return (0);
 }
@@ -255,14 +291,13 @@ int state_searching_for_base_station(struct robot_t *robot_p)
 
     FS_COUNTER_INC(robot_state_searching_for_base_station, 1);
 
-    /* TODO: Implement searching and following algorithms. */
     if (searching_p->state == SEARCHING_STATE_SEARCHING_FOR_PERIMETER_WIRE) {
         /* Find the perimeter wire. */
         left_wheel_omega = 0.05f;
         right_wheel_omega = 0.05f;
-        searching_p->state = SEARCHING_STATE_FOLLOWING_PERIMETER_WIRE;
+        searching_p->state = SEARCHING_STATE_TRACKING_PERIMETER_WIRE;
     } else {
-        /* Follow the perimeter wire to the base station. */
+        /* Track the perimeter wire to the base station. */
         if (!is_arriving_to_base_station(robot_p)) {
             track_perimeter_wire(robot_p, &left_wheel_omega, &right_wheel_omega);
         } else {
@@ -272,7 +307,6 @@ int state_searching_for_base_station(struct robot_t *robot_p)
         }
     }
 
-    /* Find the perimeter wire. */
     motor_set_omega(&robot_p->left_motor, left_wheel_omega);
     motor_set_omega(&robot_p->right_motor, right_wheel_omega);
 

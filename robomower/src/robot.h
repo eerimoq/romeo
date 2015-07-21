@@ -46,7 +46,7 @@
 
 /* Searching for base station states. */
 #define SEARCHING_STATE_SEARCHING_FOR_PERIMETER_WIRE 0
-#define SEARCHING_STATE_FOLLOWING_PERIMETER_WIRE     1
+#define SEARCHING_STATE_TRACKING_PERIMETER_WIRE      1
 
 /* Drive backwards a number of ticks. */
 #ifndef CUTTING_STATE_BACKWARDS_TICKS
@@ -86,20 +86,20 @@ struct robot_t {
         struct cutting_state_t cutting;
         struct searching_for_base_station_state_t searching;
     } substate;
-    volatile struct {
-        float speed;
-        float omega;
-    } manual;
-    struct thrd_t *self_p;
-    struct timer_t ticker;
     struct motor_t left_motor;
     struct motor_t right_motor;
     struct perimeter_wire_rx_t perimeter;
-    struct controller_pid_t pid;
+    struct controller_pid_t track_pid_controller;
     struct power_t power;
     struct {
         int processing_time;
     } debug;
+    volatile struct {
+        float speed;
+        float omega;
+    } manual;
+    struct timer_t ticker;
+    struct thrd_t *self_p;
 };
 
 int state_idle(struct robot_t *robot_p);

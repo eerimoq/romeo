@@ -29,6 +29,31 @@
 #define WHEEL_OMEGA_MAX       PI
 
 /**
+ * Robot sketch with definitions of velocity and angular velocity
+ * directions.
+ *
+ * X = wheels
+ * v = velocity forwards
+ * w = angular velocity, positive for clock wise rotation.
+ *
+ * lw = left wheel
+ * rw = right wheel
+ *
+ *
+ *             +----------------------+
+ *             |                      |
+ *            X|          ^ v         |X
+ *        lw  X|          |           |X  rw
+ *            X|      ^   |   \       |X
+ *             |    w |   O   | w     |
+ *             |      \       v       |
+ *             |                      |
+ *             |          X           |
+ *             |          X           |
+ *             +----------------------+
+ */
+
+/**
  * Check if omega is within allowed range.
  * @return true(1) in omega is within allowed range, otherwise false(0)
  */
@@ -63,14 +88,9 @@ int movement_calculate_wheels_omega(float speed,
     /* Omega gives the difference in speed for the two motors. */
     omega_wheel_speed = (omega * WHEEL_DISTANCE_M / 2.0f);
 
-    /* Add/subtract the speed component from omega. */
-    if (omega > 0) {
-        left_wheel_speed += omega_wheel_speed;
-        right_wheel_speed -= omega_wheel_speed;
-    } else {
-        left_wheel_speed -= omega_wheel_speed;
-        right_wheel_speed += omega_wheel_speed;
-    }
+    /* Add the speed component from omega. */
+    left_wheel_speed += omega_wheel_speed;
+    right_wheel_speed -= omega_wheel_speed;
 
     /* Calculate output values in radians/s. */
     left_wheel_omega = (2.0f * PI * left_wheel_speed / WHEEL_CIRCUMFERENCE_M);
