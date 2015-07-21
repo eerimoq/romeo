@@ -23,13 +23,16 @@ BOARD = linux
 SRC += main.c \
 	perimeter_wire_rx_stub.c \
 	motor_stub.c \
-	power_stub.c
+	power_stub.c \
+	testdata.c
 SLIB_SRC = harness.c
 DRIVERS_SRC = uart.c
 ROBOMOWER_SRC = robot.c \
 	robot_states.c \
 	robot_transitions.c \
-	movement.c
+	movement.c \
+	controller.c
+
 CFLAGS_EXTRA = -DCUTTING_STATE_BACKWARDS_TICKS=2 \
 	-DCUTTING_STATE_ROTATING_TICKS=2
 

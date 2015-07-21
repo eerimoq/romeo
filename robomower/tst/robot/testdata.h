@@ -1,5 +1,5 @@
 /**
- * @file power_stub.c
+ * @file testdata.h
  * @version 0.1
  *
  * @section License
@@ -20,29 +20,17 @@
 
 #include "simba.h"
 #include "robomower.h"
-#include "testdata.h"
 
-static int data_index = 0;
+struct testdata_t {
+    int8_t energy_level;
+    float perimeter_signal;
+    float left_wheel_omega;
+    float right_wheel_omega;
+};
 
-int power_init(struct power_t *power_p,
-               struct adc_device_t *dev_p,
-               struct pin_device_t *pin_dev_p)
-{
-    return (0);
-}
+/* Used by the stubs.*/
+extern int testdata_index;
+extern const struct testdata_t FAR *testdata_p;
 
-int power_start(struct power_t *power_p)
-{
-    return (0);
-}
-
-int power_get_stored_energy_level(struct power_t *power_p)
-{
-    const struct testdata_t FAR *data_p = &testdata_p[data_index++];
-
-    if (data_p->energy_level != -1) {
-        return (data_p->energy_level);
-    } else {
-        return (0);
-    }
-}
+/* Used by the testcase to prepare the stubs. */
+extern FAR const struct testdata_t test_automatic_testdata[];

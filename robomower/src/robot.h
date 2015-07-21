@@ -92,6 +92,7 @@ struct robot_t {
     struct motor_t left_motor;
     struct motor_t right_motor;
     struct perimeter_wire_rx_t perimeter;
+    struct controller_pid_t pid;
     struct power_t power;
     struct {
         int processing_time;

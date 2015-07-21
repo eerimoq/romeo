@@ -20,11 +20,9 @@
 
 #include "simba.h"
 #include "robomower.h"
+#include "testdata.h"
 
-/* Those are defined and set in main.c.*/
-extern int perimeter_testdata_index;
-extern int perimeter_testdata_max;
-extern FAR const float *perimeter_testdata_signal_level;
+static int data_index = 0;
 
 int perimeter_wire_rx_init(struct perimeter_wire_rx_t *perimeter_wire_p,
                            struct adc_device_t *dev_p,
@@ -38,14 +36,13 @@ int perimeter_wire_rx_start(struct perimeter_wire_rx_t *perimeter_wire_p)
     return (0);
 }
 
-int perimeter_wire_rx_get_signal(struct perimeter_wire_rx_t *perimeter_wire_p,
-                                 float *value)
+float perimeter_wire_rx_get_signal(struct perimeter_wire_rx_t *perimeter_wire_p)
 {
-    if (perimeter_testdata_index < perimeter_testdata_max) {
-        *value = perimeter_testdata_signal_level[perimeter_testdata_index++];
-        return (0);
+    const struct testdata_t FAR *data_p = &testdata_p[data_index++];
+
+    if (data_p->energy_level != -1) {
+        return (data_p->perimeter_signal);
     } else {
-        *value = 0.0f;
-        return (0);
+        return (0.0f);
     }
 }

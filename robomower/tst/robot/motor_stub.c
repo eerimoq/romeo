@@ -39,8 +39,6 @@ int motor_init(struct motor_t *motor_p,
 int motor_set_direction(struct motor_t *motor_p,
                         int direction)
 {
-    chan_write(&motor_queue, &direction, sizeof(direction));
-
     return (0);
 }
 
