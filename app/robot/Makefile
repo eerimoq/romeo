@@ -35,5 +35,5 @@ ROBOMOWER_SRC = filter.c \
 
 ROBOMOWER = ../../robomower/src
 include $(ROBOMOWER)/robomower.mk
-SIMBA = ../../../archive/simba
+SIMBA = ../../../simba
 include $(SIMBA)/make/app.mk

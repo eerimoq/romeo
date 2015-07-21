@@ -26,5 +26,5 @@ ROBOMOWER_SRC = perimeter_wire_tx.c
 
 ROBOMOWER = ../../robomower/src
 include $(ROBOMOWER)/robomower.mk
-SIMBA = ../../../archive/simba
+SIMBA = ../../../simba
 include $(SIMBA)/make/app.mk

@@ -38,5 +38,5 @@ CFLAGS_EXTRA = -DCUTTING_STATE_BACKWARDS_TICKS=2 \
 
 ROBOMOWER = ../../src
 include $(ROBOMOWER)/robomower.mk
-SIMBA = ../../../../archive/simba
+SIMBA = ../../../../simba
 include $(SIMBA)/make/app.mk
