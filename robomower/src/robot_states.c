@@ -39,6 +39,9 @@ FS_COUNTER_DEFINE(robot_odometer);
 
 FS_COUNTER_DEFINE(robot_perimeter_no_signal);
 
+FS_PARAMETER_DEFINE("/robot/parameters/stuck", robot_parameter_stuck, int, 0);
+FS_PARAMETER_DEFINE("/robot/parameters/charging", robot_parameter_charging, int, 0);
+
 static int is_time_to_search_for_base_station(struct robot_t *robot_p)
 {
     return (power_get_stored_energy_level(&robot_p->power) <= 20);
@@ -51,12 +54,12 @@ static int is_inside_perimeter_wire(float signal)
 
 static int is_stuck(struct robot_t *robot_p)
 {
-    return (1);
+    return (FS_PARAMETER(robot_parameter_stuck));
 }
 
 static int is_charging(struct robot_t *robot_p)
 {
-    return (1);
+    return (FS_PARAMETER(robot_parameter_charging));
 }
 
 static int is_arriving_to_base_station(struct robot_t *robot_p)
@@ -76,10 +79,10 @@ static int track_perimeter_wire(struct robot_t *robot_p,
                                        0.0f,
                                        signal);
 
-    std_printf(FSTR("%d %d\r\n"), (int)signal, (int)control);
+    std_printk(STD_LOG_DEBUG, FSTR("%d %d\r\n"), (int)signal, (int)control);
 
-    *left_wheel_omega = 0.0f;
-    *right_wheel_omega = 0.0f;
+    *left_wheel_omega = 0.2f;
+    *right_wheel_omega = 0.2f;
 
     return (0);
 }
