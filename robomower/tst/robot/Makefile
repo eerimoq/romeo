@@ -18,7 +18,7 @@
 # This file is part of the RoboMower project.
 #
 
-NAME = robot
+NAME = robot_suite
 BOARD = linux
 SRC += main.c \
 	perimeter_wire_rx_stub.c \

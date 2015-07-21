@@ -18,7 +18,7 @@
 # This file is part of the RoboMower project.
 #
 
-NAME = filter_suite
+NAME = controller_suite
 BOARD = linux
 SRC += main.c
 SLIB_SRC = harness.c

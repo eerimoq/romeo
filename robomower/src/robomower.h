@@ -26,6 +26,7 @@
 #include "robomower/perimeter_wire_tx.h"
 #include "robomower/perimeter_wire_rx.h"
 #include "robomower/movement.h"
+#include "robomower/controller.h"
 #include "robomower/motor.h"
 #include "robomower/cutter.h"
 #include "robomower/power.h"
