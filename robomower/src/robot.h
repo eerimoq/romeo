@@ -48,12 +48,15 @@
 #define SEARCHING_STATE_SEARCHING_FOR_PERIMETER_WIRE 0
 #define SEARCHING_STATE_FOLLOWING_PERIMETER_WIRE     1
 
-/* Number of ticks in cutting states. */
+/* Drive backwards a number of ticks. */
 #ifndef CUTTING_STATE_BACKWARDS_TICKS
-#    define CUTTING_STATE_BACKWARDS_TICKS 40
+#    define CUTTING_STATE_BACKWARDS_TICKS 64
 #endif
+
+/* Rotate a random number of ticks. */
 #ifndef CUTTING_STATE_ROTATING_TICKS
-#    define CUTTING_STATE_ROTATING_TICKS  40
+#    include <math.h>
+#    define CUTTING_STATE_ROTATING_TICKS  (31 + (rand() & 0x3f))
 #endif
 
 struct robot_t;
