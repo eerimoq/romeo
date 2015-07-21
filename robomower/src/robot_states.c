@@ -22,6 +22,9 @@
 #include "robomower.h"
 #include "robot.h"
 
+#define SIGNAL_THRESHOLD_MAX 10.0f
+#define SIGNAL_THRESHOLD_MIN -10.0f
+
 FS_COUNTER(robot_state_idle);
 FS_COUNTER(robot_state_starting);
 FS_COUNTER(robot_state_cutting);
@@ -68,8 +71,10 @@ static int cutting_automatic(struct robot_t *robot_p,
     *omega_p = 0.0f;
 
     /* Don't do anything if the perimeter wire signal cannot be found. */
-    if (perimeter_wire_rx_get_signal(&robot_p->perimeter,
-                                     &signal) != 0) {
+    signal = perimeter_wire_rx_get_signal(&robot_p->perimeter);
+
+    /* Check versus thresholds. */
+    if ((signal < SIGNAL_THRESHOLD_MAX) && (signal > SIGNAL_THRESHOLD_MIN)) {
         FS_COUNTER_INC(robot_perimeter_no_signal, 1);
         return (0);
     }
@@ -193,12 +198,15 @@ int state_cutting(struct robot_t *robot_p)
 
 int state_searching_for_base_station(struct robot_t *robot_p)
 {
+    float signal;
     float left_wheel_omega;
     float right_wheel_omega;
     struct searching_for_base_station_state_t *searching_p =
         &robot_p->substate.searching;
 
     FS_COUNTER_INC(robot_state_searching_for_base_station, 1);
+
+    signal = perimeter_wire_rx_get_signal(&robot_p->perimeter);
 
     /* TODO: Implement searching and following algorithms. */
     if (searching_p->state == SEARCHING_STATE_SEARCHING_FOR_PERIMETER_WIRE) {
@@ -210,6 +218,9 @@ int state_searching_for_base_station(struct robot_t *robot_p)
         /* Follow the perimeter wire to the base station. */
         left_wheel_omega = 0.0f;
         right_wheel_omega = 0.0f;
+
+        /* When the robot is stuck and charging, it has arrived to the
+           base station. */
         robot_p->state.next = ROBOT_STATE_IN_BASE_STATION;
     }
 

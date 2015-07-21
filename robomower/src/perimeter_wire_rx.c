@@ -24,9 +24,6 @@
 #define FLT_MIN -1000000.0f
 #define FLT_MAX 1000000.0f
 
-#define THRESHOLD_MAX 10.0f
-#define THRESHOLD_MIN -10.0f
-
 #define COEFFICIENTS_MAX 24
 #define INPUT_MAX (2 * PERIMETER_WIRE_RX_SAMPLES_MAX)
 #define OUTPUT_MAX (INPUT_MAX - COEFFICIENTS_MAX + 1)
@@ -63,8 +60,7 @@ int perimeter_wire_rx_start(struct perimeter_wire_rx_t *perimeter_wire_p)
     return (0);
 }
 
-int perimeter_wire_rx_get_signal(struct perimeter_wire_rx_t *perimeter_wire_p,
-                                 float *value)
+float perimeter_wire_rx_get_signal(struct perimeter_wire_rx_t *perimeter_wire_p)
 {
     int i, i_mod;
     float input[INPUT_MAX];
@@ -116,12 +112,5 @@ int perimeter_wire_rx_get_signal(struct perimeter_wire_rx_t *perimeter_wire_p,
 
     perimeter_wire_p->signal = signal;
 
-    /* Check versus thresholds. */
-    if ((signal < THRESHOLD_MAX) && (signal > THRESHOLD_MIN)) {
-        return (-1);
-    }
-
-    *value = signal;
-
-    return (0);
+    return (signal);
 }

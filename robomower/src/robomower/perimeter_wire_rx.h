@@ -54,11 +54,9 @@ int perimeter_wire_rx_start(struct perimeter_wire_rx_t *perimeter_wire_p);
 /**
  * Get the signal on the wire.
  * @param[in] perimeter_wire_p Perimeter wire instance.
- * @param[out] value The signal level.
- * @return zero(0) or negative error code.
+ * @return The signal level.
  */
-int perimeter_wire_rx_get_signal(struct perimeter_wire_rx_t *perimeter_wire_p,
-                                 float *value);
+float perimeter_wire_rx_get_signal(struct perimeter_wire_rx_t *perimeter_wire_p);
 
 /**
  * Get the cached signal.
