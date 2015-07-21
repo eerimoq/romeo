@@ -151,16 +151,16 @@ int robot_cmd_status(int argc,
 
     std_fprintf(out_p, FSTR("mode = "));
     std_fprintf(out_p, mode_as_string[robot.mode]);
-    std_fprintf(out_p, FSTR("\r\nstate = "));
+    std_fprintf(out_p, FSTR("\r\nstate = /"));
     std_fprintf(out_p, state_as_string[robot.state.current]);
 
     switch (robot.state.current) {
     case ROBOT_STATE_CUTTING:
-        std_fprintf(out_p, FSTR("\r\ncutting.state = "));
+        std_fprintf(out_p, FSTR("/"));
         std_fprintf(out_p, cutting_state_as_string[robot.substate.cutting.state]);
         break;
     case ROBOT_STATE_SEARCHING_FOR_BASE_STATION:
-        std_fprintf(out_p, FSTR("\r\nsearching_for_base_station.state = "));
+        std_fprintf(out_p, FSTR("/"));
         std_fprintf(out_p, searching_state_as_string[robot.substate.searching.state]);
         break;
     }
