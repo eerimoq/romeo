@@ -22,51 +22,51 @@
 #include "robomower.h"
 #include "robot.h"
 
-state_callback_t transition__idle__starting(struct robot_t *robot_p)
+state_callback_t robot_transition__idle__starting(struct robot_t *robot_p)
 {
-    return (state_starting);
+    return (robot_state_starting);
 }
 
-state_callback_t transition__starting__cutting(struct robot_t *robot_p)
+state_callback_t robot_transition__starting__cutting(struct robot_t *robot_p)
 {
     robot_p->substate.cutting.state = CUTTING_STATE_FORWARD;
 
-    return (state_cutting);
+    return (robot_state_cutting);
 }
 
-state_callback_t transition__starting__in_base_station(struct robot_t *robot_p)
+state_callback_t robot_transition__starting__in_base_station(struct robot_t *robot_p)
 {
-    return (state_in_base_station);
+    return (robot_state_in_base_station);
 }
 
-state_callback_t transition__cutting__idle(struct robot_t *robot_p)
+state_callback_t robot_transition__cutting__idle(struct robot_t *robot_p)
 {
-    return (state_idle);
+    return (robot_state_idle);
 }
 
-state_callback_t transition__cutting__searching_for_base_station(struct robot_t *robot_p)
+state_callback_t robot_transition__cutting__searching_for_base_station(struct robot_t *robot_p)
 {
     robot_p->substate.searching.state = SEARCHING_STATE_SEARCHING_FOR_PERIMETER_WIRE;
 
-    return (state_searching_for_base_station);
+    return (robot_state_searching_for_base_station);
 }
 
-state_callback_t transition__searching_for_base_station__in_base_station(struct robot_t *robot_p)
+state_callback_t robot_transition__searching_for_base_station__in_base_station(struct robot_t *robot_p)
 {
-    return (state_in_base_station);
+    return (robot_state_in_base_station);
 }
 
-state_callback_t transition__searching_for_base_station__idle(struct robot_t *robot_p)
+state_callback_t robot_transition__searching_for_base_station__idle(struct robot_t *robot_p)
 {
-    return (state_idle);
+    return (robot_state_idle);
 }
 
-state_callback_t transition__in_base_station__cutting(struct robot_t *robot_p)
+state_callback_t robot_transition__in_base_station__cutting(struct robot_t *robot_p)
 {
-    return (state_cutting);
+    return (robot_state_cutting);
 }
 
-state_callback_t transition__in_base_station__idle(struct robot_t *robot_p)
+state_callback_t robot_transition__in_base_station__idle(struct robot_t *robot_p)
 {
-    return (state_idle);
+    return (robot_state_idle);
 }

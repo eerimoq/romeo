@@ -217,7 +217,7 @@ static int handle_state_transition(struct robot_t *robot_p)
     case ROBOT_STATE_IDLE:
         switch (next) {
         case ROBOT_STATE_STARTING:
-            callback = transition__idle__starting;
+            callback = robot_transition__idle__starting;
             break;
         default:
             break;
@@ -227,10 +227,10 @@ static int handle_state_transition(struct robot_t *robot_p)
     case ROBOT_STATE_STARTING:
         switch (next) {
         case ROBOT_STATE_CUTTING:
-            callback = transition__starting__cutting;
+            callback = robot_transition__starting__cutting;
             break;
         case ROBOT_STATE_IN_BASE_STATION:
-            callback = transition__starting__in_base_station;
+            callback = robot_transition__starting__in_base_station;
             break;
         default:
             break;
@@ -240,10 +240,10 @@ static int handle_state_transition(struct robot_t *robot_p)
     case ROBOT_STATE_CUTTING:
         switch (next) {
         case ROBOT_STATE_SEARCHING_FOR_BASE_STATION:
-            callback = transition__cutting__searching_for_base_station;
+            callback = robot_transition__cutting__searching_for_base_station;
             break;
         case ROBOT_STATE_IDLE:
-            callback = transition__cutting__idle;
+            callback = robot_transition__cutting__idle;
             break;
         default:
             break;
@@ -253,10 +253,10 @@ static int handle_state_transition(struct robot_t *robot_p)
     case ROBOT_STATE_SEARCHING_FOR_BASE_STATION:
         switch (next) {
         case ROBOT_STATE_IN_BASE_STATION:
-            callback = transition__searching_for_base_station__in_base_station;
+            callback = robot_transition__searching_for_base_station__in_base_station;
             break;
         case ROBOT_STATE_IDLE:
-            callback = transition__searching_for_base_station__idle;
+            callback = robot_transition__searching_for_base_station__idle;
             break;
         default:
             break;
@@ -266,10 +266,10 @@ static int handle_state_transition(struct robot_t *robot_p)
     case ROBOT_STATE_IN_BASE_STATION:
         switch (next) {
         case ROBOT_STATE_CUTTING:
-            callback = transition__in_base_station__cutting;
+            callback = robot_transition__in_base_station__cutting;
             break;
         case ROBOT_STATE_IDLE:
-            callback = transition__in_base_station__idle;
+            callback = robot_transition__in_base_station__idle;
             break;
         default:
             break;
@@ -328,7 +328,7 @@ int robot_init()
 {
     robot.state.current = ROBOT_STATE_IDLE;
     robot.state.next = ROBOT_STATE_IDLE;
-    robot.state.callback = state_idle;
+    robot.state.callback = robot_state_idle;
     robot.mode = ROBOT_MODE_AUTOMATIC;
 
     motor_init(&robot.left_motor,

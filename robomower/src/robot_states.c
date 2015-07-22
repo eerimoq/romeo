@@ -215,7 +215,7 @@ static int cutting_automatic(struct robot_t *robot_p,
     return (0);
 }
 
-int state_idle(struct robot_t *robot_p)
+int robot_state_idle(struct robot_t *robot_p)
 {
     float left_wheel_omega;
     float right_wheel_omega;
@@ -232,7 +232,7 @@ int state_idle(struct robot_t *robot_p)
     return (0);
 }
 
-int state_starting(struct robot_t *robot_p)
+int robot_state_starting(struct robot_t *robot_p)
 {
     FS_COUNTER_INC(robot_state_starting, 1);
 
@@ -249,7 +249,7 @@ int state_starting(struct robot_t *robot_p)
     return (0);
 }
 
-int state_cutting(struct robot_t *robot_p)
+int robot_state_cutting(struct robot_t *robot_p)
 {
     float left_wheel_omega;
     float right_wheel_omega;
@@ -258,19 +258,22 @@ int state_cutting(struct robot_t *robot_p)
 
     FS_COUNTER_INC(robot_state_cutting, 1);
 
-    /* Calculate new motor speeds. */
+    /* TODO: Check if the robot is stuck. */
+
+    /* Calculate new robot speeds. */
     if (robot_p->mode == ROBOT_MODE_MANUAL) {
         cutting_manual(robot_p, &speed, &omega);
     } else {
         cutting_automatic(robot_p, &speed, &omega);
     }
 
-    /* Calculate new driver motor speeds and set them. */
+    /* Convert the robot speeds to wheel motor angular velocities. */
     movement_calculate_wheels_omega(speed,
                                     omega,
                                     &left_wheel_omega,
                                     &right_wheel_omega);
 
+    /* Set the wheel motor angular velocities. */
     motor_set_omega(&robot_p->left_motor, left_wheel_omega);
     motor_set_omega(&robot_p->right_motor, right_wheel_omega);
 
@@ -282,7 +285,7 @@ int state_cutting(struct robot_t *robot_p)
     return (0);
 }
 
-int state_searching_for_base_station(struct robot_t *robot_p)
+int robot_state_searching_for_base_station(struct robot_t *robot_p)
 {
     float left_wheel_omega;
     float right_wheel_omega;
@@ -290,6 +293,8 @@ int state_searching_for_base_station(struct robot_t *robot_p)
         &robot_p->substate.searching;
 
     FS_COUNTER_INC(robot_state_searching_for_base_station, 1);
+
+    /* TODO: Check if the robot is stuck. */
 
     if (searching_p->state == SEARCHING_STATE_SEARCHING_FOR_PERIMETER_WIRE) {
         /* Find the perimeter wire. */
@@ -313,7 +318,7 @@ int state_searching_for_base_station(struct robot_t *robot_p)
     return (0);
 }
 
-int state_in_base_station(struct robot_t *robot_p)
+int robot_state_in_base_station(struct robot_t *robot_p)
 {
     FS_COUNTER_INC(robot_state_in_base_station, 1);
 

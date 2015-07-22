@@ -102,20 +102,20 @@ struct robot_t {
     struct thrd_t *self_p;
 };
 
-int state_idle(struct robot_t *robot_p);
-int state_starting(struct robot_t *robot_p);
-int state_cutting(struct robot_t *robot_p);
-int state_searching_for_base_station(struct robot_t *robot_p);
-int state_in_base_station(struct robot_t *robot_p);
+int robot_state_idle(struct robot_t *robot_p);
+int robot_state_starting(struct robot_t *robot_p);
+int robot_state_cutting(struct robot_t *robot_p);
+int robot_state_searching_for_base_station(struct robot_t *robot_p);
+int robot_state_in_base_station(struct robot_t *robot_p);
 
-state_callback_t transition__idle__starting(struct robot_t *robot_p);
-state_callback_t transition__starting__cutting(struct robot_t *robot_p);
-state_callback_t transition__starting__in_base_station(struct robot_t *robot_p);
-state_callback_t transition__cutting__idle(struct robot_t *robot_p);
-state_callback_t transition__cutting__searching_for_base_station(struct robot_t *robot_p);
-state_callback_t transition__searching_for_base_station__in_base_station(struct robot_t *robot_p);
-state_callback_t transition__searching_for_base_station__idle(struct robot_t *robot_p);
-state_callback_t transition__in_base_station__cutting(struct robot_t *robot_p);
-state_callback_t transition__in_base_station__idle(struct robot_t *robot_p);
+state_callback_t robot_transition__idle__starting(struct robot_t *robot_p);
+state_callback_t robot_transition__starting__cutting(struct robot_t *robot_p);
+state_callback_t robot_transition__starting__in_base_station(struct robot_t *robot_p);
+state_callback_t robot_transition__cutting__idle(struct robot_t *robot_p);
+state_callback_t robot_transition__cutting__searching_for_base_station(struct robot_t *robot_p);
+state_callback_t robot_transition__searching_for_base_station__in_base_station(struct robot_t *robot_p);
+state_callback_t robot_transition__searching_for_base_station__idle(struct robot_t *robot_p);
+state_callback_t robot_transition__in_base_station__cutting(struct robot_t *robot_p);
+state_callback_t robot_transition__in_base_station__idle(struct robot_t *robot_p);
 
 #endif
