@@ -22,9 +22,9 @@
 #include "robomower.h"
 #include "robot.h"
 
-#define TRACK_KP  1.0
-#define TRACK_KI  0.0
-#define TRACK_KD -0.1
+#define FOLLOW_KP  1.0
+#define FOLLOW_KI  0.0
+#define FOLLOW_KD -0.1
 
 FS_COMMAND_DEFINE("/robot/status", robot_cmd_status);
 FS_COMMAND_DEFINE("/robot/start", robot_cmd_start);
@@ -75,12 +75,12 @@ FAR const char FAR *cutting_state_as_string[] = {
 /* Searching for base station states as strings. */
 static FAR const char searching_state_searching_for_perimeter_wire_string[] =
     "searching_for_perimeter_wire";
-static FAR const char searching_state_tracking_perimeter_wire_string[] =
-    "tracking_perimeter_wire";
+static FAR const char searching_state_following_perimeter_wire_string[] =
+    "following_perimeter_wire";
 
 FAR const char FAR *searching_state_as_string[] = {
     searching_state_searching_for_perimeter_wire_string,
-    searching_state_tracking_perimeter_wire_string,
+    searching_state_following_perimeter_wire_string,
 };
 
 int robot_cmd_mode_set(int argc,
@@ -352,10 +352,10 @@ int robot_init()
                &adc_0_dev,
                &pin_a1_dev);
 
-    controller_pid_init(&robot.track_pid_controller,
-                        TRACK_KP,
-                        TRACK_KI,
-                        TRACK_KD);
+    controller_pid_init(&robot.follow_pid_controller,
+                        FOLLOW_KP,
+                        FOLLOW_KI,
+                        FOLLOW_KD);
 
     return (0);
 }

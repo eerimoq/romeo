@@ -83,11 +83,11 @@ static int is_arriving_to_base_station(struct robot_t *robot_p)
 }
 
 /**
- * Track the wire clockwise. The signal on the left hand side of the
+ * Follow the wire clockwise. The signal on the left hand side of the
  * robot should be negative, while the signal on the right hand side
  * should be positive.
  */
-static int track_perimeter_wire(struct robot_t *robot_p,
+static int follow_perimeter_wire(struct robot_t *robot_p,
                                 float *left_wheel_omega_p,
                                 float *right_wheel_omega_p)
 {
@@ -106,16 +106,16 @@ static int track_perimeter_wire(struct robot_t *robot_p,
     /* Try to stay on top of the wire, hence set the actual value to
        0.0f. The returned control value is used to calculate motor
        speeds. */
-    control = controller_pid_calculate(&robot_p->track_pid_controller,
+    control = controller_pid_calculate(&robot_p->follow_pid_controller,
                                        0.0f,
                                        signal);
 
     std_printk(STD_LOG_INFO,
-               FSTR("track: signal = %d, control = %d"),
+               FSTR("follow: signal = %d, control = %d"),
                (int)signal,
                (int)(100 * control));
 
-    /* A big control value indicates the robot is off track, so just
+    /* A big control value indicates the robot is off follow, so just
        rotate the robot. Start driving forward when the control value
        is sufficiantly small. */
     speed = 0.0f;
@@ -129,7 +129,7 @@ static int track_perimeter_wire(struct robot_t *robot_p,
            the wire.*/
         omega = 0.2f;
     } else {
-        /* Give the robot some speed forwards and try to track the
+        /* Give the robot some speed forwards and try to follow the
            line. */
         speed = 0.1f;
         omega = -control / 4.0f;
@@ -326,14 +326,14 @@ int robot_state_searching_for_base_station(struct robot_t *robot_p)
             /* Find the perimeter wire. */
             left_wheel_omega = 0.05f;
             right_wheel_omega = 0.05f;
-            searching_p->state = SEARCHING_STATE_TRACKING_PERIMETER_WIRE;
+            searching_p->state = SEARCHING_STATE_FOLLOWING_PERIMETER_WIRE;
         } else {
             /* TODO: try to get free */
         }
     } else {
-        /* Track the perimeter wire to the base station. */
+        /* Follow the perimeter wire to the base station. */
         if (!is_arriving_to_base_station(robot_p)) {
-            track_perimeter_wire(robot_p, &left_wheel_omega, &right_wheel_omega);
+            follow_perimeter_wire(robot_p, &left_wheel_omega, &right_wheel_omega);
         } else {
             robot_p->state.next = ROBOT_STATE_IN_BASE_STATION;
         }
