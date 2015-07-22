@@ -1,3 +1,5 @@
 digraph robot_state_diagram_searching {
+  searching_for_perimeter_wire [style=filled, fillcolor=lightskyblue1];
+  following_perimeter_wire [style=filled, fillcolor=lightskyblue1];
   searching_for_perimeter_wire -> following_perimeter_wire;
 }
