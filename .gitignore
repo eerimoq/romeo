@@ -40,3 +40,4 @@ size.log
 *.gcov
 index.*html
 coverage.log
+profile.log
