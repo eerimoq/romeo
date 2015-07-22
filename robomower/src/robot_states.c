@@ -42,6 +42,8 @@ FS_COUNTER_DEFINE(robot_odometer);
 
 FS_COUNTER_DEFINE(robot_perimeter_no_signal);
 
+FS_COUNTER_DEFINE(robot_is_stuck);
+
 FS_PARAMETER_DEFINE("/robot/parameters/charging", robot_parameter_charging, int, 0);
 
 static int is_time_to_search_for_base_station(struct robot_t *robot_p)
@@ -62,7 +64,12 @@ static int is_stuck(struct robot_t *robot_p)
     left_current = motor_get_current(&robot_p->left_motor);
     right_current = motor_get_current(&robot_p->right_motor);
 
-    return ((left_current > 500) || (right_current > 500));
+    if ((left_current > 500) || (right_current > 500)) {
+        FS_COUNTER_INC(robot_is_stuck, 1);
+        return (1);
+    }
+
+    return (0);
 }
 
 static int is_charging(struct robot_t *robot_p)
@@ -86,6 +93,13 @@ static int track_perimeter_wire(struct robot_t *robot_p,
 {
     float signal, control;
     float speed, omega;
+
+    /* Just wait if the robot is stuck. */
+    if (is_stuck(robot_p)) {
+        *left_wheel_omega_p = 0.0f;
+        *right_wheel_omega_p = 0.0f;
+        return (0);
+    }
 
     signal = perimeter_wire_rx_get_signal(&robot_p->perimeter);
 
@@ -134,8 +148,13 @@ static int cutting_manual(struct robot_t *robot_p,
                           float *speed,
                           float *omega)
 {
-    *speed = robot_p->manual.speed;
-    *omega = robot_p->manual.omega;
+    if (!is_stuck(robot_p)) {
+        *speed = robot_p->manual.speed;
+        *omega = robot_p->manual.omega;
+    } else {
+        *speed = 0.0f;
+        *omega = 0.0f;
+    }
 
     return (0);
 }
@@ -150,6 +169,12 @@ static int cutting_automatic(struct robot_t *robot_p,
     /* Default no movement. */
     *speed_p = 0.0f;
     *omega_p = 0.0f;
+
+    if (is_stuck(robot_p)) {
+        /* TODO: try to get free */
+        std_printk(STD_LOG_NOTICE, FSTR("cutting stuck"));
+        return (0);
+    }
 
     /* Don't do anything if the perimeter wire signal cannot be found. */
     signal = perimeter_wire_rx_get_signal(&robot_p->perimeter);
@@ -189,8 +214,8 @@ static int cutting_automatic(struct robot_t *robot_p,
             *omega_p = 0.0f;
 
             if (cutting_p->ticks_left == 0) {
-                /* Enter rotating state. */
-                /* TODO: number of ticks should be random. */
+                /* Enter rotating state and rotate a random number of
+                   ticks. */
                 *speed_p = 0.0f;
                 cutting_p->ticks_left = CUTTING_STATE_ROTATING_TICKS;
                 cutting_p->state = CUTTING_STATE_ROTATING;
@@ -258,8 +283,6 @@ int robot_state_cutting(struct robot_t *robot_p)
 
     FS_COUNTER_INC(robot_state_cutting, 1);
 
-    /* TODO: Check if the robot is stuck. */
-
     /* Calculate new robot speeds. */
     if (robot_p->mode == ROBOT_MODE_MANUAL) {
         cutting_manual(robot_p, &speed, &omega);
@@ -292,22 +315,26 @@ int robot_state_searching_for_base_station(struct robot_t *robot_p)
     struct searching_for_base_station_state_t *searching_p =
         &robot_p->substate.searching;
 
+    left_wheel_omega = 0.0f;
+    right_wheel_omega = 0.0f;
+
     FS_COUNTER_INC(robot_state_searching_for_base_station, 1);
 
-    /* TODO: Check if the robot is stuck. */
-
     if (searching_p->state == SEARCHING_STATE_SEARCHING_FOR_PERIMETER_WIRE) {
-        /* Find the perimeter wire. */
-        left_wheel_omega = 0.05f;
-        right_wheel_omega = 0.05f;
-        searching_p->state = SEARCHING_STATE_TRACKING_PERIMETER_WIRE;
+        /* No movement if the robot is stuck. */
+        if (!is_stuck(robot_p)) {
+            /* Find the perimeter wire. */
+            left_wheel_omega = 0.05f;
+            right_wheel_omega = 0.05f;
+            searching_p->state = SEARCHING_STATE_TRACKING_PERIMETER_WIRE;
+        } else {
+            /* TODO: try to get free */
+        }
     } else {
         /* Track the perimeter wire to the base station. */
         if (!is_arriving_to_base_station(robot_p)) {
             track_perimeter_wire(robot_p, &left_wheel_omega, &right_wheel_omega);
         } else {
-            left_wheel_omega = 0.0f;
-            right_wheel_omega = 0.0f;
             robot_p->state.next = ROBOT_STATE_IN_BASE_STATION;
         }
     }

@@ -41,6 +41,9 @@ float perimeter_wire_rx_get_signal(struct perimeter_wire_rx_t *perimeter_wire_p)
     const struct testdata_t FAR *data_p = &testdata_p[data_index++];
 
     if (data_p->energy_level != -1) {
+        std_printk(STD_LOG_NOTICE,
+                   FSTR("perimeter_wire_rx_stub: perimeter_signal = %d"),
+                   (int)data_p->perimeter_signal);
         return (data_p->perimeter_signal);
     } else {
         return (0.0f);

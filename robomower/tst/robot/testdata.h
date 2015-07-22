@@ -26,6 +26,7 @@ struct testdata_t {
     float perimeter_signal;
     float left_wheel_omega;
     float right_wheel_omega;
+    float motor_current;
 };
 
 /* Used by the stubs.*/

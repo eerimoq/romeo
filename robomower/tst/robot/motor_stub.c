@@ -20,8 +20,11 @@
 
 #include "simba.h"
 #include "robomower.h"
+#include "testdata.h"
 
 extern struct queue_t motor_queue;
+
+static int data_index = 0;
 
 int motor_init(struct motor_t *motor_p,
                struct pin_device_t *in1_p,
@@ -47,6 +50,8 @@ int motor_set_direction(struct motor_t *motor_p,
 int motor_set_omega(struct motor_t *motor_p,
                     float omega)
 {
+    std_printk(STD_LOG_NOTICE, FSTR("motor_stub: omega = %d"), (int)omega);
+
     chan_write(&motor_queue, &omega, sizeof(omega));
 
     return (0);
@@ -54,5 +59,16 @@ int motor_set_omega(struct motor_t *motor_p,
 
 float motor_get_current(struct motor_t *motor_p)
 {
-    return (1000.0f);
+    const struct testdata_t FAR *data_p = &testdata_p[data_index / 2];
+
+    data_index++;
+
+    if (data_p->energy_level != -1) {
+        std_printk(STD_LOG_NOTICE,
+                   FSTR("motor_stub: motor_current = %d"),
+                   (int)data_p->motor_current);
+        return (data_p->motor_current);
+    } else {
+        return (0.0f);
+    }
 }
