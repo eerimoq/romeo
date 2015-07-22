@@ -40,6 +40,14 @@ The robot has a two level state machine.
 
 #### State descriptions
 
+The grey state is not part of the software state machine. It is
+present to give a clear picture of what happens when the power is
+turned on.
+
+In the light blue states the robot can drive around in the garden.
+
+In the white states the robot is standing still.
+
 ##### idle
 The robot is idle, waiting to be started manually.
 

@@ -1,5 +1,10 @@
 digraph robot_state_diagram_cutting {
+  forward [style=filled, fillcolor=lightskyblue1];
   forward -> backwards;
+
+  backwards [style=filled, fillcolor=lightskyblue1];
   backwards -> rotating;
+
+  rotating [style=filled, fillcolor=lightskyblue1];
   rotating -> forward;
 }
