@@ -1,5 +1,5 @@
 #
-# @file robomower/robomower.mk
+# @file emtp/Makefile
 # @version 0.1
 #
 # @section License
@@ -18,21 +18,13 @@
 # This file is part of the RoboMower project.
 #
 
-INC += $(ROBOMOWER)
+NAME = emtp_suite
+BOARD = linux
+SRC += main.c
+SLIB_SRC = harness.c
+DRIVERS_SRC = uart.c
 
-ROBOMOWER_SRC ?= \
-	controller.c \
-	cutter.c \
-	emtp.c \
-	filter.c \
-	motor.c \
-	movement.c \
-	perimeter_wire_rx.c \
-	perimeter_wire_tx.c \
-	power.c \
-	robot.c \
-	robot_states.c \
-	robot_transitions.c \
-	watchdog.c
-
-SRC += $(ROBOMOWER_SRC:%=$(ROBOMOWER)/%)
+ROBOMOWER = ../../src
+include $(ROBOMOWER)/robomower.mk
+SIMBA = ../../../../simba
+include $(SIMBA)/make/app.mk

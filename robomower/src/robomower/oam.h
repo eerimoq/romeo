@@ -1,5 +1,5 @@
 /**
- * @file robomower.h
+ * @file robomower/oam.h
  * @version 0.1
  *
  * @section License
@@ -18,20 +18,17 @@
  * This file is part of the RoboMower project.
  */
 
-#ifndef __ROBOMOWER_H__
-#define __ROBOMOWER_H__
+#ifndef __ROBOMOWER_OAM_H__
+#define __ROBOMOWER_OAM_H__
 
-#include "robomower/math.h"
-#include "robomower/filter.h"
-#include "robomower/perimeter_wire_tx.h"
-#include "robomower/perimeter_wire_rx.h"
-#include "robomower/movement.h"
-#include "robomower/controller.h"
-#include "robomower/motor.h"
-#include "robomower/cutter.h"
-#include "robomower/power.h"
-#include "robomower/watchdog.h"
-#include "robomower/robot.h"
-#include "robomower/emtp.h"
+#include "simba.h"
+#include "robomower.h"
+
+#define OAM_MESSAGE_TYPE_PING 0
+#define OAM_MESSAGE_TYPE_PONG 1
+
+struct oam_message_watchdog_kick_t {
+    struct emtp_message_header_t header;
+} __attribute__((packed));
 
 #endif

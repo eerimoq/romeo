@@ -343,7 +343,33 @@ static int robot_process(struct robot_t *robot_p)
 	return (handle_state_transition(robot_p));
     }
 }
+#if 0
+static int handle_oam_message(struct robot_t *robot_p,
+                              struct emtp_t *emtp_p)
+{
+    struct oam_message_pong_t pong;
 
+    switch (header_p->type) {
+
+    case OAM_MESSAGE_TYPE_PING:
+        watchdog_kick(&robot_p->watchdog);
+
+        /* Reply with a pong message. */
+        pong.header.type = OAM_MESSAGE_TYPE_PONG;
+        pong.size = sizeof(pong);
+        robot_oam_message_write(&robot_p->oam, &pong);
+        break;
+
+    default:
+        std_printk(STD_LOG_ERROR,
+                   FSTR("bad oam message type %d"),
+                   (int)header_p->type);
+        break;
+    }
+
+    return (0);
+}
+#endif
 int robot_init()
 {
     robot.state.current = ROBOT_STATE_IDLE;
@@ -407,10 +433,14 @@ void *robot_entry(void *arg_p)
 	/* Timer callback resumes this thread. */
 	thrd_suspend(NULL);
 
-	time_get(&start_time);
-	robot_process(&robot);
-	time_get(&timeout);
-	robot.debug.processing_time = (timeout.seconds - start_time.seconds);
+        //        if () {
+            time_get(&start_time);
+            robot_process(&robot);
+            time_get(&timeout);
+            robot.debug.processing_time = (timeout.seconds - start_time.seconds);
+        /* } else { */
+        /*     robot_oam_process(&robot.oam); */
+        /* } */
     }
 
     return (0);
