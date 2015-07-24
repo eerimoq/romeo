@@ -20,13 +20,19 @@
 
 NAME = robot_suite
 BOARD = linux
-SRC += main.c \
-	perimeter_wire_rx_stub.c \
+
+SRC += \
+	main.c \
 	motor_stub.c \
+	perimeter_wire_rx_stub.c \
 	power_stub.c \
-	testdata.c
+	testdata.c \
+	watchdog_stub.c
+
 SLIB_SRC = harness.c
+
 DRIVERS_SRC = uart.c
+
 ROBOMOWER_SRC = robot.c \
 	robot_states.c \
 	robot_transitions.c \
@@ -34,7 +40,8 @@ ROBOMOWER_SRC = robot.c \
 	controller.c
 
 CFLAGS_EXTRA = -DCUTTING_STATE_BACKWARDS_TICKS=2 \
-	-DCUTTING_STATE_ROTATING_TICKS=2
+	-DCUTTING_STATE_ROTATING_TICKS=2 \
+	-DWATCHDOG_TIMEOUT_TICKS=10
 
 ROBOMOWER = ../../src
 include $(ROBOMOWER)/robomower.mk

@@ -20,18 +20,23 @@
 
 NAME = robot
 BOARD = linux
+
 SRC += main.c
+
 DRIVERS_SRC = uart.c pin.c pwm.c adc.c
-ROBOMOWER_SRC = filter.c \
-	perimeter_wire_rx.c \
+
+ROBOMOWER_SRC = \
+	controller.c \
+	cutter.c \
+	filter.c \
 	motor.c \
 	movement.c \
-	cutter.c \
+	perimeter_wire_rx.c \
+	power.c \
 	robot.c \
 	robot_states.c \
 	robot_transitions.c \
-	power.c \
-	controller.c
+	watchdog.c
 
 ROBOMOWER = ../../robomower/src
 include $(ROBOMOWER)/robomower.mk

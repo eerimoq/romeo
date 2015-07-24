@@ -1,5 +1,5 @@
 /**
- * @file robomower.h
+ * @file watchdog_stub.c
  * @version 0.1
  *
  * @section License
@@ -18,19 +18,35 @@
  * This file is part of the RoboMower project.
  */
 
-#ifndef __ROBOMOWER_H__
-#define __ROBOMOWER_H__
+#include "simba.h"
+#include "robomower.h"
 
-#include "robomower/math.h"
-#include "robomower/filter.h"
-#include "robomower/perimeter_wire_tx.h"
-#include "robomower/perimeter_wire_rx.h"
-#include "robomower/movement.h"
-#include "robomower/controller.h"
-#include "robomower/motor.h"
-#include "robomower/cutter.h"
-#include "robomower/power.h"
-#include "robomower/watchdog.h"
-#include "robomower/robot.h"
+int watchdog_init(struct watchdog_t *watchdog_p,
+                  int timeout)
+{
+    return (0);
+}
 
-#endif
+int watchdog_start(struct watchdog_t *watchdog_p)
+{
+    return (0);
+}
+
+int watchdog_stop(struct watchdog_t *watchdog_p)
+{
+    return (0);
+}
+
+int watchdog_tick(struct watchdog_t *watchdog_p)
+{
+    std_printk(STD_LOG_NOTICE, FSTR("watchdog_stub: tick"));
+
+    return (1);
+}
+
+int watchdog_kick(struct watchdog_t *watchdog_p)
+{
+    std_printk(STD_LOG_NOTICE, FSTR("watchdog_stub: kicked"));
+
+    return (0);
+}

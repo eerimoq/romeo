@@ -53,6 +53,10 @@
 #    define CUTTING_STATE_BACKWARDS_TICKS 64
 #endif
 
+#ifndef WATCHDOG_TIMEOUT_TICKS
+#    define WATCHDOG_TIMEOUT_TICKS 40
+#endif
+
 /* Rotate a random number of ticks. */
 #ifndef CUTTING_STATE_ROTATING_TICKS
 #    include <math.h>
@@ -91,6 +95,7 @@ struct robot_t {
     struct perimeter_wire_rx_t perimeter;
     struct controller_pid_t follow_pid_controller;
     struct power_t power;
+    struct watchdog_t watchdog;
     struct {
         int processing_time;
     } debug;

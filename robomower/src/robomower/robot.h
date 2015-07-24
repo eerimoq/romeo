@@ -42,4 +42,10 @@ void *robot_entry(void *arg_p);
  */
 int robot_manual_start();
 
+/**
+ * Manual stop of the robot. Do from idle to cutting state.
+ * @return zero(0) or negative error code
+ */
+int robot_manual_stop();
+
 #endif
