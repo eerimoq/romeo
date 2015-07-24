@@ -78,15 +78,15 @@ int emtp_process(struct emtp_t *emtp_p)
     return (0);
 }
 
-int emtp_write(struct emtp_t *emtp_p,
-               const void *buf_p,
-               size_t size)
+ssize_t emtp_write(struct emtp_t *emtp_p,
+                   const void *buf_p,
+                   size_t size)
 {
     return (chan_write(&emtp_p->internal.output, buf_p, size));
 }
 
-int emtp_message_write(struct emtp_t *emtp_p,
-                       struct emtp_message_header_t *message_p)
+ssize_t emtp_message_write(struct emtp_t *emtp_p,
+                           struct emtp_message_header_t *message_p)
 {    return (chan_write(&emtp_p->internal.output,
 		       message_p,
 		       message_p->size));

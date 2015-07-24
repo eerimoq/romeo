@@ -56,6 +56,18 @@ struct emtp_t {
     } internal;
 };
 
+/**
+ * Initialize object from given parameters.
+ * @param[out] emtp_p Object to initialize.
+ * @param[in] input_p Input channel from underlaying layer.
+ * @param[in] output_p Output channel to underlaying layer.
+ * @param[in] stream_output_p Output channel to stream handler.
+ * @param[in] message_cb Message callback. Called when a new
+ *                        message is received from underlaying layer.
+ * @param[in] message_cb_arg_p User defined argument passed to
+ *                             message_cb.
+ * @return zero(0) oe negative error code.
+ */
 int emtp_init(struct emtp_t *emtp_p,
 	      chan_t *input_p,
 	      chan_t *output_p,
@@ -64,13 +76,31 @@ int emtp_init(struct emtp_t *emtp_p,
 				struct emtp_t *emtp_p),
 	      void *message_cb_arg_p);
 
+/**
+ * Process next incoming stream byte or message.
+ * @param[in] emtp_p Initialized object.
+ * @return zero(0) oe negative error code.
+ */
 int emtp_process(struct emtp_t *emtp_p);
 
-int emtp_write(struct emtp_t *emtp_p,
-	       const void *buf_p,
-	       size_t size);
+/**
+ * Write data to ubderlaying layer.
+ * @param[in] emtp_p Initialized object.
+ * @param[in] buf_p Buffer to write.
+ * @param[in] size Number of bytes to write.
+ * @return Number of bytes written.
+ */
+ssize_t emtp_write(struct emtp_t *emtp_p,
+                   const void *buf_p,
+                   size_t size);
 
-int emtp_message_write(struct emtp_t *emtp_p,
-		       struct emtp_message_header_t *message_p);
+/**
+ * Write message to ubderlaying layer.
+ * @param[in] emtp_p Initialized object.
+ * @param[in] message_p Message to send.
+ * @return Number of bytes written.
+ */
+ssize_t emtp_message_write(struct emtp_t *emtp_p,
+                           struct emtp_message_header_t *message_p);
 
 #endif
