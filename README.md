@@ -18,6 +18,17 @@ your choice, normally a PC.
 
 ![](doc/connectivity.jpg)
 
+HARDWARE
+========
+
+ROBOT SCHEMATICS
+----------------
+![](doc/robot_schematics.jpg)
+
+BASE STATION SCHEMATICS
+-----------------------
+![](doc/base_station_schematics.jpg)
+
 SOFTWARE
 ========
 
@@ -99,17 +110,6 @@ The robot is searching for the perimeter wire.
 
 ##### following_perimeter_wire
 The robot is following the perimeter wire to the base station.
-
-HARDWARE
-========
-
-ROBOT SCHEMATICS
-----------------
-![](doc/robot_schematics.jpg)
-
-BASE STATION SCHEMATICS
------------------------
-![](doc/base_station_schematics.jpg)
 
 PARTS
 -----
