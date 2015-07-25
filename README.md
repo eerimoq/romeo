@@ -51,7 +51,7 @@ Folder structure:
        +-- app/
        |   +-- base_station/             - base station application
        |   +-- robot/                    - robot application
-       +-- doc/                          - documenatation
+       +-- doc/                          - documentation
        +-- LICENSE
        +-- Makefile
        +-- README.md
