@@ -14,9 +14,19 @@ CONNECTIVITY
 ============
 
 Control and monitor the Robot and the Base station from a device of
-your choice, normally a PC.
+your choice, normally a PC. There is also a smartphone application to
+manually control the robot.
 
 ![](doc/connectivity.jpg)
+
+CONTROLLER SMARTPHONE APP
+-------------------------
+The controller smartphone application can control the speed and
+angular velocity of the robot. The application connects to the robot
+using the same bluetooth interface as the base station, so only one of
+the two can be connected at a time.
+
+![](doc/controller_smartphone_app.jpg)
 
 HARDWARE
 ========
