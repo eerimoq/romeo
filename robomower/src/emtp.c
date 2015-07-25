@@ -44,7 +44,8 @@ int emtp_init(struct emtp_t *emtp_p,
               chan_t *output_p,
               chan_t *stream_output_p,
               int (*message_cb)(void *arg_p,
-                                struct emtp_t *emtp_p),
+                                struct emtp_t *emtp_p,
+                                struct emtp_message_header_t *header_p),
               void *message_cb_arg_p)
 {
     emtp_p->input_p = input_p;
@@ -66,11 +67,22 @@ int emtp_init(struct emtp_t *emtp_p,
 int emtp_process(struct emtp_t *emtp_p)
 {
     char c;
+    struct emtp_message_header_t header;
+
+    /* Return if no data is available. */
+    if (chan_size(emtp_p->input_p) == 0) {
+        return (0);
+    }
 
     chan_read(emtp_p->input_p, &c, sizeof(c));
 
     if (c == EMTP_MESSAGE_BEGIN) {
-        emtp_p->service.callback(emtp_p->service.arg_p, emtp_p);
+        chan_read(emtp_p->input_p,
+                  &header.type,
+                  sizeof(header) - sizeof(header.begin));
+        emtp_p->service.callback(emtp_p->service.arg_p,
+                                 emtp_p,
+                                 &header);
     } else {
 	chan_write(emtp_p->service.output_p, &c, sizeof(c));
     }
@@ -87,7 +99,10 @@ ssize_t emtp_write(struct emtp_t *emtp_p,
 
 ssize_t emtp_message_write(struct emtp_t *emtp_p,
                            struct emtp_message_header_t *message_p)
-{    return (chan_write(&emtp_p->internal.output,
+{
+    message_p->begin = EMTP_MESSAGE_BEGIN;
+
+    return (chan_write(&emtp_p->internal.output,
 		       message_p,
 		       message_p->size));
 }

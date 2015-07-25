@@ -96,6 +96,7 @@ struct robot_t {
     struct controller_pid_t follow_pid_controller;
     struct power_t power;
     struct watchdog_t watchdog;
+    struct emtp_t emtp;
     struct {
         int processing_time;
     } debug;

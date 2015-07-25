@@ -28,6 +28,7 @@ DRIVERS_SRC = uart.c pin.c pwm.c adc.c
 ROBOMOWER_SRC = \
 	controller.c \
 	cutter.c \
+	emtp.c \
 	filter.c \
 	motor.c \
 	movement.c \

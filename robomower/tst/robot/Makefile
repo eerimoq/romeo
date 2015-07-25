@@ -33,7 +33,9 @@ SLIB_SRC = harness.c
 
 DRIVERS_SRC = uart.c
 
-ROBOMOWER_SRC = robot.c \
+ROBOMOWER_SRC = \
+	robot.c \
+	emtp.c \
 	robot_states.c \
 	robot_transitions.c \
 	movement.c \

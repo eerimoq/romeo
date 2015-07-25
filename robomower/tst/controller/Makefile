@@ -26,5 +26,5 @@ DRIVERS_SRC = uart.c
 
 ROBOMOWER = ../../src
 include $(ROBOMOWER)/robomower.mk
-SIMBA = ../../../../archive/simba
+SIMBA = ../../../../simba
 include $(SIMBA)/make/app.mk

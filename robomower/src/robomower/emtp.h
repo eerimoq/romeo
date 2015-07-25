@@ -35,18 +35,30 @@
 
 #define EMTP_MESSAGE_BEGIN DLE
 
+#define EMTP_MESSAGE_TYPE_PING 0
+#define EMTP_MESSAGE_TYPE_PONG 1
+
 struct emtp_message_header_t {
     uint8_t begin;
     uint8_t type;
     uint16_t size;
 } __attribute__((packed));
 
+struct emtp_message_ping_t {
+    struct emtp_message_header_t header;
+};
+
+struct emtp_message_pong_t {
+    struct emtp_message_header_t header;
+};
+
 struct emtp_t {
     chan_t *input_p;
     chan_t *output_p;
     struct {
 	int (*callback)(void *arg_p,
-			struct emtp_t *emtp_p);
+			struct emtp_t *emtp_p,
+			struct emtp_message_header_t *header_p);
 	void *arg_p;
 	chan_t *output_p;
     } service;
@@ -73,7 +85,8 @@ int emtp_init(struct emtp_t *emtp_p,
 	      chan_t *output_p,
 	      chan_t *stream_output_p,
 	      int (*message_cb)(void *arg_p,
-				struct emtp_t *emtp_p),
+				struct emtp_t *emtp_p,
+				struct emtp_message_header_t *header_p),
 	      void *message_cb_arg_p);
 
 /**
@@ -91,8 +104,8 @@ int emtp_process(struct emtp_t *emtp_p);
  * @return Number of bytes written.
  */
 ssize_t emtp_write(struct emtp_t *emtp_p,
-                   const void *buf_p,
-                   size_t size);
+		   const void *buf_p,
+		   size_t size);
 
 /**
  * Write message to ubderlaying layer.
@@ -101,6 +114,6 @@ ssize_t emtp_write(struct emtp_t *emtp_p,
  * @return Number of bytes written.
  */
 ssize_t emtp_message_write(struct emtp_t *emtp_p,
-                           struct emtp_message_header_t *message_p);
+			   struct emtp_message_header_t *message_p);
 
 #endif

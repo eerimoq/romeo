@@ -24,10 +24,14 @@
 static struct sem_t message_callback_sem;
 
 static int message_callback(void *arg_p,
-			    struct emtp_t *emtp_p)
+			    struct emtp_t *emtp_p,
+                            struct emtp_message_header_t *header_p)
 {
 
     std_printk(STD_LOG_NOTICE, FSTR("message callback"));
+
+    BTASSERT(header_p->type == EMTP_MESSAGE_TYPE_PING);
+    BTASSERT(header_p->size == sizeof(struct emtp_message_ping_t));
 
     sem_put(&message_callback_sem, 1);
 
@@ -43,7 +47,7 @@ static int test_message(struct harness_t *harness_p)
     char input_buf[32];
     char output_buf[32];
     char stream_output_buf[32];
-    struct emtp_message_header_t ping;
+    struct emtp_message_ping_t ping;
 
     BTASSERT(queue_init(&input,
 			input_buf,
@@ -63,8 +67,9 @@ static int test_message(struct harness_t *harness_p)
 		       NULL) == 0);
 
     /* Write a message on the input channel. */
-    ping.begin = EMTP_MESSAGE_BEGIN;
-    ping.size = sizeof(ping);
+    ping.header.begin = EMTP_MESSAGE_BEGIN;
+    ping.header.type = EMTP_MESSAGE_TYPE_PING;
+    ping.header.size = sizeof(ping);
     BTASSERT(chan_write(&input, &ping, sizeof(ping)) == sizeof(ping));
 
     BTASSERT(emtp_process(&emtp) == 0);
@@ -73,17 +78,19 @@ static int test_message(struct harness_t *harness_p)
     sem_get(&message_callback_sem, NULL);
 
     /* Write a message on the internal input channel. */
-    ping.begin = EMTP_MESSAGE_BEGIN;
-    ping.size = sizeof(ping);
-    BTASSERT(emtp_message_write(&emtp, &ping) == sizeof(ping));
+    ping.header.type = EMTP_MESSAGE_TYPE_PING;
+    ping.header.size = sizeof(ping);
+    BTASSERT(emtp_message_write(&emtp, &ping.header) == sizeof(ping));
 
     /* Read the message from the output channel and verify its
        contents. */
-    ping.begin = ~EMTP_MESSAGE_BEGIN;
-    ping.size = 0;
+    ping.header.begin = ~EMTP_MESSAGE_BEGIN;
+    ping.header.type = -1;
+    ping.header.size = 0;
     BTASSERT(chan_read(&output, &ping, sizeof(ping)) == sizeof(ping));
-    BTASSERT(ping.begin == EMTP_MESSAGE_BEGIN);
-    BTASSERT(ping.size == sizeof(ping));
+    BTASSERT(ping.header.begin == EMTP_MESSAGE_BEGIN);
+    BTASSERT(ping.header.type == EMTP_MESSAGE_TYPE_PING);
+    BTASSERT(ping.header.size == sizeof(ping));
 
     return (0);
 }

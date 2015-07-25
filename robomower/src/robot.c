@@ -336,6 +336,9 @@ static int robot_process(struct robot_t *robot_p)
 	}
     }
 
+    /* Handle any emtp message or stream data. */
+    //emtp_process(&robot_p->emtp);
+
     /* Execute robot state machine. */
     if (robot_p->state.current == robot_p->state.next) {
 	return (robot_p->state.callback(robot_p));
@@ -343,33 +346,34 @@ static int robot_process(struct robot_t *robot_p)
 	return (handle_state_transition(robot_p));
     }
 }
-#if 0
-static int handle_oam_message(struct robot_t *robot_p,
-                              struct emtp_t *emtp_p)
+
+static int handle_emtp_message(struct robot_t *robot_p,
+                               struct emtp_t *emtp_p,
+                               struct emtp_message_header_t *header_p)
 {
-    struct oam_message_pong_t pong;
+    struct emtp_message_pong_t pong;
 
     switch (header_p->type) {
 
-    case OAM_MESSAGE_TYPE_PING:
+    case EMTP_MESSAGE_TYPE_PING:
         watchdog_kick(&robot_p->watchdog);
 
         /* Reply with a pong message. */
-        pong.header.type = OAM_MESSAGE_TYPE_PONG;
-        pong.size = sizeof(pong);
-        robot_oam_message_write(&robot_p->oam, &pong);
+        pong.header.type = EMTP_MESSAGE_TYPE_PONG;
+        pong.header.size = sizeof(pong);
+        emtp_message_write(&robot_p->emtp, &pong.header);
         break;
 
     default:
-        std_printk(STD_LOG_ERROR,
-                   FSTR("bad oam message type %d"),
+        std_printk(STD_LOG_ERR,
+                   FSTR("bad emtp message type %d"),
                    (int)header_p->type);
         break;
     }
 
     return (0);
 }
-#endif
+
 int robot_init()
 {
     robot.state.current = ROBOT_STATE_IDLE;
@@ -407,6 +411,15 @@ int robot_init()
     watchdog_init(&robot.watchdog,
 		  WATCHDOG_TIMEOUT_TICKS);
 
+    emtp_init(&robot.emtp,
+	      NULL,
+	      NULL,
+	      NULL,
+              (int (*)(void *,
+                       struct emtp_t *,
+                       struct emtp_message_header_t *))handle_emtp_message,
+	      &robot);
+
     return (0);
 }
 
@@ -433,14 +446,10 @@ void *robot_entry(void *arg_p)
 	/* Timer callback resumes this thread. */
 	thrd_suspend(NULL);
 
-        //        if () {
-            time_get(&start_time);
-            robot_process(&robot);
-            time_get(&timeout);
-            robot.debug.processing_time = (timeout.seconds - start_time.seconds);
-        /* } else { */
-        /*     robot_oam_process(&robot.oam); */
-        /* } */
+        time_get(&start_time);
+        robot_process(&robot);
+        time_get(&timeout);
+        robot.debug.processing_time = (timeout.seconds - start_time.seconds);
     }
 
     return (0);
