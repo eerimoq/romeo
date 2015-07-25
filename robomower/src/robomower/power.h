@@ -30,6 +30,7 @@
 struct power_t {
     struct adc_driver_t adc;
     int sample;
+    int energy_level;
 };
 
 /**
@@ -56,5 +57,14 @@ int power_start(struct power_t *power_p);
  *         Otherwise negative error code.
  */
 int power_get_stored_energy_level(struct power_t *power_p);
+
+/**
+ * Get the cached value of the stored energy level.
+ * @param[in] power_p Initialized power object.
+ * @return Linerar scale from 0 to 100, where 0 means no energy stored
+ *         and 100 means that the maximum amount of energy is stored.
+ *         Otherwise negative error code.
+ */
+int power_get_cached_stored_energy_level(struct power_t *power_p);
 
 #endif

@@ -133,12 +133,16 @@ int robot_cmd_status(int argc,
     time.seconds = 0;
     time.nanoseconds = PROCESS_PERIOD_NS;
     std_fprintf(out_p,
-		FSTR("\r\nprocess period = %d ticks\r\n"
-		     "tick time = %d ticks\r\n"
-		     "perimeter signal level = %d\r\n"),
+		FSTR("\r\nperiod = %d ticks\r\n"
+		     "execution time = %d ticks\r\n"
+		     "perimeter signal level = %d\r\n"
+		     "energy level = %d\r\n"
+                     "watchdog count = %d\r\n"),
 		(int)T2ST(&time),
 		robot.debug.tick_time,
-		(int)perimeter_wire_rx_get_cached_signal(&robot.perimeter));
+		(int)perimeter_wire_rx_get_cached_signal(&robot.perimeter),
+		(int)power_get_cached_stored_energy_level(&robot.power),
+                robot.watchdog.count);
 
     if (robot.mode == ROBOT_MODE_MANUAL) {
 	std_fprintf(out_p,
@@ -224,6 +228,7 @@ static int init()
 
     robot_init(&robot);
 
+    self_p = thrd_self();
     thrd_set_name("robot");
 
     /* Start the shell. */

@@ -253,6 +253,8 @@ int robot_state_idle(struct robot_t *robot_p)
     motor_set_omega(&robot_p->left_motor, left_wheel_omega);
     motor_set_omega(&robot_p->right_motor, right_wheel_omega);
 
+    power_get_stored_energy_level(&robot_p->power);
+
     return (0);
 }
 
