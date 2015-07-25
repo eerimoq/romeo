@@ -5,17 +5,18 @@ digraph robot_state_diagram {
 
   idle -> starting [label="manual start"];
 
-  starting -> cutting;
+  starting -> idle [label="stop or error"];
   starting -> in_base_station;
+  starting -> cutting;
 
   cutting [style=filled, fillcolor=lightskyblue1];
-  cutting -> idle [label="error"];
+  cutting -> idle [label="stop or error"];
   cutting -> searching_for_base_station [label="battery low or scheduled"];
 
   searching_for_base_station [style=filled, fillcolor=lightskyblue1];
   searching_for_base_station -> in_base_station [label="station found"];
-  searching_for_base_station -> idle [label="error"];
+  searching_for_base_station -> idle [label="stop or error"];
 
   in_base_station -> cutting [label="battery charged and scheduled"];
-  in_base_station -> idle [label="error"];
+  in_base_station -> idle [label="stop or error"];
 }
