@@ -18,13 +18,34 @@
 # This file is part of the Romeo project.
 #
 
-NAME = base_station
+NAME = robot_suite
 BOARD = linux
-SRC += main.c
-DRIVERS_SRC = uart.c pin.c
-ROMEO_SRC = perimeter_wire_tx.c
 
-ROMEO = ../../romeo/src
+SRC += \
+	main.c \
+	motor_stub.c \
+	perimeter_wire_rx_stub.c \
+	power_stub.c \
+	testdata.c \
+	watchdog_stub.c
+
+SLIB_SRC = harness.c
+
+DRIVERS_SRC = uart.c
+
+ROMEO_SRC = \
+	robot.c \
+	emtp.c \
+	robot_states.c \
+	robot_transitions.c \
+	movement.c \
+	controller.c
+
+CFLAGS_EXTRA = -DCUTTING_STATE_BACKWARDS_TICKS=2 \
+	-DCUTTING_STATE_ROTATING_TICKS=2 \
+	-DWATCHDOG_TIMEOUT_TICKS=10
+
+ROMEO = ../../src
 include $(ROMEO)/romeo.mk
-SIMBA = ../../../simba
+SIMBA = ../../../../simba
 include $(SIMBA)/make/app.mk

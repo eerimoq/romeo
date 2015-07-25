@@ -84,7 +84,7 @@ def main(args):
 
     writer_input_queue = start_threads(robot_serial)
 
-    sys.stdout.write("RoboMower - operation and maintenance.\n")
+    sys.stdout.write("Romeo - operation and maintenance.\n")
     sys.stdout.write("ctrl-d to exit\n")
     sys.stdout.write("ctrl-p to begin a message\n")
 

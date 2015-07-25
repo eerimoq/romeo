@@ -15,7 +15,7 @@
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 # Lesser General Public License for more details.
 #
-# This file is part of the RoboMower project.
+# This file is part of the Romeo project.
 #
 
 NAME = robot
@@ -25,7 +25,7 @@ SRC += main.c
 
 DRIVERS_SRC = uart.c pin.c pwm.c adc.c
 
-ROBOMOWER_SRC = \
+ROMEO_SRC = \
 	controller.c \
 	cutter.c \
 	emtp.c \
@@ -39,7 +39,7 @@ ROBOMOWER_SRC = \
 	robot_transitions.c \
 	watchdog.c
 
-ROBOMOWER = ../../robomower/src
-include $(ROBOMOWER)/robomower.mk
+ROMEO = ../../romeo/src
+include $(ROMEO)/romeo.mk
 SIMBA = ../../../simba
 include $(SIMBA)/make/app.mk

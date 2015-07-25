@@ -34,7 +34,7 @@ deps
 *.map
 obj
 run.log
-robomower/tst/*/fs
+romeo/tst/*/fs
 app/*/fs
 size.log
 *.gcov

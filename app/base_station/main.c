@@ -15,11 +15,11 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
  *
- * This file is part of the RoboMower project.
+ * This file is part of the Romeo project.
  */
 
 #include "simba.h"
-#include "robomower.h"
+#include "romeo.h"
 
 #define VERSION_STR "0.1.0"
 
@@ -39,7 +39,7 @@ int main()
     uart_start(&uart);
     sys_set_stdout(&uart.chout);
 
-    std_printf(FSTR("RoboMower - base station version " VERSION_STR "\r\n"));
+    std_printf(FSTR("Romeo - base station version " VERSION_STR "\r\n"));
 
     /* Start transmitting the signal on the perimeter wire. */
     perimeter_wire_tx_module_init();

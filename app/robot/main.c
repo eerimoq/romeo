@@ -15,11 +15,11 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
  *
- * This file is part of the RoboMower project.
+ * This file is part of the Romeo project.
  */
 
 #include "simba.h"
-#include "robomower.h"
+#include "romeo.h"
 
 #define VERSION_STR "0.1.0"
 
@@ -256,7 +256,7 @@ int main()
 
     init();
 
-    std_printf(FSTR("RoboMower - robot version " VERSION_STR "\r\n"));
+    std_printf(FSTR("Romeo - robot version " VERSION_STR "\r\n"));
 
     /* Start the robot periodic timer with a 50ms period. */
     timeout.seconds = 0;

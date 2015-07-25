@@ -15,10 +15,10 @@
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 # Lesser General Public License for more details.
 #
-# This file is part of the Robomower project.
+# This file is part of the Romeo project.
 #
 
-TESTS = $(addprefix robomower/tst/, $(shell ls robomower/tst))
+TESTS = $(addprefix romeo/tst/, $(shell ls romeo/tst))
 APPS = $(addprefix app/, base_station robot)
 TESTS_AND_APPS = $(TESTS) $(APPS)
 

@@ -1,9 +1,9 @@
 OVERVIEW
 ========
 
-RoboMower is a lawn mower DIY project, inspired by Ardumower. It uses
-the Simba microkernel and build system instead of the Arduino IDE and
-libraries.
+Romeo (RObot MOwEr) is a lawn mower DIY project, inspired by
+Ardumower. It uses the Simba microkernel and build system instead of
+the Arduino IDE and libraries.
 
 The goal of the project is to create a simple lawn mower for my tiny
 garden of 10 m2, but it will not be limited to that size.
@@ -55,7 +55,7 @@ Folder structure:
        +-- LICENSE
        +-- Makefile
        +-- README.md
-       +-- robomower/                    - robomower package
+       +-- romeo/                    - romeo package
            +-- src/                      - source code
            +-- tst/                      - test suites
            +-- tools/                    - various tools

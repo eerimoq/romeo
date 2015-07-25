@@ -18,13 +18,13 @@
 # This file is part of the Romeo project.
 #
 
-NAME = base_station
+NAME = controller_suite
 BOARD = linux
 SRC += main.c
-DRIVERS_SRC = uart.c pin.c
-ROMEO_SRC = perimeter_wire_tx.c
+SLIB_SRC = harness.c
+DRIVERS_SRC = uart.c
 
-ROMEO = ../../romeo/src
+ROMEO = ../../src
 include $(ROMEO)/romeo.mk
-SIMBA = ../../../simba
+SIMBA = ../../../../simba
 include $(SIMBA)/make/app.mk

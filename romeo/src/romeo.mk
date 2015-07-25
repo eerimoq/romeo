@@ -1,5 +1,5 @@
 #
-# @file filter/Makefile
+# @file romeo/romeo.mk
 # @version 0.1
 #
 # @section License
@@ -18,13 +18,21 @@
 # This file is part of the Romeo project.
 #
 
-NAME = base_station
-BOARD = linux
-SRC += main.c
-DRIVERS_SRC = uart.c pin.c
-ROMEO_SRC = perimeter_wire_tx.c
+INC += $(ROMEO)
 
-ROMEO = ../../romeo/src
-include $(ROMEO)/romeo.mk
-SIMBA = ../../../simba
-include $(SIMBA)/make/app.mk
+ROMEO_SRC ?= \
+	controller.c \
+	cutter.c \
+	emtp.c \
+	filter.c \
+	motor.c \
+	movement.c \
+	perimeter_wire_rx.c \
+	perimeter_wire_tx.c \
+	power.c \
+	robot.c \
+	robot_states.c \
+	robot_transitions.c \
+	watchdog.c
+
+SRC += $(ROMEO_SRC:%=$(ROMEO)/%)
