@@ -20,6 +20,7 @@
 
 #include "simba.h"
 #include "robomower.h"
+#include <arpa/inet.h>
 
 /**
  * Output channel write callback. Ensures message integrity.
@@ -64,7 +65,7 @@ int emtp_init(struct emtp_t *emtp_p,
     return (0);
 }
 
-int emtp_process(struct emtp_t *emtp_p)
+int emtp_try_read_input(struct emtp_t *emtp_p)
 {
     char c;
     struct emtp_message_header_t header;
@@ -80,6 +81,7 @@ int emtp_process(struct emtp_t *emtp_p)
         chan_read(emtp_p->input_p,
                   &header.type,
                   sizeof(header) - sizeof(header.begin));
+        header.size = ntohs(header.size);
         emtp_p->service.callback(emtp_p->service.arg_p,
                                  emtp_p,
                                  &header);
@@ -100,9 +102,13 @@ ssize_t emtp_write(struct emtp_t *emtp_p,
 ssize_t emtp_message_write(struct emtp_t *emtp_p,
                            struct emtp_message_header_t *message_p)
 {
+    uint16_t size;
+
+    size = message_p->size;
     message_p->begin = EMTP_MESSAGE_BEGIN;
+    message_p->size = htons(message_p->size);
 
     return (chan_write(&emtp_p->internal.output,
 		       message_p,
-		       message_p->size));
+		       size));
 }

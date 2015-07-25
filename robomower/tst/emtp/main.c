@@ -20,6 +20,7 @@
 
 #include "simba.h"
 #include "robomower.h"
+#include <arpa/inet.h>
 
 static struct sem_t message_callback_sem;
 
@@ -31,7 +32,7 @@ static int message_callback(void *arg_p,
     std_printk(STD_LOG_NOTICE, FSTR("message callback"));
 
     BTASSERT(header_p->type == EMTP_MESSAGE_TYPE_PING);
-    BTASSERT(header_p->size == sizeof(struct emtp_message_ping_t));
+    BTASSERT(htons(header_p->size) == sizeof(struct emtp_message_ping_t));
 
     sem_put(&message_callback_sem, 1);
 
@@ -72,7 +73,7 @@ static int test_message(struct harness_t *harness_p)
     ping.header.size = sizeof(ping);
     BTASSERT(chan_write(&input, &ping, sizeof(ping)) == sizeof(ping));
 
-    BTASSERT(emtp_process(&emtp) == 0);
+    BTASSERT(emtp_try_read_input(&emtp) == 0);
 
     /* Wait for signal from message callback. */
     sem_get(&message_callback_sem, NULL);
@@ -90,7 +91,7 @@ static int test_message(struct harness_t *harness_p)
     BTASSERT(chan_read(&output, &ping, sizeof(ping)) == sizeof(ping));
     BTASSERT(ping.header.begin == EMTP_MESSAGE_BEGIN);
     BTASSERT(ping.header.type == EMTP_MESSAGE_TYPE_PING);
-    BTASSERT(ping.header.size == sizeof(ping));
+    BTASSERT(htons(ping.header.size) == sizeof(ping));
 
     return (0);
 }
@@ -129,7 +130,7 @@ static int test_stream(struct harness_t *harness_p)
 
     /* One byte is processed at a time. */
     for (i = 0; i < sizeof("foo"); i++) {
-        BTASSERT(emtp_process(&emtp) == 0);
+        BTASSERT(emtp_try_read_input(&emtp) == 0);
     }
 
     /* Read the text from the stream output channel and verify its

@@ -90,11 +90,11 @@ int emtp_init(struct emtp_t *emtp_p,
 	      void *message_cb_arg_p);
 
 /**
- * Process next incoming stream byte or message.
+ * Try to read next incoming stream byte or message.
  * @param[in] emtp_p Initialized object.
  * @return zero(0) oe negative error code.
  */
-int emtp_process(struct emtp_t *emtp_p);
+int emtp_try_read_input(struct emtp_t *emtp_p);
 
 /**
  * Write data to ubderlaying layer.

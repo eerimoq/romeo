@@ -39,7 +39,7 @@ int main()
     uart_start(&uart);
     sys_set_stdout(&uart.chout);
 
-    std_printf(FSTR("RoboMower base station v" VERSION_STR "\r\n"));
+    std_printf(FSTR("RoboMower - base station version " VERSION_STR "\r\n"));
 
     /* Start transmitting the signal on the perimeter wire. */
     perimeter_wire_tx_module_init();

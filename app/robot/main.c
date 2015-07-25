@@ -32,6 +32,8 @@ FS_COMMAND_DEFINE("/robot/manual/movement/set", robot_cmd_manual_movement_set);
 static struct uart_driver_t uart;
 static char qinbuf[32];
 static struct shell_args_t shell_args;
+static struct queue_t shell_input_channel;
+static char shell_input_channel_buf[2];
 
 static struct robot_t robot;
 static struct timer_t ticker;
@@ -136,7 +138,7 @@ int robot_cmd_status(int argc,
 		FSTR("\r\nperiod = %d ticks\r\n"
 		     "execution time = %d ticks\r\n"
 		     "perimeter signal level = %d\r\n"
-		     "energy level = %d\r\n"
+		     "energy level = %d%%\r\n"
                      "watchdog count = %d\r\n"),
 		(int)T2ST(&time),
 		robot.debug.tick_time,
@@ -217,10 +219,14 @@ static int init()
     uart_start(&uart);
     sys_set_stdout(&uart.chout);
 
+    queue_init(&shell_input_channel,
+               shell_input_channel_buf,
+               sizeof(shell_input_channel_buf));
+
     emtp_init(&emtp,
-	      NULL,
-	      NULL,
-	      NULL,
+	      &uart.chin,
+	      &uart.chout,
+	      &shell_input_channel,
               (int (*)(void *,
                        struct emtp_t *,
                        struct emtp_message_header_t *))robot_handle_emtp_message,
@@ -232,8 +238,8 @@ static int init()
     thrd_set_name("robot");
 
     /* Start the shell. */
-    shell_args.chin_p = &uart.chin;
-    shell_args.chout_p = &uart.chout;
+    shell_args.chin_p = &shell_input_channel;
+    shell_args.chout_p = &emtp.internal.output;
     thrd_spawn(shell_entry,
                &shell_args,
                20,
@@ -250,7 +256,7 @@ int main()
 
     init();
 
-    std_printf(FSTR("RoboMower robot v" VERSION_STR "\r\n"));
+    std_printf(FSTR("RoboMower - robot version " VERSION_STR "\r\n"));
 
     /* Start the robot periodic timer with a 50ms period. */
     timeout.seconds = 0;
@@ -272,7 +278,7 @@ int main()
         robot_tick(&robot);
 
         /* Handle any emtp message or stream data. */
-        //emtp_process(&robot_p->emtp);
+        emtp_try_read_input(&emtp);
 
         time_get(&timeout);
         robot.debug.tick_time = (timeout.seconds - start_time.seconds);
