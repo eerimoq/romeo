@@ -22,16 +22,18 @@
 #include "robomower.h"
 
 struct testdata_t {
-    int8_t energy_level;
-    float perimeter_signal;
-    float left_wheel_omega;
-    float right_wheel_omega;
-    float motor_current;
+    int id;
+    struct {
+        int8_t energy_level;
+        float perimeter_signal;
+        float motor_current;
+    } input;
+    struct {
+        int compare;
+        float left_wheel_omega;
+        float right_wheel_omega;
+    } output;
 };
-
-/* Used by the stubs.*/
-extern int testdata_index;
-extern const struct testdata_t FAR *testdata_p;
 
 /* Used by the testcase to prepare the stubs. */
 extern FAR const struct testdata_t test_automatic_testdata[];

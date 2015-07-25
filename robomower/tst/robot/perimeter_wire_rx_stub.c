@@ -22,7 +22,8 @@
 #include "robomower.h"
 #include "testdata.h"
 
-static int data_index = 0;
+int perimeter_wire_rx_stub_signal_next;
+float perimeter_wire_rx_stub_signal[16];
 
 int perimeter_wire_rx_init(struct perimeter_wire_rx_t *perimeter_wire_p,
                            struct adc_device_t *dev_p,
@@ -38,14 +39,13 @@ int perimeter_wire_rx_start(struct perimeter_wire_rx_t *perimeter_wire_p)
 
 float perimeter_wire_rx_get_signal(struct perimeter_wire_rx_t *perimeter_wire_p)
 {
-    const struct testdata_t FAR *data_p = &testdata_p[data_index++];
+    float signal;
 
-    if (data_p->energy_level != -1) {
-        std_printk(STD_LOG_NOTICE,
-                   FSTR("perimeter_wire_rx_stub: perimeter_signal = %d"),
-                   (int)data_p->perimeter_signal);
-        return (data_p->perimeter_signal);
-    } else {
-        return (0.0f);
-    }
+    signal = perimeter_wire_rx_stub_signal[0];
+
+    std_printk(STD_LOG_NOTICE,
+               FSTR("perimeter_wire_rx_stub: perimeter_signal = %d"),
+               (int)signal);
+
+    return (signal);
 }

@@ -88,10 +88,11 @@ static int is_arriving_to_base_station(struct robot_t *robot_p)
  * should be positive.
  */
 static int follow_perimeter_wire(struct robot_t *robot_p,
-                                float *left_wheel_omega_p,
-                                float *right_wheel_omega_p)
+                                 float *left_wheel_omega_p,
+                                 float *right_wheel_omega_p,
+                                 float signal)
 {
-    float signal, control;
+    float control;
     float speed, omega;
 
     /* Just wait if the robot is stuck. */
@@ -100,8 +101,6 @@ static int follow_perimeter_wire(struct robot_t *robot_p,
         *right_wheel_omega_p = 0.0f;
         return (0);
     }
-
-    signal = perimeter_wire_rx_get_signal(&robot_p->perimeter);
 
     /* Try to stay on top of the wire, hence set the actual value to
        0.0f. The returned control value is used to calculate motor
@@ -310,6 +309,7 @@ int robot_state_cutting(struct robot_t *robot_p)
 
 int robot_state_searching_for_base_station(struct robot_t *robot_p)
 {
+    float signal;
     float left_wheel_omega;
     float right_wheel_omega;
     struct searching_for_base_station_state_t *searching_p =
@@ -318,22 +318,28 @@ int robot_state_searching_for_base_station(struct robot_t *robot_p)
     left_wheel_omega = 0.0f;
     right_wheel_omega = 0.0f;
 
+    signal = perimeter_wire_rx_get_signal(&robot_p->perimeter);
+
     FS_COUNTER_INC(robot_state_searching_for_base_station, 1);
 
     if (searching_p->state == SEARCHING_STATE_SEARCHING_FOR_PERIMETER_WIRE) {
         /* No movement if the robot is stuck. */
         if (!is_stuck(robot_p)) {
             /* Find the perimeter wire. */
-            left_wheel_omega = 0.05f;
-            right_wheel_omega = 0.05f;
-            searching_p->state = SEARCHING_STATE_FOLLOWING_PERIMETER_WIRE;
+            if (is_inside_perimeter_wire(signal)) {
+                left_wheel_omega = 0.05f;
+                right_wheel_omega = 0.05f;
+            } else {
+                /* Perimeter wire found. */
+                searching_p->state = SEARCHING_STATE_FOLLOWING_PERIMETER_WIRE;
+            }
         } else {
             /* TODO: try to get free */
         }
     } else {
         /* Follow the perimeter wire to the base station. */
         if (!is_arriving_to_base_station(robot_p)) {
-            follow_perimeter_wire(robot_p, &left_wheel_omega, &right_wheel_omega);
+            follow_perimeter_wire(robot_p, &left_wheel_omega, &right_wheel_omega, signal);
         } else {
             robot_p->state.next = ROBOT_STATE_IN_BASE_STATION;
         }

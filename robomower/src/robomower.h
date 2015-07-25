@@ -22,6 +22,7 @@
 #define __ROBOMOWER_H__
 
 #include "robomower/math.h"
+#include "robomower/emtp.h"
 #include "robomower/filter.h"
 #include "robomower/perimeter_wire_tx.h"
 #include "robomower/perimeter_wire_rx.h"
@@ -32,6 +33,5 @@
 #include "robomower/power.h"
 #include "robomower/watchdog.h"
 #include "robomower/robot.h"
-#include "robomower/emtp.h"
 
 #endif

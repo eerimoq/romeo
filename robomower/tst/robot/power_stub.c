@@ -22,7 +22,8 @@
 #include "robomower.h"
 #include "testdata.h"
 
-static int data_index = 0;
+int power_stub_energy_level_next;
+int power_stub_energy_level[16];
 
 int power_init(struct power_t *power_p,
                struct adc_device_t *dev_p,
@@ -38,18 +39,14 @@ int power_start(struct power_t *power_p)
 
 int power_get_stored_energy_level(struct power_t *power_p)
 {
-    const struct testdata_t FAR *data_p;
+    int energy_level;
 
-    do {
-        data_p = &testdata_p[data_index++];
-    } while (data_p->energy_level == -2);
+    energy_level = power_stub_energy_level[0];
 
-    if (data_p->energy_level != -1) {
-        std_printk(STD_LOG_NOTICE,
-                   FSTR("power_stub: energy_level = %d"),
-                   data_p->energy_level);
-        return (data_p->energy_level);
-    } else {
-        return (0);
-    }
+
+    std_printk(STD_LOG_NOTICE,
+               FSTR("power_stub: energy_level = %d"),
+               energy_level);
+    
+    return (energy_level);
 }

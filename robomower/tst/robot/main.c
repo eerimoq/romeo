@@ -26,9 +26,17 @@ extern int FS_PARAMETER(robot_parameter_charging);
 #include "robomower.h"
 #include "testdata.h"
 
-static char robot_stack[300];
+extern int motor_stub_omega_next;
+extern float motor_stub_omega[16];
 
-struct queue_t motor_queue;
+extern int motor_stub_current_next;
+extern float motor_stub_current[16];
+
+extern int perimeter_wire_rx_stub_signal_next;
+extern float perimeter_wire_rx_stub_signal[16];
+
+extern int power_stub_energy_level_next;
+extern int power_stub_energy_level[16];
 
 static int float_close_to_zero(float value)
 {
@@ -39,49 +47,60 @@ static int test_automatic(struct harness_t *harness_p)
 {
     int i;
     float omega;
-    const struct testdata_t FAR *data_p;
-
-    testdata_index = 0;
-    testdata_p = test_automatic_testdata;
-
-    BTASSERT(queue_init(&motor_queue, NULL, 0) == 0);
-
-    robot_init();
-
-    thrd_spawn(robot_entry,
-               NULL,
-               0,
-               robot_stack,
-               sizeof(robot_stack));
+    struct robot_t robot;
+    const struct testdata_t FAR *testdata_p;
 
     FS_PARAMETER(robot_parameter_charging) = 1;
 
-    robot_manual_start();
+    robot_init(&robot);
+    robot_start(&robot);
 
-    /* Read direction and omega that the robot module passes to the
-       motor stub module. */
+    testdata_p = test_automatic_testdata;
+
+    /* Tick the robot to enter cutting state. */
+    robot_tick(&robot);
+    robot_tick(&robot);
+    robot_tick(&robot);
+
+    /* The actual verification of robot behaviour is done in the
+       stubs. */
     i = 0;
-    data_p = &test_automatic_testdata[0];
 
-    while (data_p->energy_level != -1) {
-        /* Left wheel. */
-        BTASSERT(chan_read(&motor_queue, &omega, sizeof(omega)) == sizeof(omega));
-        BTASSERT(float_close_to_zero(omega - data_p->left_wheel_omega), 
-                 "[%d]: %f %f",
-                 i,
-                 omega,
-                 data_p->left_wheel_omega);
+    while (testdata_p->input.energy_level != -1) {
+        std_printk(STD_LOG_NOTICE, FSTR("id: %d"), testdata_p->id);
 
-        /* Right wheel. */
-        BTASSERT(chan_read(&motor_queue, &omega, sizeof(omega)) == sizeof(omega));
-        BTASSERT(float_close_to_zero(omega - data_p->right_wheel_omega), 
-                 "[%d]: %f %f",
-                 i,
-                 omega,
-                 data_p->right_wheel_omega);
+        /* Prepare the stubs. */
+        motor_stub_omega_next = 0;
+        motor_stub_current_next = 0;
+        perimeter_wire_rx_stub_signal_next = 0;
+        power_stub_energy_level_next = 0;
+
+        motor_stub_current[0] = testdata_p->input.motor_current;
+        perimeter_wire_rx_stub_signal[0] = testdata_p->input.perimeter_signal;
+        power_stub_energy_level[0] = testdata_p->input.energy_level;
+
+        /* Tick the robot. */
+        robot_tick(&robot);
+
+        if (testdata_p->output.compare == 1) {
+            /* Compare output to reference data. */
+            BTASSERT(motor_stub_omega_next == 2, "next = %d", motor_stub_omega_next);
+            omega = motor_stub_omega[0];
+            BTASSERT(float_close_to_zero(omega - testdata_p->output.left_wheel_omega), 
+                     "[%d]: %f %f",
+                     i,
+                     omega,
+                     testdata_p->output.left_wheel_omega);
+            omega = motor_stub_omega[1];
+            BTASSERT(float_close_to_zero(omega - testdata_p->output.right_wheel_omega), 
+                     "[%d]: %f %f",
+                     i,
+                     omega,
+                     testdata_p->output.right_wheel_omega);
+        }
 
         i++;
-        data_p++;
+        testdata_p++;
     }
 
     return (0);
