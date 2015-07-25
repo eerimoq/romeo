@@ -55,7 +55,7 @@ Folder structure:
        +-- LICENSE
        +-- Makefile
        +-- README.md
-       +-- romeo/                    - romeo package
+       +-- romeo/                        - romeo package
            +-- src/                      - source code
            +-- tst/                      - test suites
            +-- tools/                    - various tools
