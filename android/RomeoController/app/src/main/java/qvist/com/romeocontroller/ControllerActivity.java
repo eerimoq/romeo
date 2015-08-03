@@ -9,6 +9,8 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.util.Log;
 import android.widget.SeekBar;
 
@@ -30,27 +32,14 @@ public class ControllerActivity extends Activity {
 
     // Used when logging
     private static final String TAG = "ControllerActivity";
-
-    /**
-     * The flags to pass to {@link SystemUiHider#getInstance}.
-     */
-    private static final int HIDER_FLAGS = 0;
-
-    /**
-     * The instance of the {@link SystemUiHider} for this activity.
-     */
-    private SystemUiHider mSystemUiHider;
-
     private static final UUID ROMEO_CONTROLLER_UUID_INSECURE =
             UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
+    final protected static char[] hexArray = "0123456789ABCDEF".toCharArray();
 
     private static ControllerThread mControllerThread;
-
     private BluetoothAdapter mBluetoothAdapter;
-
     private int mSpeed = 0;
     private int mAngularVelocity = 0;
-
     private SeekBar mAngularVelocitySeekbar;
     private SeekBar mSpeedSeekbar;
 
@@ -102,11 +91,9 @@ public class ControllerActivity extends Activity {
                 mSpeedSeekbar.setProgress(50);
             }
         });
-    }
 
-    @Override
-    protected void onStart() {
-        super.onStart();
+        mAngularVelocitySeekbar.setEnabled(false);
+        mSpeedSeekbar.setEnabled(false);
 
         // Get the bluetooth device mac address from the intent passed to startActivity()
         Intent intent = getIntent();
@@ -122,7 +109,23 @@ public class ControllerActivity extends Activity {
         mControllerThread.start();
     }
 
-    final protected static char[] hexArray = "0123456789ABCDEF".toCharArray();
+    @Override
+    protected void onDestroy() {
+        mControllerThread.kill();
+        super.onDestroy();
+    }
+
+    private final Handler mHandler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+                case Constants.MESSAGE_CONNECTED_TO_DEVICE:
+                    mAngularVelocitySeekbar.setEnabled(true);
+                    mSpeedSeekbar.setEnabled(true);
+                    break;
+            }
+        }
+    };
 
     public static String bytesToHex(byte[] bytes) {
         char[] hexChars = new char[bytes.length * 2];
@@ -151,6 +154,7 @@ public class ControllerActivity extends Activity {
         private ReaderThread mReaderThread;
         private PingerThread mPingerThread;
         private String mMovementMessage = null;
+        private boolean mRunning = true;
 
         public ControllerThread(BluetoothDevice device) {
             mDevice = device;
@@ -193,8 +197,12 @@ public class ControllerActivity extends Activity {
             executeCommand("robot/parameters/watchdog/enabled 0");
             executeCommand("robot/start");
 
+            // Notify the Activity of successful connection
+            Message msg = mHandler.obtainMessage(Constants.MESSAGE_CONNECTED_TO_DEVICE);
+            mHandler.sendMessage(msg);
+
             // Handle one command at a time
-            while (true) {
+            while (mRunning) {
                 try {
                     // Sleep robot tick period time
                     sleep(100);
@@ -208,6 +216,16 @@ public class ControllerActivity extends Activity {
                     executeCommand(message);
                 }
             }
+
+            //mPingerThread.kill();
+            try {
+                mSocket.close();
+            } catch (IOException e) {
+            }
+        }
+
+        public void kill() {
+            mRunning = false;
         }
 
         public synchronized void setMovement(int speed, int angularVelocity) {
@@ -261,6 +279,8 @@ public class ControllerActivity extends Activity {
 
         private class PingerThread extends Thread {
 
+            private boolean mRunning = true;
+
             public PingerThread() {
             }
 
@@ -268,7 +288,7 @@ public class ControllerActivity extends Activity {
                 Log.d(TAG, "Pinger thread started.");
 
                 // send ping periodically
-                while (true) {
+                while (mRunning) {
                     try {
                         sleep(1000);
                     } catch (InterruptedException e) {
@@ -278,6 +298,11 @@ public class ControllerActivity extends Activity {
                     write(PING_MESSAGE);
                 }
             }
+
+            public void kill() {
+                mRunning = false;
+            }
+
         }
 
         private class ReaderThread extends Thread {
@@ -313,8 +338,8 @@ public class ControllerActivity extends Activity {
                             }
                         }
                     } catch (IOException e) {
-                        Log.e(TAG, "Reading exception. Continuing.", e);
-                        continue;
+                        Log.e(TAG, "Reading exception. Breaking.", e);
+                        break;
                     }
                 }
             }

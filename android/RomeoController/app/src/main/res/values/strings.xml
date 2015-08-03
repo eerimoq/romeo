@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">RomeoController</string>
 
-    <string name="devices_list_heading">Select a device to connect to</string>
+    <string name="devices_list_heading">Select a paired device to connect to. If the device is missing, use the system bluetooth configuration to pair the device.</string>
     <string name="action_settings">Settings</string>
     <string name="button_scan_for_devices">Scan for bluetooth devices</string>
 

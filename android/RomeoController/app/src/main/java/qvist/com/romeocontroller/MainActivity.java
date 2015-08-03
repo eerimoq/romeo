@@ -41,6 +41,8 @@ public class MainActivity extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        Log.d(TAG, "onCreate");
+
         // Get the local Bluetooth adapter
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 
@@ -132,6 +134,9 @@ public class MainActivity extends ActionBarActivity {
     private void populateDevicesList() {
         // Get a set of currently paired devices
         Set<BluetoothDevice> mPairedDevices = mBluetoothAdapter.getBondedDevices();
+
+        mDevicesListMacAddresses.clear();
+        mDevicesListAdapter.clear();
 
         for (BluetoothDevice device : mPairedDevices) {
             mDevicesListMacAddresses.add(device.getAddress());

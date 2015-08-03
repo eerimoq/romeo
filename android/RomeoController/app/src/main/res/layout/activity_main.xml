@@ -22,11 +22,4 @@
         android:layout_below="@id/devices_list_heading"
         android:stackFromBottom="true"/>
 
-    <Button
-        android:id="@+id/button_scan_for_devices"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/devices_list"
-        android:onClick="onScanForDevices"
-        android:text="@string/button_scan_for_devices"/>
 </RelativeLayout>
