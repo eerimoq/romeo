@@ -15,6 +15,8 @@ convert schematics-1.jpg -crop 1654x1240+0+200 robot_schematics.jpg
 convert schematics-2.jpg -crop 1654x1000+0+210 base_station_schematics.jpg
 convert schematics-3.jpg -crop 1654x1000+0+230 connectivity.jpg
 convert schematics-4.jpg -crop 1654x700+0+350 controller_smartphone_app.jpg
+convert schematics-5.jpg -crop 1654x850+0+300 bluetooth_configration_setup.jpg
+convert schematics-6.jpg -crop 1654x750+0+400 hc_05_module.jpg
 
 rm -f schematics.pdf
 rm schematics-*.jpg
