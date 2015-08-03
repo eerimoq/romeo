@@ -1,0 +1,7 @@
+.gradle/
+.idea/
+RomeoController.iml
+app/app.iml
+app/build/
+build/
+local.properties
