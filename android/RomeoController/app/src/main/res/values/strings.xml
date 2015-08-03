@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">RomeoController</string>
+
+    <string name="devices_list_heading">Select a device to connect to</string>
+    <string name="action_settings">Settings</string>
+    <string name="button_scan_for_devices">Scan for bluetooth devices</string>
+
+    <string name="title_activity_controller">ControllerActivity</string>
+    <string name="dummy_button">Dummy Button</string>
+    <string name="dummy_content">DUMMY\nCONTENT</string>
+</resources>
