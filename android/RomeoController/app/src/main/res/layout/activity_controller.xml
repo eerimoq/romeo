@@ -44,12 +44,13 @@
                 </LinearLayout>
 
                 <SeekBar
-                android:id="@+id/angular_velocity_seekbar"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="70"
-                android:layout_gravity="center"
-                android:progress="50"/>
+                    android:id="@+id/angular_velocity_seekbar"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="70"
+                    android:layout_gravity="center"
+                    android:progressDrawable="@android:color/transparent"
+                    android:progress="50"/>
 
                 <LinearLayout
                     android:layout_width="0dp"
@@ -100,14 +101,16 @@
                     android:layout_weight="30"
                     android:orientation="vertical">
                 </LinearLayout>
-            <SeekBar
-                android:id="@+id/speed_seekbar"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:rotation="270"
-                android:layout_weight="200"
-                android:progress="50"/>
+
+                <SeekBar
+                    android:id="@+id/speed_seekbar"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:rotation="270"
+                    android:layout_weight="200"
+                    android:progressDrawable="@android:color/transparent"
+                    android:progress="50"/>
 
                 <LinearLayout
                     android:layout_width="0dp"

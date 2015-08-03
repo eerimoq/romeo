@@ -7,10 +7,12 @@ import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.os.Vibrator;
 import android.util.Log;
 import android.widget.SeekBar;
 
@@ -35,6 +37,7 @@ public class ControllerActivity extends Activity {
     private static final UUID ROMEO_CONTROLLER_UUID_INSECURE =
             UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
     final protected static char[] hexArray = "0123456789ABCDEF".toCharArray();
+    private static final int VIBRATE_TIME_MS = 5;
 
     private static ControllerThread mControllerThread;
     private BluetoothAdapter mBluetoothAdapter;
@@ -42,6 +45,7 @@ public class ControllerActivity extends Activity {
     private int mAngularVelocity = 0;
     private SeekBar mAngularVelocitySeekbar;
     private SeekBar mSpeedSeekbar;
+    private Vibrator mVibrator;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,6 +53,8 @@ public class ControllerActivity extends Activity {
 
         setContentView(R.layout.activity_controller);
         getActionBar().hide();
+
+        mVibrator = (Vibrator)this.getSystemService(Context.VIBRATOR_SERVICE);
 
         mAngularVelocitySeekbar = (SeekBar)findViewById(R.id.angular_velocity_seekbar);
         mAngularVelocitySeekbar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
@@ -61,6 +67,7 @@ public class ControllerActivity extends Activity {
 
             @Override
             public void onStartTrackingTouch(SeekBar seekBar) {
+                mVibrator.vibrate(VIBRATE_TIME_MS);
             }
 
             @Override
@@ -68,6 +75,7 @@ public class ControllerActivity extends Activity {
                 mAngularVelocity = 0;
                 mControllerThread.setMovement(mSpeed, mAngularVelocity);
                 mAngularVelocitySeekbar.setProgress(50);
+                mVibrator.vibrate(VIBRATE_TIME_MS);
             }
         });
 
@@ -82,6 +90,7 @@ public class ControllerActivity extends Activity {
 
             @Override
             public void onStartTrackingTouch(SeekBar seekBar) {
+                mVibrator.vibrate(VIBRATE_TIME_MS);
             }
 
             @Override
@@ -89,6 +98,7 @@ public class ControllerActivity extends Activity {
                 mSpeed = 0;
                 mControllerThread.setMovement(mSpeed, mAngularVelocity);
                 mSpeedSeekbar.setProgress(50);
+                mVibrator.vibrate(VIBRATE_TIME_MS);
             }
         });
 
