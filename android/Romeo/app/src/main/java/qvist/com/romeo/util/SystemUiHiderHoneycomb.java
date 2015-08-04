@@ -1,4 +1,4 @@
-package qvist.com.romeocontroller.util;
+package qvist.com.romeo.util;
 
 import android.annotation.TargetApi;
 import android.app.Activity;

@@ -1,7 +1,7 @@
-package qvist.com.romeocontroller;
+package qvist.com.romeo;
 
-import qvist.com.romeocontroller.util.Constants;
-import qvist.com.romeocontroller.util.SystemUiHider;
+import qvist.com.romeo.util.Constants;
+import qvist.com.romeo.util.SystemUiHider;
 
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;

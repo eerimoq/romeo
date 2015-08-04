@@ -1,4 +1,4 @@
-package qvist.com.romeocontroller.util;
+package qvist.com.romeo.util;
 
 /**
  * Created by erik on 2015-08-03.

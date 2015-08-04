@@ -1,6 +1,6 @@
 .gradle/
 .idea/
-RomeoController.iml
+Romeo.iml
 app/app.iml
 app/app-release.apk
 app/build/

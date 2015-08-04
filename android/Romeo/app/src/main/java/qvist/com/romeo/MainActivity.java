@@ -1,4 +1,4 @@
-package qvist.com.romeocontroller;
+package qvist.com.romeo;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -19,7 +19,7 @@ import android.widget.Toast;
 import java.util.ArrayList;
 import java.util.Set;
 
-import qvist.com.romeocontroller.util.Constants;
+import qvist.com.romeo.util.Constants;
 
 public class MainActivity extends ActionBarActivity {
 

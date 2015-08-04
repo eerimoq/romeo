@@ -1,4 +1,4 @@
-package qvist.com.romeocontroller.util;
+package qvist.com.romeo.util;
 
 import android.app.Activity;
 import android.os.Build;
