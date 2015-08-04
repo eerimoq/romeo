@@ -121,6 +121,7 @@ public class ControllerActivity extends Activity {
 
     @Override
     protected void onDestroy() {
+        Log.d(TAG, "onDestroy");
         mControllerThread.kill();
         super.onDestroy();
     }
