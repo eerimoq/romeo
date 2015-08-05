@@ -21,10 +21,10 @@ manually control the robot.
 
 CONTROLLER ANDROID APP
 -------------------------
-The controller Android application can control the speed and
-angular velocity of the robot. The application connects to the robot
-using the same bluetooth interface as the base station, so only one of
-the two can be connected at a time.
+The controller Android application can set the speed and angular
+velocity of the robot. The application connects to the robot using the
+same bluetooth interface as the base station, that means only one of the two
+can be connected at a time.
 
 <div align="center"><img src="doc/controller_app_android.png" width="400"></div>
 
