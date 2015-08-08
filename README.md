@@ -157,6 +157,3 @@ http://www.ebay.com/itm/New-L298N-DC-Stepper-Motor-Driver-Module-Dual-H-Bridge-C
 
 ### Current sensor
 http://www.ebay.com/itm/New-design-30A-range-Current-Sensor-Module-ACS712-Module-Arduino-module-/310506962976?pt=LH_DefaultDomain_0&hash=item484ba84020
-
-### Chassi
-http://www.ikea.com/se/sv/catalog/products/80131672/
