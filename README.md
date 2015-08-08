@@ -31,12 +31,34 @@ can be connected at a time.
 HARDWARE
 ========
 
-ROBOT SCHEMATICS
-----------------
+ROBOT
+-----
+
+### MECHANICAL DRAWING
+
+A drawing of the planned mechanical design of the robot.
+
+![](doc/robot_top_left.jpg)
+
+### ELECTRONICS SCHEMATIC
+
+VCC and ground are not shown in the schematic.
+
 ![](doc/robot_schematics.jpg)
 
-BASE STATION SCHEMATICS
------------------------
+BASE STATION
+------------
+
+### MECHANICAL DRAWING
+
+A drawing of the planned mechanical design of the base station.
+
+![](doc/base_station_top_left.jpg)
+
+### ELECTRONICS SCHEMATIC
+
+VCC and ground are not shown in the schematic.
+
 ![](doc/base_station_schematics.jpg)
 
 SOFTWARE
