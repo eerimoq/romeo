@@ -38,8 +38,8 @@ int power_async_convert(struct power_t *power_p)
 {
     /* Start asynchronous convertion. */
     return (adc_async_convert(&power_p->adc,
-                              power_p->ongoing.sample,
-                              membersof(power_p->ongoing.sample)));
+                              power_p->ongoing.samples,
+                              membersof(power_p->ongoing.samples)));
 }
 
 int power_async_wait(struct power_t *power_p)
@@ -57,11 +57,11 @@ int power_update(struct power_t *power_p)
     int sample;
 
     /* Save latest sample. */
-    memcpy(power_p->updated.sample,
-           power_p->ongoing.sample,
-           sizeof(power_p->ongoing.sample));
+    memcpy(power_p->updated.samples,
+           power_p->ongoing.samples,
+           sizeof(power_p->updated.samples));
 
-    sample = power_p->updated.sample[0];
+    sample = power_p->updated.samples[0];
 
     if (sample > 1000) {
         sample = 1000;

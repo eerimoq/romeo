@@ -30,10 +30,10 @@
 struct power_t {
     struct adc_driver_t adc;
     struct {
-        int sample[1];
+        int samples[1];
     } ongoing;
     struct {
-        int sample[1];
+        int samples[1];
         int stored_energy_level;
     } updated;
 };

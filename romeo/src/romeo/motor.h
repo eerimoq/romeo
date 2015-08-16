@@ -36,7 +36,13 @@ struct motor_t {
     struct pwm_driver_t enable;
     struct {
         struct adc_driver_t adc;
-        int sample;
+        struct {
+            int samples[1];
+        } ongoing;
+        struct {
+            int samples[1];
+            int value;
+        } updated;
     } current;
 };
 
@@ -58,13 +64,6 @@ int motor_init(struct motor_t *motor_p,
                struct pin_device_t *current_dev_p);
 
 /**
- * Start motor object.
- * @param[in] motor_p Initialized motor object.
- * @return zero(0) or negative error code
- */
-int motor_start(struct motor_t *motor_p);
-
-/**
  * Set motor rotation direction.
  * @param[in] motor_p Initialized motor object.
  * @param[in] direction MOTOR_DIRECTION_CW or MOTOR_DIRECTION_CCW
@@ -83,7 +82,29 @@ int motor_set_omega(struct motor_t *motor_p,
                     float omega);
 
 /**
- * Set motor rotation speed.
+ * Start an asynchronous convertion of the motor current consumption. Call
+ * motor_async_wait() to save the converted value in this object.
+ * @param[in] motor_p Initialized motor object.
+ * @return zero(0) or negative error code
+ */
+int motor_async_convert(struct motor_t *motor_p);
+
+/**
+ * Wait for the asynchronous convertion to finish.
+ * @param[in] motor_p Initialized motor object.
+ * @return zero(0) or negative error code
+ */
+int motor_async_wait(struct motor_t *motor_p);
+
+/**
+ * Update the object from the latest coverted samples.
+ * @param[in] motor_p Initialized motor object.
+ * @return zero(0) or negative error code.
+ */
+int motor_update(struct motor_t *motor_p);
+
+/**
+ * Get motor current consumption.
  * @param[in] motor_p Initialized motor object.
  * @return Motor current consumption.
  */

@@ -185,6 +185,8 @@ int robot_init(struct robot_t *robot_p)
     /* Start convertion of sensor data. */
     power_async_convert(&robot_p->power);
     perimeter_wire_rx_async_convert(&robot_p->perimeter);
+    motor_async_convert(&robot_p->left_motor);
+    motor_async_convert(&robot_p->right_motor);
 
     return (0);
 }
@@ -226,9 +228,16 @@ int robot_tick(struct robot_t *robot_p)
     perimeter_wire_rx_async_wait(&robot_p->perimeter);
     perimeter_wire_rx_update(&robot_p->perimeter);
 
+    motor_async_wait(&robot_p->left_motor);
+    motor_async_wait(&robot_p->right_motor);
+    motor_update(&robot_p->left_motor);
+    motor_update(&robot_p->right_motor);
+
     /* Start next convertion of sensor data. */
     power_async_convert(&robot_p->power);
     perimeter_wire_rx_async_convert(&robot_p->perimeter);
+    motor_async_convert(&robot_p->left_motor);
+    motor_async_convert(&robot_p->right_motor);
 
     /* Execute robot state machine. */
     if (robot_p->state.current == robot_p->state.next) {

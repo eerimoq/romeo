@@ -259,9 +259,6 @@ int robot_state_starting(struct robot_t *robot_p)
 {
     FS_COUNTER_INC(robot_state_starting, 1);
 
-    motor_start(&robot_p->left_motor);
-    motor_start(&robot_p->right_motor);
-
     robot_p->state.next = ROBOT_STATE_CUTTING;
 
     return (0);

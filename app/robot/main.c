@@ -139,11 +139,15 @@ int robot_cmd_status(int argc,
 		     "execution time = %d ticks\r\n"
 		     "perimeter signal level = %f\r\n"
 		     "energy level = %d%%\r\n"
+		     "left motor current = %f\r\n"
+		     "right motor current = %f\r\n"
                      "watchdog count = %d\r\n"),
 		(int)T2ST(&time),
 		robot.debug.tick_time,
 		perimeter_wire_rx_get_signal(&robot.perimeter),
 		power_get_stored_energy_level(&robot.power),
+		motor_get_current(&robot.left_motor),
+		motor_get_current(&robot.right_motor),
                 robot.watchdog.count);
 
     if (robot.mode == ROBOT_MODE_MANUAL) {

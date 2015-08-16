@@ -45,14 +45,40 @@ int motor_init(struct motor_t *motor_p,
     return (0);
 }
 
-int motor_start(struct motor_t *motor_p)
+int motor_async_convert(struct motor_t *motor_p)
 {
     /* Start first asynchronous convertion. */
-    adc_async_convert(&motor_p->current.adc,
-                      &motor_p->current.sample,
-                      1);
+    return (adc_async_convert(&motor_p->current.adc,
+                              motor_p->current.ongoing.samples,
+                              membersof(motor_p->current.ongoing.samples)));
+}
+
+int motor_async_wait(struct motor_t *motor_p)
+{
+    /* Wait for ongoing asynchronous convertion to finish. */
+    if (!adc_async_wait(&motor_p->current.adc)) {
+        std_printk(STD_LOG_WARNING, FSTR("motor convertion has not finished"));
+    }
 
     return (0);
+}
+
+int motor_update(struct motor_t *motor_p)
+{
+    /* Save latest sample. */
+    memcpy(motor_p->current.updated.samples,
+           motor_p->current.ongoing.samples,
+           sizeof(motor_p->current.updated.samples));
+
+    /* Copy sample to local variable. */
+    motor_p->current.updated.value = motor_p->current.updated.samples[0];
+
+    return (0);
+}
+
+float motor_get_current(struct motor_t *motor_p)
+{
+    return (motor_p->current.updated.value);
 }
 
 /**
@@ -101,24 +127,4 @@ int motor_set_omega(struct motor_t *motor_p,
                duty);
 
     return (0);
-}
-
-float motor_get_current(struct motor_t *motor_p)
-{
-    int sample;
-
-    /* Wait for ongoing asynchronous convertion to finish. */
-    if (!adc_async_wait(&motor_p->current.adc)) {
-        std_printk(STD_LOG_WARNING, FSTR("motor convertion has not finished"));
-    }
-
-    /* Copy sample to local variable. */
-    sample = motor_p->current.sample;
-
-    /* Start next asynchronous convertion. */
-    adc_async_convert(&motor_p->current.adc,
-                      &motor_p->current.sample,
-                      1);
-
-    return (sample);
 }
