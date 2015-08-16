@@ -182,6 +182,9 @@ int robot_init(struct robot_t *robot_p)
     watchdog_init(&robot_p->watchdog,
 		  WATCHDOG_TIMEOUT_TICKS);
 
+    /* Start convertion of sensor data. */
+    power_async_convert(&robot_p->power);
+
     return (0);
 }
 
@@ -214,6 +217,13 @@ int robot_tick(struct robot_t *robot_p)
 	    robot_p->state.next = ROBOT_STATE_IDLE;
 	}
     }
+
+    /* Read sensor data and update the sensor objects. */
+    power_async_wait(&robot_p->power);
+    power_update(&robot_p->power);
+
+    /* Start next convertion of sensor data. */
+    power_async_convert(&robot_p->power);
 
     /* Execute robot state machine. */
     if (robot_p->state.current == robot_p->state.next) {

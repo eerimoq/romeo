@@ -143,7 +143,7 @@ int robot_cmd_status(int argc,
 		(int)T2ST(&time),
 		robot.debug.tick_time,
 		perimeter_wire_rx_get_cached_signal(&robot.perimeter),
-		power_get_cached_stored_energy_level(&robot.power),
+		power_get_stored_energy_level(&robot.power),
                 robot.watchdog.count);
 
     if (robot.mode == ROBOT_MODE_MANUAL) {

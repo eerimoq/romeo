@@ -34,39 +34,45 @@ int power_init(struct power_t *power_p,
     return (0);
 }
 
-int power_start(struct power_t *power_p)
+int power_async_convert(struct power_t *power_p)
 {
-    /* Start first asynchronous convertion. */
-    adc_async_convert(&power_p->adc, &power_p->sample, 1);
+    /* Start asynchronous convertion. */
+    return (adc_async_convert(&power_p->adc,
+                              power_p->ongoing.sample,
+                              sizeof(power_p->ongoing.sample)));
+}
+
+int power_async_wait(struct power_t *power_p)
+{
+    /* Wait for ongoing asynchronous convertion to finish. */
+    if (!adc_async_wait(&power_p->adc)) {
+        std_printk(STD_LOG_WARNING, FSTR("power convertion has not finished"));
+    }
+
+    return (0);
+}
+
+int power_update(struct power_t *power_p)
+{
+    int sample;
+
+    /* Save latest sample. */
+    memcpy(power_p->updated.sample,
+           power_p->ongoing.sample,
+           sizeof(power_p->ongoing.sample));
+
+    sample = power_p->updated.sample[0];
+
+    if (sample > 1000) {
+        sample = 1000;
+    }
+
+    power_p->updated.stored_energy_level = (sample / 10);
 
     return (0);
 }
 
 int power_get_stored_energy_level(struct power_t *power_p)
 {
-    int sample;
-
-    /* Wait for ongoing asynchronous convertion to finish. */
-    if (!adc_async_wait(&power_p->adc)) {
-        std_printk(STD_LOG_WARNING, FSTR("power convertion has not finished"));
-    }
-
-    /* Copy sample to local variable. */
-    sample = power_p->sample;
-
-    /* Start next asynchronous convertion. */
-    adc_async_convert(&power_p->adc, &power_p->sample, 1);
-
-    if (sample > 1000) {
-        sample = 1000;
-    }
-
-    power_p->energy_level = (sample / 10);
-
-    return (power_p->energy_level);
-}
-
-int power_get_cached_stored_energy_level(struct power_t *power_p)
-{
-    return (power_p->energy_level);
+    return (power_p->updated.stored_energy_level);
 }

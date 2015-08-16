@@ -252,8 +252,6 @@ int robot_state_idle(struct robot_t *robot_p)
     motor_set_omega(&robot_p->left_motor, left_wheel_omega);
     motor_set_omega(&robot_p->right_motor, right_wheel_omega);
 
-    power_get_stored_energy_level(&robot_p->power);
-
     return (0);
 }
 
@@ -263,8 +261,6 @@ int robot_state_starting(struct robot_t *robot_p)
 
     /* Start sampling the perimeter wire signal. */
     perimeter_wire_rx_start(&robot_p->perimeter);
-
-    power_start(&robot_p->power);
 
     motor_start(&robot_p->left_motor);
     motor_start(&robot_p->right_motor);
