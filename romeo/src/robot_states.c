@@ -23,9 +23,6 @@
 #include "robot.h"
 #include <math.h>
 
-#define SIGNAL_THRESHOLD_MAX 0.5f
-#define SIGNAL_THRESHOLD_MIN -0.5f
-
 #define CONTROL_ROTATE_THRESHOLD 1.0f
 
 FS_COUNTER_DEFINE(robot_state_idle);
@@ -53,7 +50,7 @@ static int is_time_to_search_for_base_station(struct robot_t *robot_p)
 
 static int is_inside_perimeter_wire(float signal)
 {
-    return (signal < 0.0f);
+    return (signal >= 3.0f);
 }
 
 static int is_stuck(struct robot_t *robot_p)

@@ -20,19 +20,21 @@
 
 #include "simba.h"
 #include "romeo.h"
+#include <limits.h>
 
-#define FLT_MIN -1000000.0f
-#define FLT_MAX 1000000.0f
-
-#define COEFFICIENTS_MAX 24
+#define COEFFICIENTS_MAX 48
+#define NUMBER_OF_NON_ZERO_COEFFICIENTS 32
 #define INPUT_MAX (2 * PERIMETER_WIRE_RX_SAMPLES_MAX)
 #define OUTPUT_MAX (INPUT_MAX - COEFFICIENTS_MAX + 1)
 
 /* The coefficients used as a reference in the matched filter. */
-static float coefficients[COEFFICIENTS_MAX] = {
-    1.0f, 0.0f, -1.0f, -0.0f, 1.0f, -1.0f, 1.0f, -1.0f,
-    -0.0f, 1.0f, -1.0f, 1.0f, 0.0f, -1.0f, -0.0f, 1.0f,
-    -1.0f, -0.0f, 1.0f, -1.0f, -0.0f, 1.0f, 0.0f, -1.0f
+static int coefficients[COEFFICIENTS_MAX] = {
+    1, 1, 0, 0, -1, -1, -0, -0,
+    1, 1, -1, -1, 1, 1, -1, -1,
+    -0, -0, 1, 1, -1, -1, 1, 1,
+    0, 0, -1, -1, -0, -0, 1, 1,
+    -1, -1, 0, 0, 1, 1, -1, -1,
+    -0, -0, 1, 1, 0, 0, -1, -1
 };
 
 int perimeter_wire_rx_init(struct perimeter_wire_rx_t *perimeter_wire_p,
@@ -45,7 +47,7 @@ int perimeter_wire_rx_init(struct perimeter_wire_rx_t *perimeter_wire_p,
              dev_p,
              pin_dev_p,
              ADC_REFERENCE_VCC,
-             9620);
+             2 * 9615);
 
     return (0);
 }
@@ -71,9 +73,11 @@ int perimeter_wire_rx_async_wait(struct perimeter_wire_rx_t *perimeter_wire_p)
 int perimeter_wire_rx_update(struct perimeter_wire_rx_t *perimeter_wire_p)
 {
     int i, i_mod;
-    float input[INPUT_MAX];
-    float output[OUTPUT_MAX];
-    float min, max, signal;
+    /* Input and output buffers holds values in the range -512..511. */
+    int input[INPUT_MAX];
+    int output[OUTPUT_MAX];
+    int min, max;
+    float signal;
 
     /* Save latest sample. */
     memcpy(perimeter_wire_p->updated.samples,
@@ -83,18 +87,18 @@ int perimeter_wire_rx_update(struct perimeter_wire_rx_t *perimeter_wire_p)
     /* Copy samples to filter input buffer. */
     for (i = 0; i < INPUT_MAX; i++) {
         i_mod = (i % PERIMETER_WIRE_RX_SAMPLES_MAX);
-        input[i] = (float)(perimeter_wire_p->updated.samples[i_mod] - 512) / 512.0f;
+        input[i] = (perimeter_wire_p->updated.samples[i_mod] - 512);
     }
 
-    filter_firf(input,
-                membersof(input),
-                coefficients,
-                membersof(coefficients),
-                output);
+    filter_fir(input,
+               membersof(input),
+               coefficients,
+               membersof(coefficients),
+               output);
 
     /* Get min and max values. */
-    min = FLT_MAX;
-    max = FLT_MIN;
+    min = INT_MAX;
+    max = INT_MIN;
 
     for (i = 0; i < OUTPUT_MAX; i++) {
         if (output[i] > max) {
@@ -111,6 +115,8 @@ int perimeter_wire_rx_update(struct perimeter_wire_rx_t *perimeter_wire_p)
     } else {
         signal = min;
     }
+
+    signal /= NUMBER_OF_NON_ZERO_COEFFICIENTS;
 
     /* Low pass filtering of the signal. */
     signal = (4.0f * perimeter_wire_p->updated.signal + 1.0f * signal) / 5.0f;

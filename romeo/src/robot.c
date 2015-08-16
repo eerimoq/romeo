@@ -183,8 +183,8 @@ int robot_init(struct robot_t *robot_p)
 		  WATCHDOG_TIMEOUT_TICKS);
 
     /* Start convertion of sensor data. */
-    power_async_convert(&robot_p->power);
     perimeter_wire_rx_async_convert(&robot_p->perimeter);
+    power_async_convert(&robot_p->power);
     motor_async_convert(&robot_p->left_motor);
     motor_async_convert(&robot_p->right_motor);
 
@@ -234,8 +234,8 @@ int robot_tick(struct robot_t *robot_p)
     motor_update(&robot_p->right_motor);
 
     /* Start next convertion of sensor data. */
-    power_async_convert(&robot_p->power);
     perimeter_wire_rx_async_convert(&robot_p->perimeter);
+    power_async_convert(&robot_p->power);
     motor_async_convert(&robot_p->left_motor);
     motor_async_convert(&robot_p->right_motor);
 

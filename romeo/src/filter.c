@@ -50,7 +50,7 @@ int filter_fir(const int *input_p,
                int *output_p)
 {
     size_t i, n;
-    int sum;
+    long sum;
     size_t number_of_convolutions =
         (number_of_samples - number_of_coefficients + 1);
 

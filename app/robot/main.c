@@ -28,6 +28,7 @@ FS_COMMAND_DEFINE("/robot/stop", robot_cmd_stop);
 FS_COMMAND_DEFINE("/robot/status", robot_cmd_status);
 FS_COMMAND_DEFINE("/robot/mode/set", robot_cmd_mode_set);
 FS_COMMAND_DEFINE("/robot/manual/movement/set", robot_cmd_manual_movement_set);
+FS_COMMAND_DEFINE("/robot/sensors", robot_cmd_sensors);
 
 static struct uart_driver_t uart;
 static char qinbuf[32];
@@ -199,6 +200,53 @@ int robot_cmd_manual_movement_set(int argc,
 
     robot.manual.speed = 0.1f * (((float)speed) / 100.0f);
     robot.manual.omega = 0.4f * (((float)omega) / 100.0f);
+
+    return (0);
+}
+
+int robot_cmd_sensors(int argc,
+                      const char *argv[],
+                      void *out_p,
+                      void *in_p)
+{
+    UNUSED(in_p);
+
+    int i;
+
+    std_fprintf(out_p, FSTR("- Sensor samples -\r\n"));
+    std_fprintf(out_p, FSTR("\r\nperimeter wire:\r\n"
+                            "  signal = %f\r\n"),
+                robot.perimeter.updated.signal);
+
+    for (i = 0; i < membersof(robot.perimeter.updated.samples); i++) {
+        std_fprintf(out_p, FSTR("  [%2d]: %4d\r\n"),
+                    i,
+                    robot.perimeter.updated.samples[i]);
+    }
+
+    std_fprintf(out_p, FSTR("\r\nleft motor:\r\n"));
+
+    for (i = 0; i < membersof(robot.left_motor.current.updated.samples); i++) {
+        std_fprintf(out_p, FSTR("  [%2d]: %4d\r\n"),
+                    i,
+                    robot.left_motor.current.updated.samples[i]);
+    }
+
+    std_fprintf(out_p, FSTR("\r\nright motor:\r\n"));
+
+    for (i = 0; i < membersof(robot.right_motor.current.updated.samples); i++) {
+        std_fprintf(out_p, FSTR("  [%2d]: %4d\r\n"),
+                    i,
+                    robot.right_motor.current.updated.samples[i]);
+    }
+
+    std_fprintf(out_p, FSTR("\r\npower level:\r\n"));
+
+    for (i = 0; i < membersof(robot.power.updated.samples); i++) {
+        std_fprintf(out_p, FSTR("  [%2d]: %4d\r\n"),
+                    i,
+                    robot.power.updated.samples[i]);
+    }
 
     return (0);
 }
