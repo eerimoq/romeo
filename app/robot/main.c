@@ -40,7 +40,7 @@ static struct timer_t ticker;
 static struct thrd_t *self_p;
 static struct emtp_t emtp;
 
-static char shell_stack[350];
+static char shell_stack[456];
 
 /* Modes as strings. */
 static FAR const char manual_string[] = "manual";

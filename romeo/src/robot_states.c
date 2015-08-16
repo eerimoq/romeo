@@ -177,12 +177,6 @@ static int cutting_automatic(struct robot_t *robot_p,
 
     signal = perimeter_wire_rx_get_signal(&robot_p->perimeter);
 
-    /* Check versus thresholds. */
-    if ((signal < SIGNAL_THRESHOLD_MAX) && (signal > SIGNAL_THRESHOLD_MIN)) {
-        FS_COUNTER_INC(robot_perimeter_no_signal, 1);
-        return (0);
-    }
-
     /* Search for base station if battery voltage is low. */
     if (is_time_to_search_for_base_station(robot_p)) {
         robot_p->state.next = ROBOT_STATE_SEARCHING_FOR_BASE_STATION;
@@ -231,6 +225,7 @@ static int cutting_automatic(struct robot_t *robot_p,
                     cutting_p->state = CUTTING_STATE_FORWARD;
                 } else {
                     /* Stop the robot if it is not inside the perimerter wire. */
+                    *omega_p = 0.0f;
                     robot_p->state.next = ROBOT_STATE_IDLE;
                 }
             }
