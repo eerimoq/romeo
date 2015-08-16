@@ -43,18 +43,16 @@ int base_station_start(struct base_station_t *base_station_p)
 
 int base_station_stop(struct base_station_t *base_station_p)
 {
-    perimeter_wire_tx_stop(&base_station_p->perimeter);
+    //perimeter_wire_tx_stop(&base_station_p->perimeter);
 
     return (0);
 }
 
 int base_station_tick(struct base_station_t *base_station_p)
 {
-    float current;
-
     FS_COUNTER_INC(base_station_tick, 1);
 
-    current = perimeter_wire_tx_get_current(&base_station_p->perimeter);
+    perimeter_wire_tx_get_current(&base_station_p->perimeter);
 
     return (0);
 }

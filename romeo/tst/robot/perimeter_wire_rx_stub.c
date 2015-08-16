@@ -32,7 +32,17 @@ int perimeter_wire_rx_init(struct perimeter_wire_rx_t *perimeter_wire_p,
     return (0);
 }
 
-int perimeter_wire_rx_start(struct perimeter_wire_rx_t *perimeter_wire_p)
+int perimeter_wire_rx_async_convert(struct perimeter_wire_rx_t *perimeter_wire_p)
+{
+    return (0);
+}
+
+int perimeter_wire_rx_async_wait(struct perimeter_wire_rx_t *perimeter_wire_p)
+{
+    return (0);
+}
+
+int perimeter_wire_rx_update(struct perimeter_wire_rx_t *perimeter_wire_p)
 {
     return (0);
 }

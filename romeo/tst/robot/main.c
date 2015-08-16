@@ -87,7 +87,7 @@ static int test_automatic(struct harness_t *harness_p)
             BTASSERT(motor_stub_omega_next == 2, "next = %d", motor_stub_omega_next);
             omega = motor_stub_omega[0];
             BTASSERT(float_close_to_zero(omega - testdata_p->output.left_wheel_omega), 
-                     "[%d]: %f %f",
+                     "[%d]: from robot: %f, testdata: %f",
                      i,
                      omega,
                      testdata_p->output.left_wheel_omega);

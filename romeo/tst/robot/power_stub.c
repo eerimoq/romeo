@@ -32,7 +32,17 @@ int power_init(struct power_t *power_p,
     return (0);
 }
 
-int power_start(struct power_t *power_p)
+int power_async_convert(struct power_t *power_p)
+{
+    return (0);
+}
+
+int power_async_wait(struct power_t *power_p)
+{
+    return (0);
+}
+
+int power_update(struct power_t *power_p)
 {
     return (0);
 }

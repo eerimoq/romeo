@@ -37,24 +37,18 @@ int motor_init(struct motor_t *motor_p,
     return (0);
 }
 
-int motor_start(struct motor_t *motor_p)
+int motor_async_convert(struct motor_t *motor_p)
 {
     return (0);
 }
 
-int motor_set_direction(struct motor_t *motor_p,
-                        int direction)
+int motor_async_wait(struct motor_t *motor_p)
 {
     return (0);
 }
 
-int motor_set_omega(struct motor_t *motor_p,
-                    float omega)
+int motor_update(struct motor_t *motor_p)
 {
-    std_printk(STD_LOG_NOTICE, FSTR("motor_stub: omega = %d"), (int)omega);
-
-    motor_stub_omega[motor_stub_omega_next++] = omega;
-
     return (0);
 }
 
@@ -69,4 +63,20 @@ float motor_get_current(struct motor_t *motor_p)
                (int)current);
 
     return (current);
+}
+
+int motor_set_direction(struct motor_t *motor_p,
+                        int direction)
+{
+    return (0);
+}
+
+int motor_set_omega(struct motor_t *motor_p,
+                    float omega)
+{
+    std_printk(STD_LOG_NOTICE, FSTR("motor_stub: robot called motor_set_omega(%d)"), (int)omega);
+
+    motor_stub_omega[motor_stub_omega_next++] = omega;
+
+    return (0);
 }
