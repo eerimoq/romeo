@@ -63,7 +63,7 @@ int power_get_stored_energy_level(struct power_t *power_p)
 
     power_p->energy_level = (sample / 10);
 
-    return (sample / 10);
+    return (power_p->energy_level);
 }
 
 int power_get_cached_stored_energy_level(struct power_t *power_p)

@@ -23,8 +23,8 @@
 #include "robot.h"
 #include <math.h>
 
-#define SIGNAL_THRESHOLD_MAX 10.0f
-#define SIGNAL_THRESHOLD_MIN -10.0f
+#define SIGNAL_THRESHOLD_MAX 0.5f
+#define SIGNAL_THRESHOLD_MIN -0.5f
 
 #define CONTROL_ROTATE_THRESHOLD 1.0f
 
@@ -53,7 +53,7 @@ static int is_time_to_search_for_base_station(struct robot_t *robot_p)
 
 static int is_inside_perimeter_wire(float signal)
 {
-    return (signal >= 0.0f);
+    return (signal < 0.0f);
 }
 
 static int is_stuck(struct robot_t *robot_p)
@@ -175,7 +175,6 @@ static int cutting_automatic(struct robot_t *robot_p,
         return (0);
     }
 
-    /* Don't do anything if the perimeter wire signal cannot be found. */
     signal = perimeter_wire_rx_get_signal(&robot_p->perimeter);
 
     /* Check versus thresholds. */

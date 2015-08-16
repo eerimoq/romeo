@@ -32,8 +32,10 @@
 
 struct perimeter_wire_tx_t {
     uint8_t pos;
+    float current;
     struct pin_driver_t pin_in1;
     struct pin_driver_t pin_in2;
+    struct adc_driver_t current_adc;
 };
 
 int perimeter_wire_tx_module_init(void);
@@ -43,11 +45,15 @@ int perimeter_wire_tx_module_init(void);
  * @param[out] perimeter_wire_p Instance to be initialised.
  * @param[in] pin_dev_in1_p Pin device for in1.
  * @param[in] pin_dev_in2_p Pin device for in2.
+ * @param[in] current_adc_p ADC for current measurement.
+ * @param[in] current_dev_p Analog pin to read current on.
  * @return zero(0) or negative error code.
  */
 int perimeter_wire_tx_init(struct perimeter_wire_tx_t *perimeter_wire_p,
                            struct pin_device_t *pin_dev_in1_p,
-                           struct pin_device_t *pin_dev_in2_p);
+                           struct pin_device_t *pin_dev_in2_p,
+                           struct adc_device_t *current_adc_p,
+                           struct pin_device_t *current_dev_p);
 
 /**
  * Start transmitting the signal on the perimeter wire.
@@ -55,5 +61,12 @@ int perimeter_wire_tx_init(struct perimeter_wire_tx_t *perimeter_wire_p,
  * @return zero(0) or negative error code.
  */
 int perimeter_wire_tx_start(struct perimeter_wire_tx_t *perimeter_wire_p);
+
+/**
+ * Get the current on the perimerter wire.
+ * @param[out] perimeter_wire_p Perimiter wire instance.
+ * @return Current in ampere.
+ */
+float perimeter_wire_tx_get_current(struct perimeter_wire_tx_t *perimeter_wire_p);
 
 #endif

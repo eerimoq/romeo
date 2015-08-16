@@ -33,5 +33,6 @@
 #include "romeo/power.h"
 #include "romeo/watchdog.h"
 #include "romeo/robot.h"
+#include "romeo/base_station.h"
 
 #endif

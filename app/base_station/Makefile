@@ -21,8 +21,8 @@
 NAME = base_station
 BOARD = linux
 SRC += main.c
-DRIVERS_SRC = uart.c pin.c
-ROMEO_SRC = perimeter_wire_tx.c
+DRIVERS_SRC = uart.c pin.c adc.c
+ROMEO_SRC = perimeter_wire_tx.c base_station.c
 
 ROMEO = ../../romeo/src
 include $(ROMEO)/romeo.mk

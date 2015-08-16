@@ -23,7 +23,7 @@
 
 FS_COUNTER_DEFINE(perimeter_timer_callback);
 
-#define PERIOD_NS 1000000L
+#define PERIOD_NS 100000L
 
 /* The signal transmitted on the wire. */
 static uint8_t output_signal[] = {
@@ -35,6 +35,9 @@ static uint8_t output_signal[] = {
 static struct timer_t timer;
 static struct perimeter_wire_tx_t *perimeter_wires[PERIMITER_WIRE_TX_MAX];
 
+/**
+ * Timer callback called in interrupt context.
+ */
 static void timer_callback(void *arg_p)
 {
     int i;
@@ -85,13 +88,21 @@ int perimeter_wire_tx_module_init(void)
 
 int perimeter_wire_tx_init(struct perimeter_wire_tx_t *perimeter_wire_p,
                            struct pin_device_t *pin_dev_in1_p,
-                           struct pin_device_t *pin_dev_in2_p)
+                           struct pin_device_t *pin_dev_in2_p,
+                           struct adc_device_t *current_adc_p,
+                           struct pin_device_t *current_dev_p)
 {
     perimeter_wire_p->pos = 0;
 
     /* Setup the pins. */
     pin_init(&perimeter_wire_p->pin_in1, pin_dev_in1_p, PIN_OUTPUT);
     pin_init(&perimeter_wire_p->pin_in2, pin_dev_in2_p, PIN_OUTPUT);
+
+    adc_init(&perimeter_wire_p->current_adc,
+             current_adc_p,
+             current_dev_p,
+             ADC_REFERENCE_VCC,
+             1000);
 
     return (0);
 }
@@ -104,4 +115,16 @@ int perimeter_wire_tx_start(struct perimeter_wire_tx_t *perimeter_wire_p)
     perimeter_wires[0] = perimeter_wire_p;
 
     return (0);
+}
+
+float perimeter_wire_tx_get_current(struct perimeter_wire_tx_t *perimeter_wire_p)
+{
+    int sample;
+
+    adc_convert(&perimeter_wire_p->current_adc, &sample, 1);
+    perimeter_wire_p->current = ((sample * 30.0f) / 1024.0f);
+
+    //std_printf(FSTR("sample = %d\r\n"), sample);
+
+    return (perimeter_wire_p->current);
 }

@@ -70,23 +70,25 @@ int emtp_try_read_input(struct emtp_t *emtp_p)
     char c;
     struct emtp_message_header_t header;
 
-    /* Return if no data is available. */
-    if (chan_size(emtp_p->input_p) == 0) {
-        return (0);
-    }
+    while (1) {
+        /* Return if no data is available. */
+        if (chan_size(emtp_p->input_p) == 0) {
+            return (0);
+        }
 
-    chan_read(emtp_p->input_p, &c, sizeof(c));
+        chan_read(emtp_p->input_p, &c, sizeof(c));
 
-    if (c == EMTP_MESSAGE_BEGIN) {
-        chan_read(emtp_p->input_p,
-                  &header.type,
-                  sizeof(header) - sizeof(header.begin));
-        header.size = ntohs(header.size);
-        emtp_p->service.callback(emtp_p->service.arg_p,
-                                 emtp_p,
-                                 &header);
-    } else {
-	chan_write(emtp_p->service.output_p, &c, sizeof(c));
+        if (c == EMTP_MESSAGE_BEGIN) {
+            chan_read(emtp_p->input_p,
+                      &header.type,
+                      sizeof(header) - sizeof(header.begin));
+            header.size = ntohs(header.size);
+            emtp_p->service.callback(emtp_p->service.arg_p,
+                                     emtp_p,
+                                     &header);
+        } else {
+            chan_write(emtp_p->service.output_p, &c, sizeof(c));
+        }
     }
 
     return (0);

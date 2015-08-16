@@ -23,14 +23,42 @@
 
 #define VERSION_STR "0.1.0"
 
+FS_COMMAND_DEFINE("/base_station/status", base_station_cmd_status);
+
 static struct uart_driver_t uart;
 static char qinbuf[32];
 static struct shell_args_t shell_args;
 
-int main()
-{
-    struct perimeter_wire_tx_t perimeter_wire;
+static struct base_station_t base_station;
+static struct timer_t ticker;
+static struct thrd_t *self_p;
 
+static char shell_stack[350];
+
+int base_station_cmd_status(int argc,
+                            const char *argv[],
+                            void *out_p,
+                            void *in_p)
+{
+    UNUSED(in_p);
+
+    std_fprintf(out_p,
+                FSTR("perimeter wire current = %d.%u\r\n"),
+		    (int)(base_station.perimeter.current),
+                ((unsigned int)(base_station.perimeter.current * 100.0f)) % 100);
+
+    return (0);
+}
+
+static void timer_callback(void *arg_p)
+{
+    struct thrd_t *thrd_p = arg_p;
+
+    thrd_resume_irq(thrd_p, 0);
+}
+
+static int init()
+{
     sys_start();
     uart_module_init();
 
@@ -39,21 +67,54 @@ int main()
     uart_start(&uart);
     sys_set_stdout(&uart.chout);
 
-    std_printf(FSTR("Romeo - base station version " VERSION_STR "\r\n"));
+    /* Sample */
 
     /* Start transmitting the signal on the perimeter wire. */
     perimeter_wire_tx_module_init();
-    perimeter_wire_tx_init(&perimeter_wire,
-                           &pin_d7_dev,
-                           &pin_d8_dev);
-    perimeter_wire_tx_start(&perimeter_wire);
+
+    base_station_init(&base_station);
+
+    self_p = thrd_self();
+    thrd_set_name("base_station");
 
     /* Start the shell. */
     shell_args.chin_p = &uart.chin;
     shell_args.chout_p = &uart.chout;
+    thrd_spawn(shell_entry,
+               &shell_args,
+               20,
+               shell_stack,
+               sizeof(shell_stack));
 
-    /* The shell never returns. */
-    shell_entry(&shell_args);
+    return (0);
+}
+
+int main()
+{
+    struct time_t timeout;
+
+    init();
+
+    std_printf(FSTR("Romeo - base station version " VERSION_STR "\r\n"));
+
+    /* Start the robot periodic timer with a 50ms period. */
+    timeout.seconds = 0;
+    timeout.nanoseconds = PROCESS_PERIOD_NS;
+
+    timer_set(&ticker,
+	      &timeout,
+	      timer_callback,
+	      self_p,
+	      TIMER_PERIODIC);
+
+    base_station_start(&base_station);
+
+    /* Base station main loop. */
+    while (1) {
+	/* Timer callback resumes this thread. */
+	thrd_suspend(NULL);
+        base_station_tick(&base_station);
+    }
 
     return (0);
 }

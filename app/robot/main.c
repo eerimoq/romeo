@@ -143,7 +143,7 @@ int robot_cmd_status(int argc,
 		(int)T2ST(&time),
 		robot.debug.tick_time,
 		(int)perimeter_wire_rx_get_cached_signal(&robot.perimeter),
-		(int)power_get_cached_stored_energy_level(&robot.power),
+		power_get_cached_stored_energy_level(&robot.power),
                 robot.watchdog.count);
 
     if (robot.mode == ROBOT_MODE_MANUAL) {
@@ -195,8 +195,8 @@ int robot_cmd_manual_movement_set(int argc,
     std_strtol(argv[1], &speed);
     std_strtol(argv[2], &omega);
 
-    robot.manual.speed = ((float)speed) / 100.0f;
-    robot.manual.omega = ((float)omega) / 100.0f;
+    robot.manual.speed = 0.1f * (((float)speed) / 100.0f);
+    robot.manual.omega = 0.4f * (((float)omega) / 100.0f);
 
     return (0);
 }
@@ -223,14 +223,14 @@ static int init()
                shell_input_channel_buf,
                sizeof(shell_input_channel_buf));
 
-    emtp_init(&emtp,
-	      &uart.chin,
-	      &uart.chout,
-	      &shell_input_channel,
-              (int (*)(void *,
-                       struct emtp_t *,
-                       struct emtp_message_header_t *))robot_handle_emtp_message,
-	      &robot);
+    /* emtp_init(&emtp, */
+    /*           &uart.chin, */
+    /*           &uart.chout, */
+    /*           &shell_input_channel, */
+    /*           (int (*)(void *, */
+    /*                    struct emtp_t *, */
+    /*                    struct emtp_message_header_t *))robot_handle_emtp_message, */
+    /*           &robot); */
 
     robot_init(&robot);
 
@@ -238,8 +238,8 @@ static int init()
     thrd_set_name("robot");
 
     /* Start the shell. */
-    shell_args.chin_p = &shell_input_channel;
-    shell_args.chout_p = &emtp.internal.output;
+    shell_args.chin_p = &uart.chin;
+    shell_args.chout_p = &uart.chout;
     thrd_spawn(shell_entry,
                &shell_args,
                20,
@@ -278,7 +278,7 @@ int main()
         robot_tick(&robot);
 
         /* Handle any emtp message or stream data. */
-        emtp_try_read_input(&emtp);
+        //emtp_try_read_input(&emtp);
 
         time_get(&timeout);
         robot.debug.tick_time = (timeout.seconds - start_time.seconds);

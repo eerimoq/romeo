@@ -30,9 +30,9 @@
 
 /* The coefficients used as a reference in the matched filter. */
 static float coefficients[COEFFICIENTS_MAX] = {
-    1.0f, 1.0f, -1.0f, -1.0f, 1.0f, -1.0f, 1.0f, -1.0f,
-    -1.0f, 1.0f, -1.0f, 1.0f, 1.0f, -1.0f, -1.0f, 1.0f,
-    -1.0f, -1.0f, 1.0f, -1.0f, -1.0f, 1.0f, 1.0f, -1.0f
+    1.0f, 0.0f, -1.0f, -0.0f, 1.0f, -1.0f, 1.0f, -1.0f,
+    -0.0f, 1.0f, -1.0f, 1.0f, 0.0f, -1.0f, -0.0f, 1.0f,
+    -1.0f, -0.0f, 1.0f, -1.0f, -0.0f, 1.0f, 0.0f, -1.0f
 };
 
 int perimeter_wire_rx_init(struct perimeter_wire_rx_t *perimeter_wire_p,
@@ -45,7 +45,7 @@ int perimeter_wire_rx_init(struct perimeter_wire_rx_t *perimeter_wire_p,
              dev_p,
              pin_dev_p,
              ADC_REFERENCE_VCC,
-             962);
+             9620);
 
     return (0);
 }
