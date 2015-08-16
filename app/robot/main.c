@@ -137,23 +137,21 @@ int robot_cmd_status(int argc,
     std_fprintf(out_p,
 		FSTR("\r\nperiod = %d ticks\r\n"
 		     "execution time = %d ticks\r\n"
-		     "perimeter signal level = %d\r\n"
+		     "perimeter signal level = %f\r\n"
 		     "energy level = %d%%\r\n"
                      "watchdog count = %d\r\n"),
 		(int)T2ST(&time),
 		robot.debug.tick_time,
-		(int)perimeter_wire_rx_get_cached_signal(&robot.perimeter),
+		perimeter_wire_rx_get_cached_signal(&robot.perimeter),
 		power_get_cached_stored_energy_level(&robot.power),
                 robot.watchdog.count);
 
     if (robot.mode == ROBOT_MODE_MANUAL) {
 	std_fprintf(out_p,
-		    FSTR("speed = %d.%u m/s\r\n"
-			 "omega = %d.%u rad/s\r\n"),
-		    (int)(robot.manual.speed),
-		    ((unsigned int)(robot.manual.speed * 100.0f)) % 100,
-		    (int)(robot.manual.omega),
-		    ((unsigned int)(robot.manual.omega * 100.0f)) % 100);
+		    FSTR("speed = %f m/s\r\n"
+			 "omega = %f rad/s\r\n"),
+		    robot.manual.speed,
+		    robot.manual.omega);
     }
 
     return (0);
