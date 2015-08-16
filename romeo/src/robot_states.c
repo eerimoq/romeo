@@ -227,9 +227,12 @@ static int cutting_automatic(struct robot_t *robot_p,
             *omega_p = 0.1f;
 
             if (cutting_p->ticks_left == 0) {
-                /* Enter forward state. */
-                *omega_p = 0.0f;
-                cutting_p->state = CUTTING_STATE_FORWARD;
+                if (is_inside_perimeter_wire(signal)) {
+                    cutting_p->state = CUTTING_STATE_FORWARD;
+                } else {
+                    /* Stop the robot if it is not inside the perimerter wire. */
+                    robot_p->state.next = ROBOT_STATE_IDLE;
+                }
             }
             break;
         }
