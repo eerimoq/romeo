@@ -23,7 +23,7 @@
 
 #include "simba.h"
 
-#define PERIMETER_WIRE_RX_SAMPLES_MAX (2 * 24)
+#define PERIMETER_WIRE_RX_SAMPLES_MAX (96)
 
 struct perimeter_wire_rx_t {
     struct adc_driver_t adc;
@@ -33,6 +33,7 @@ struct perimeter_wire_rx_t {
     struct {
         int samples[PERIMETER_WIRE_RX_SAMPLES_MAX];
         float signal;
+        float quality;
     } updated;
 };
 
@@ -76,5 +77,12 @@ int perimeter_wire_rx_update(struct perimeter_wire_rx_t *perimeter_wire_p);
  * @return The signal level.
  */
 float perimeter_wire_rx_get_signal(struct perimeter_wire_rx_t *perimeter_wire_p);
+
+/**
+ * Get the signal quality.
+ * @param[in] perimeter_wire_p Perimeter wire instance.
+ * @return The signal quality.
+ */
+float perimeter_wire_rx_get_quality(struct perimeter_wire_rx_t *perimeter_wire_p);
 
 #endif

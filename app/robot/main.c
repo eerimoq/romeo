@@ -23,6 +23,13 @@
 
 #define VERSION_STR "0.1.0"
 
+struct shell_config_t {
+    char stack[456];
+    struct shell_args_t args;
+    struct queue_t input_channel;
+    char input_channel_buf[2];
+};
+
 FS_COMMAND_DEFINE("/robot/start", robot_cmd_start);
 FS_COMMAND_DEFINE("/robot/stop", robot_cmd_stop);
 FS_COMMAND_DEFINE("/robot/status", robot_cmd_status);
@@ -32,16 +39,17 @@ FS_COMMAND_DEFINE("/robot/sensors", robot_cmd_sensors);
 
 static struct uart_driver_t uart;
 static char qinbuf[32];
-static struct shell_args_t shell_args;
-static struct queue_t shell_input_channel;
-static char shell_input_channel_buf[2];
+
+static struct uart_driver_t uart3;
+static char qinbuf3[32];
 
 static struct robot_t robot;
 static struct timer_t ticker;
 static struct thrd_t *self_p;
 static struct emtp_t emtp;
 
-static char shell_stack[456];
+static struct shell_config_t shell_default;
+static struct shell_config_t shell_bluetooth;
 
 /* Modes as strings. */
 static FAR const char manual_string[] = "manual";
@@ -139,6 +147,7 @@ int robot_cmd_status(int argc,
 		FSTR("\r\nperiod = %d ticks\r\n"
 		     "execution time = %d ticks\r\n"
 		     "perimeter signal level = %f\r\n"
+		     "perimeter signal quality = %f\r\n"
 		     "energy level = %d%%\r\n"
 		     "left motor current = %f\r\n"
 		     "right motor current = %f\r\n"
@@ -146,6 +155,7 @@ int robot_cmd_status(int argc,
 		(int)T2ST(&time),
 		robot.debug.tick_time,
 		perimeter_wire_rx_get_signal(&robot.perimeter),
+		perimeter_wire_rx_get_quality(&robot.perimeter),
 		power_get_stored_energy_level(&robot.power),
 		motor_get_current(&robot.left_motor),
 		motor_get_current(&robot.right_motor),
@@ -215,8 +225,10 @@ int robot_cmd_sensors(int argc,
 
     std_fprintf(out_p, FSTR("- Sensor samples -\r\n"));
     std_fprintf(out_p, FSTR("\r\nperimeter wire:\r\n"
-                            "  signal = %f\r\n"),
-                robot.perimeter.updated.signal);
+                            "  signal = %f\r\n"
+                            "  quality = %f\r\n"),
+		perimeter_wire_rx_get_signal(&robot.perimeter),
+		perimeter_wire_rx_get_quality(&robot.perimeter));
 
     for (i = 0; i < membersof(robot.perimeter.updated.samples); i++) {
         std_fprintf(out_p, FSTR("  [%2d]: %4d\r\n"),
@@ -269,14 +281,21 @@ static int init()
     uart_start(&uart);
     sys_set_stdout(&uart.chout);
 
-    queue_init(&shell_input_channel,
-               shell_input_channel_buf,
-               sizeof(shell_input_channel_buf));
+    uart_init(&uart3, &uart_device[3], 38400, qinbuf3, sizeof(qinbuf3));
+    uart_start(&uart3);
+
+    queue_init(&shell_default.input_channel,
+               shell_default.input_channel_buf,
+               sizeof(shell_default.input_channel_buf));
+
+    queue_init(&shell_bluetooth.input_channel,
+               shell_bluetooth.input_channel_buf,
+               sizeof(shell_bluetooth.input_channel_buf));
 
     /* emtp_init(&emtp, */
     /*           &uart.chin, */
     /*           &uart.chout, */
-    /*           &shell_input_channel, */
+    /*           &shell_default.input_channel, */
     /*           (int (*)(void *, */
     /*                    struct emtp_t *, */
     /*                    struct emtp_message_header_t *))robot_handle_emtp_message, */
@@ -288,13 +307,22 @@ static int init()
     thrd_set_name("robot");
 
     /* Start the shell. */
-    shell_args.chin_p = &uart.chin;
-    shell_args.chout_p = &uart.chout;
+    shell_default.args.chin_p = &uart.chin;
+    shell_default.args.chout_p = &uart.chout;
     thrd_spawn(shell_entry,
-               &shell_args,
+               &shell_default.args,
                20,
-               shell_stack,
-               sizeof(shell_stack));
+               shell_default.stack,
+               sizeof(shell_default.stack));
+
+    /* Start the shell. */
+    shell_bluetooth.args.chin_p = &uart3.chin;
+    shell_bluetooth.args.chout_p = &uart3.chout;
+    thrd_spawn(shell_entry,
+               &shell_bluetooth.args,
+               20,
+               shell_bluetooth.stack,
+               sizeof(shell_bluetooth.stack));
 
     return (0);
 }

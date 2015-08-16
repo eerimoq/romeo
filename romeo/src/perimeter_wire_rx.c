@@ -22,19 +22,25 @@
 #include "romeo.h"
 #include <limits.h>
 
-#define COEFFICIENTS_MAX 48
-#define NUMBER_OF_NON_ZERO_COEFFICIENTS 32
+#define COEFFICIENTS_MAX 96
+#define NUMBER_OF_NON_ZERO_COEFFICIENTS 64
 #define INPUT_MAX (2 * PERIMETER_WIRE_RX_SAMPLES_MAX)
 #define OUTPUT_MAX (INPUT_MAX - COEFFICIENTS_MAX + 1)
 
 /* The coefficients used as a reference in the matched filter. */
 static int coefficients[COEFFICIENTS_MAX] = {
-    1, 1, 0, 0, -1, -1, -0, -0,
-    1, 1, -1, -1, 1, 1, -1, -1,
-    -0, -0, 1, 1, -1, -1, 1, 1,
-    0, 0, -1, -1, -0, -0, 1, 1,
-    -1, -1, 0, 0, 1, 1, -1, -1,
-    -0, -0, 1, 1, 0, 0, -1, -1
+     1,  1,  1,  1,  0,  0,  0,  0,
+    -1, -1, -1, -1, -0, -0, -0, -0,
+     1,  1,  1,  1, -1, -1, -1, -1,
+     1,  1,  1,  1, -1, -1, -1, -1,
+    -0, -0, -0, -0,  1,  1,  1,  1,
+    -1, -1, -1, -1,  1,  1,  1,  1,
+     0,  0,  0,  0, -1, -1, -1, -1,
+    -0, -0, -0, -0,  1,  1,  1,  1,
+    -1, -1, -1, -1,  0,  0,  0,  0,
+     1,  1,  1,  1, -1, -1, -1, -1,
+    -0, -0, -0, -0,  1,  1,  1,  1,
+     0,  0,  0,  0, -1, -1, -1, -1
 };
 
 int perimeter_wire_rx_init(struct perimeter_wire_rx_t *perimeter_wire_p,
@@ -42,12 +48,13 @@ int perimeter_wire_rx_init(struct perimeter_wire_rx_t *perimeter_wire_p,
                            struct pin_device_t *pin_dev_p)
 {
     perimeter_wire_p->updated.signal = 0.0f;
+    perimeter_wire_p->updated.quality = 0.0f;
 
     adc_init(&perimeter_wire_p->adc,
              dev_p,
              pin_dev_p,
              ADC_REFERENCE_VCC,
-             2 * 9615);
+             38462);
 
     return (0);
 }
@@ -77,7 +84,7 @@ int perimeter_wire_rx_update(struct perimeter_wire_rx_t *perimeter_wire_p)
     int input[INPUT_MAX];
     int output[OUTPUT_MAX];
     int min, max;
-    float signal;
+    float signal, quality;
 
     /* Save latest sample. */
     memcpy(perimeter_wire_p->updated.samples,
@@ -112,16 +119,20 @@ int perimeter_wire_rx_update(struct perimeter_wire_rx_t *perimeter_wire_p)
 
     if (max > -min) {
         signal = max;
+        quality = -((float)max / min);
     } else {
         signal = min;
+        quality = -((float)min / max);
     }
 
     signal /= NUMBER_OF_NON_ZERO_COEFFICIENTS;
 
     /* Low pass filtering of the signal. */
-    signal = (4.0f * perimeter_wire_p->updated.signal + 1.0f * signal) / 5.0f;
+    signal = (9.0f * perimeter_wire_p->updated.signal + 1.0f * signal) / 10.0f;
+    quality = (9.0f * perimeter_wire_p->updated.quality + 1.0f * quality) / 10.0f;
 
     perimeter_wire_p->updated.signal = signal;
+    perimeter_wire_p->updated.quality = quality;
 
     return (0);
 }
@@ -129,4 +140,9 @@ int perimeter_wire_rx_update(struct perimeter_wire_rx_t *perimeter_wire_p)
 float perimeter_wire_rx_get_signal(struct perimeter_wire_rx_t *perimeter_wire_p)
 {
     return (perimeter_wire_p->updated.signal);
+}
+
+float perimeter_wire_rx_get_quality(struct perimeter_wire_rx_t *perimeter_wire_p)
+{
+    return (perimeter_wire_p->updated.quality);
 }

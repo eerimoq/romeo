@@ -24,4 +24,8 @@
 /* Small system log buffer. */
 #define STD_KLOG_BUFFER_MAX 128
 
+
+/* System tick period of 2ms. */
+#define SYS_TICK_FREQUENCY 500
+
 #endif

@@ -152,6 +152,14 @@ int robot_init(struct robot_t *robot_p)
     robot_p->state.callback = robot_state_idle;
     robot_p->mode = ROBOT_MODE_AUTOMATIC;
 
+    perimeter_wire_rx_init(&robot_p->perimeter,
+			   &adc_0_dev,
+			   &pin_a0_dev);
+
+    power_init(&robot_p->power,
+	       &adc_0_dev,
+	       &pin_a1_dev);
+
     motor_init(&robot_p->left_motor,
 	       &pin_d2_dev,
 	       &pin_d3_dev,
@@ -165,14 +173,6 @@ int robot_init(struct robot_t *robot_p)
 	       &pwm_d11_dev,
 	       &adc_0_dev,
 	       &pin_a3_dev);
-
-    perimeter_wire_rx_init(&robot_p->perimeter,
-			   &adc_0_dev,
-			   &pin_a0_dev);
-
-    power_init(&robot_p->power,
-	       &adc_0_dev,
-	       &pin_a1_dev);
 
     controller_pid_init(&robot_p->follow_pid_controller,
 			FOLLOW_KP,
@@ -222,11 +222,11 @@ int robot_tick(struct robot_t *robot_p)
     }
 
     /* Read sensor data and update the sensor objects. */
-    power_async_wait(&robot_p->power);
-    power_update(&robot_p->power);
-
     perimeter_wire_rx_async_wait(&robot_p->perimeter);
     perimeter_wire_rx_update(&robot_p->perimeter);
+
+    power_async_wait(&robot_p->power);
+    power_update(&robot_p->power);
 
     motor_async_wait(&robot_p->left_motor);
     motor_async_wait(&robot_p->right_motor);

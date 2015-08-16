@@ -37,9 +37,10 @@ FS_COUNTER_DEFINE(robot_cutting_state_rotating);
 
 FS_COUNTER_DEFINE(robot_odometer);
 
-FS_COUNTER_DEFINE(robot_perimeter_no_signal);
-
 FS_COUNTER_DEFINE(robot_is_stuck);
+
+FS_COUNTER_DEFINE(robot_is_inside_perimeter_wire);
+FS_COUNTER_DEFINE(robot_is_outside_perimeter_wire);
 
 FS_PARAMETER_DEFINE("/robot/parameters/charging", robot_parameter_charging, int, 0);
 
@@ -50,7 +51,15 @@ static int is_time_to_search_for_base_station(struct robot_t *robot_p)
 
 static int is_inside_perimeter_wire(float signal)
 {
-    return (signal >= 3.0f);
+    int is_inside = (signal >= 3.0f);
+
+    if (is_inside == 1) {
+        FS_COUNTER_INC(robot_is_inside_perimeter_wire, 1);
+    } else {
+        FS_COUNTER_INC(robot_is_outside_perimeter_wire, 1);
+    }
+
+    return (is_inside);
 }
 
 static int is_stuck(struct robot_t *robot_p)
