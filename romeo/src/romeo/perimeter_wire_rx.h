@@ -27,8 +27,13 @@
 
 struct perimeter_wire_rx_t {
     struct adc_driver_t adc;
-    float signal;
-    int samples[PERIMETER_WIRE_RX_SAMPLES_MAX];
+    struct {
+        int samples[PERIMETER_WIRE_RX_SAMPLES_MAX];
+    } ongoing;
+    struct {
+        int samples[PERIMETER_WIRE_RX_SAMPLES_MAX];
+        float signal;
+    } updated;
 };
 
 int perimeter_wire_rx_module_init(void);
@@ -45,11 +50,25 @@ int perimeter_wire_rx_init(struct perimeter_wire_rx_t *perimeter_wire_p,
                            struct pin_device_t *pin_dev_p);
 
 /**
- * Start to raed the signal picked up by the inductor.
+ * Start an asynchronous convertion of the signal picked up by the inductor.
  * @param[in] perimeter_wire_p Perimeter wire instance.
  * @return zero(0) or negative error code.
  */
-int perimeter_wire_rx_start(struct perimeter_wire_rx_t *perimeter_wire_p);
+int perimeter_wire_rx_async_convert(struct perimeter_wire_rx_t *perimeter_wire_p);
+
+/**
+ * Wait for the asynchronous convertion to finish.
+ * @param[in] perimeter_wire_p Perimeter wire instance.
+ * @return zero(0) or negative error code.
+ */
+int perimeter_wire_rx_async_wait(struct perimeter_wire_rx_t *perimeter_wire_p);
+
+/**
+ * Update the object from the latest coverted samples.
+ * @param[in] perimeter_wire_p Perimeter wire instance.
+ * @return zero(0) or negative error code.
+ */
+int perimeter_wire_rx_update(struct perimeter_wire_rx_t *perimeter_wire_p);
 
 /**
  * Get the signal on the wire.
@@ -57,16 +76,5 @@ int perimeter_wire_rx_start(struct perimeter_wire_rx_t *perimeter_wire_p);
  * @return The signal level.
  */
 float perimeter_wire_rx_get_signal(struct perimeter_wire_rx_t *perimeter_wire_p);
-
-/**
- * Get the cached signal.
- * @param[in] perimeter_wire_p Perimeter wire instance.
- * @return Cached signal level.
- */
-static inline float
-perimeter_wire_rx_get_cached_signal(struct perimeter_wire_rx_t *perimeter_wire_p)
-{
-    return (perimeter_wire_p->signal);
-}
 
 #endif

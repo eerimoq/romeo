@@ -142,7 +142,7 @@ int robot_cmd_status(int argc,
                      "watchdog count = %d\r\n"),
 		(int)T2ST(&time),
 		robot.debug.tick_time,
-		perimeter_wire_rx_get_cached_signal(&robot.perimeter),
+		perimeter_wire_rx_get_signal(&robot.perimeter),
 		power_get_stored_energy_level(&robot.power),
                 robot.watchdog.count);
 

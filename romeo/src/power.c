@@ -39,7 +39,7 @@ int power_async_convert(struct power_t *power_p)
     /* Start asynchronous convertion. */
     return (adc_async_convert(&power_p->adc,
                               power_p->ongoing.sample,
-                              sizeof(power_p->ongoing.sample)));
+                              membersof(power_p->ongoing.sample)));
 }
 
 int power_async_wait(struct power_t *power_p)

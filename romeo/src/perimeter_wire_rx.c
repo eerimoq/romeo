@@ -39,7 +39,7 @@ int perimeter_wire_rx_init(struct perimeter_wire_rx_t *perimeter_wire_p,
                            struct adc_device_t *dev_p,
                            struct pin_device_t *pin_dev_p)
 {
-    perimeter_wire_p->signal = 0.0f;
+    perimeter_wire_p->updated.signal = 0.0f;
 
     adc_init(&perimeter_wire_p->adc,
              dev_p,
@@ -50,38 +50,41 @@ int perimeter_wire_rx_init(struct perimeter_wire_rx_t *perimeter_wire_p,
     return (0);
 }
 
-int perimeter_wire_rx_start(struct perimeter_wire_rx_t *perimeter_wire_p)
+int perimeter_wire_rx_async_convert(struct perimeter_wire_rx_t *perimeter_wire_p)
 {
     /* Start first asynchronous convertion. */
-    adc_async_convert(&perimeter_wire_p->adc,
-                      perimeter_wire_p->samples,
-                      membersof(perimeter_wire_p->samples));
+    return (adc_async_convert(&perimeter_wire_p->adc,
+                              perimeter_wire_p->ongoing.samples,
+                              membersof(perimeter_wire_p->ongoing.samples)));
+}
+
+int perimeter_wire_rx_async_wait(struct perimeter_wire_rx_t *perimeter_wire_p)
+{
+    /* Wait for ongoing asynchronous convertion to finish. */
+    if (!adc_async_wait(&perimeter_wire_p->adc)) {
+        std_printk(STD_LOG_WARNING, FSTR("convertion has not finished"));
+    }
 
     return (0);
 }
 
-float perimeter_wire_rx_get_signal(struct perimeter_wire_rx_t *perimeter_wire_p)
+int perimeter_wire_rx_update(struct perimeter_wire_rx_t *perimeter_wire_p)
 {
     int i, i_mod;
     float input[INPUT_MAX];
     float output[OUTPUT_MAX];
     float min, max, signal;
 
-    /* Wait for ongoing asynchronous convertion to finish. */
-    if (!adc_async_wait(&perimeter_wire_p->adc)) {
-        std_printk(STD_LOG_WARNING, FSTR("convertion has not finished"));
-    }
+    /* Save latest sample. */
+    memcpy(perimeter_wire_p->updated.samples,
+           perimeter_wire_p->ongoing.samples,
+           sizeof(perimeter_wire_p->ongoing.samples));
 
     /* Copy samples to filter input buffer. */
     for (i = 0; i < INPUT_MAX; i++) {
         i_mod = (i % PERIMETER_WIRE_RX_SAMPLES_MAX);
-        input[i] = (float)(perimeter_wire_p->samples[i_mod] - 512) / 512.0f;
+        input[i] = (float)(perimeter_wire_p->updated.samples[i_mod] - 512) / 512.0f;
     }
-
-    /* Start next asynchronous convertion. */
-    adc_async_convert(&perimeter_wire_p->adc,
-                      perimeter_wire_p->samples,
-                      membersof(perimeter_wire_p->samples));
 
     filter_firf(input,
                 membersof(input),
@@ -92,10 +95,12 @@ float perimeter_wire_rx_get_signal(struct perimeter_wire_rx_t *perimeter_wire_p)
     /* Get min and max values. */
     min = FLT_MAX;
     max = FLT_MIN;
+
     for (i = 0; i < OUTPUT_MAX; i++) {
         if (output[i] > max) {
             max = output[i];
         }
+
         if (output[i] < min) {
             min = output[i];
         }
@@ -108,9 +113,14 @@ float perimeter_wire_rx_get_signal(struct perimeter_wire_rx_t *perimeter_wire_p)
     }
 
     /* Low pass filtering of the signal. */
-    signal = (4.0f * perimeter_wire_p->signal + 1.0f * signal) / 5.0f;
+    signal = (4.0f * perimeter_wire_p->updated.signal + 1.0f * signal) / 5.0f;
 
-    perimeter_wire_p->signal = signal;
+    perimeter_wire_p->updated.signal = signal;
 
-    return (signal);
+    return (0);
+}
+
+float perimeter_wire_rx_get_signal(struct perimeter_wire_rx_t *perimeter_wire_p)
+{
+    return (perimeter_wire_p->updated.signal);
 }

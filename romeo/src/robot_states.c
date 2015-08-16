@@ -259,9 +259,6 @@ int robot_state_starting(struct robot_t *robot_p)
 {
     FS_COUNTER_INC(robot_state_starting, 1);
 
-    /* Start sampling the perimeter wire signal. */
-    perimeter_wire_rx_start(&robot_p->perimeter);
-
     motor_start(&robot_p->left_motor);
     motor_start(&robot_p->right_motor);
 
