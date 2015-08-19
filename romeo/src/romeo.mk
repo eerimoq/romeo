@@ -24,7 +24,6 @@ ROMEO_SRC ?= \
 	base_station.c \
 	controller.c \
 	cutter.c \
-	emtp.c \
 	filter.c \
 	motor.c \
 	movement.c \

@@ -46,7 +46,6 @@ static char qinbuf3[32];
 static struct robot_t robot;
 static struct timer_t ticker;
 static struct thrd_t *self_p;
-static struct emtp_t emtp;
 
 static struct shell_config_t shell_default;
 static struct shell_config_t shell_bluetooth;
@@ -292,15 +291,6 @@ static int init()
                shell_bluetooth.input_channel_buf,
                sizeof(shell_bluetooth.input_channel_buf));
 
-    /* emtp_init(&emtp, */
-    /*           &uart.chin, */
-    /*           &uart.chout, */
-    /*           &shell_default.input_channel, */
-    /*           (int (*)(void *, */
-    /*                    struct emtp_t *, */
-    /*                    struct emtp_message_header_t *))robot_handle_emtp_message, */
-    /*           &robot); */
-
     robot_init(&robot);
 
     self_p = thrd_self();
@@ -354,9 +344,6 @@ int main()
         time_get(&start_time);
 
         robot_tick(&robot);
-
-        /* Handle any emtp message or stream data. */
-        //emtp_try_read_input(&emtp);
 
         time_get(&timeout);
         robot.debug.tick_time = (timeout.seconds - start_time.seconds);

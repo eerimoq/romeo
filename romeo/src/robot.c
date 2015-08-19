@@ -246,30 +246,3 @@ int robot_tick(struct robot_t *robot_p)
 	return (handle_state_transition(robot_p));
     }
 }
-
-int robot_handle_emtp_message(struct robot_t *robot_p,
-                              struct emtp_t *emtp_p,
-                              struct emtp_message_header_t *header_p)
-{
-    struct emtp_message_pong_t pong;
-
-    switch (header_p->type) {
-
-    case EMTP_MESSAGE_TYPE_PING:
-        watchdog_kick(&robot_p->watchdog);
-
-        /* Reply with a pong message. */
-        pong.header.type = EMTP_MESSAGE_TYPE_PONG;
-        pong.header.size = sizeof(pong);
-        emtp_message_write(emtp_p, &pong.header);
-        break;
-
-    default:
-        std_printk(STD_LOG_ERR,
-                   FSTR("bad emtp message type %d"),
-                   (int)header_p->type);
-        break;
-    }
-
-    return (0);
-}

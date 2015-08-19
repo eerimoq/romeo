@@ -133,15 +133,4 @@ int robot_stop(struct robot_t *robot_p);
  */
 int robot_tick(struct robot_t *robot_p);
 
-/**
- * EMTP message callback.
- * @param[in] robot_p Initialized robot object.
- * @param[in] emtp_p EMTP object the message is received on.
- * @param[in] header_p Message header.
- * @return zero(0) or negative error code
- */
-int robot_handle_emtp_message(struct robot_t *robot_p,
-                              struct emtp_t *emtp_p,
-                              struct emtp_message_header_t *header_p);
-
 #endif

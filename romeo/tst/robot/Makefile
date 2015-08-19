@@ -35,7 +35,6 @@ DRIVERS_SRC = uart.c
 
 ROMEO_SRC = \
 	robot.c \
-	emtp.c \
 	robot_states.c \
 	robot_transitions.c \
 	movement.c \

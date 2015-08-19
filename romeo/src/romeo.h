@@ -22,7 +22,6 @@
 #define __ROMEO_H__
 
 #include "romeo/math.h"
-#include "romeo/emtp.h"
 #include "romeo/filter.h"
 #include "romeo/perimeter_wire_tx.h"
 #include "romeo/perimeter_wire_rx.h"
