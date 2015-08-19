@@ -133,4 +133,11 @@ int robot_stop(struct robot_t *robot_p);
  */
 int robot_tick(struct robot_t *robot_p);
 
+/**
+ * Kick the robot watchdog.
+ * @param[in] robot_p Initialized robot object.
+ * @return zero(0) or negative error code
+ */
+int robot_watchdog_kick(struct robot_t *robot_p);
+
 #endif

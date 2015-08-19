@@ -246,3 +246,8 @@ int robot_tick(struct robot_t *robot_p)
 	return (handle_state_transition(robot_p));
     }
 }
+
+int robot_watchdog_kick(struct robot_t *robot_p)
+{
+    return (watchdog_kick(&robot_p->watchdog));
+}

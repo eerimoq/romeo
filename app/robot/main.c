@@ -36,6 +36,7 @@ FS_COMMAND_DEFINE("/robot/status", robot_cmd_status);
 FS_COMMAND_DEFINE("/robot/mode/set", robot_cmd_mode_set);
 FS_COMMAND_DEFINE("/robot/manual/movement/set", robot_cmd_manual_movement_set);
 FS_COMMAND_DEFINE("/robot/sensors", robot_cmd_sensors);
+FS_COMMAND_DEFINE("/robot/watchdog/kick", robot_cmd_watchdog_kick);
 
 static struct uart_driver_t uart;
 static char qinbuf[32];
@@ -260,6 +261,14 @@ int robot_cmd_sensors(int argc,
     }
 
     return (0);
+}
+
+int robot_cmd_watchdog_kick(int argc,
+                            const char *argv[],
+                            void *out_p,
+                            void *in_p)
+{
+    return (robot_watchdog_kick(&robot));
 }
 
 static void timer_callback(void *arg_p)
