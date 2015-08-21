@@ -144,11 +144,12 @@ int robot_cmd_status(int argc,
     time.seconds = 0;
     time.nanoseconds = PROCESS_PERIOD_NS;
     std_fprintf(out_p,
-		FSTR("\r\nperiod = %d ticks\r\n"
-		     "execution time = %d ticks\r\n"
+		FSTR("\r\ntick period = %d ticks\r\n"
+		     "tick execution time = %d ticks\r\n"
 		     "perimeter signal level = %f\r\n"
 		     "perimeter signal quality = %f\r\n"
-		     "energy level = %d%%\r\n"
+		     "battery voltage = %f V\r\n"
+		     "battery energy level = %d%%\r\n"
 		     "left motor current = %f\r\n"
 		     "right motor current = %f\r\n"
                      "watchdog count = %d\r\n"),
@@ -156,6 +157,7 @@ int robot_cmd_status(int argc,
 		robot.debug.tick_time,
 		perimeter_wire_rx_get_signal(&robot.perimeter),
 		perimeter_wire_rx_get_quality(&robot.perimeter),
+		power_get_battery_voltage(&robot.power),
 		power_get_stored_energy_level(&robot.power),
 		motor_get_current(&robot.left_motor),
 		motor_get_current(&robot.right_motor),

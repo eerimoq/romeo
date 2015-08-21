@@ -29,11 +29,13 @@
 
 struct power_t {
     struct adc_driver_t adc;
+    float battery_voltage_full;
     struct {
         int samples[1];
     } ongoing;
     struct {
         int samples[1];
+        float battery_voltage;
         int stored_energy_level;
     } updated;
 };
@@ -77,5 +79,12 @@ int power_update(struct power_t *power_p);
  *         Otherwise negative error code.
  */
 int power_get_stored_energy_level(struct power_t *power_p);
+
+/**
+ * Get the value of the current battery voltage.
+ * @param[in] power_p Initialized power object.
+ * @return Battery voltage.
+ */
+float power_get_battery_voltage(struct power_t *power_p);
 
 #endif

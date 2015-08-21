@@ -21,13 +21,40 @@
 #include "simba.h"
 #include "romeo.h"
 
+#define ANALOG_VOLTAGE_MAX 5.0f
+#define ANALOG_SAMPLES_MAX 1024
+#define ANALOG_VOLTAGE_PER_SAMPLE               \
+    (ANALOG_VOLTAGE_MAX / ANALOG_SAMPLES_MAX)
+#define ANALOG_SAMPLE_AT_4V                             \
+    ((ANALOG_SAMPLES_MAX * 4) / ANALOG_VOLTAGE_MAX)
+
+/* Measure over one of three resistors. */
+#define VOLTAGE_DIVIDER_GAIN 3
+
+#define BATTERY_VOLTAGE_PER_SAMPLE                      \
+    (VOLTAGE_DIVIDER_GAIN * ANALOG_VOLTAGE_PER_SAMPLE)
+
+#define BATTERY_VOLTAGE_WHEN_ANALOG_VOLTAGE_IS_4V (12.0f)
+
+#define BATTERY_VOLTAGE_EMPTY (11.5f)
+#define ANALOG_SAMPLE_EMPTY                             \
+    (ANALOG_SAMPLE_AT_4V -                              \
+    ((BATTERY_VOLTAGE_WHEN_ANALOG_VOLTAGE_IS_4V -       \
+      BATTERY_VOLTAGE_EMPTY) /                          \
+     BATTERY_VOLTAGE_PER_SAMPLE))
+
+FS_PARAMETER_DEFINE("/robot/power/set_battery_voltage_full", power_param_battery_voltage_full, int, 13);
+
 int power_init(struct power_t *power_p,
                struct adc_device_t *dev_p,
                struct pin_device_t *pin_dev_p)
 {
+    /* Go to charging station when started. */
+    power_p->battery_voltage_full = FS_PARAMETER(power_param_battery_voltage_full);
+
     adc_init(&power_p->adc,
              dev_p,
-             pin_dev_p,             
+             pin_dev_p,
              ADC_REFERENCE_VCC,
              1000);
 
@@ -54,7 +81,8 @@ int power_async_wait(struct power_t *power_p)
 
 int power_update(struct power_t *power_p)
 {
-    int sample;
+    int sample, stored_energy_level;
+    float battery_voltage;
 
     /* Save latest sample. */
     memcpy(power_p->updated.samples,
@@ -63,11 +91,29 @@ int power_update(struct power_t *power_p)
 
     sample = power_p->updated.samples[0];
 
-    if (sample > 1000) {
-        sample = 1000;
+    /* Remove when measured after charging. */
+    power_p->battery_voltage_full = FS_PARAMETER(power_param_battery_voltage_full);
+
+    if (power_p->battery_voltage_full < BATTERY_VOLTAGE_EMPTY) {
+        power_p->battery_voltage_full = BATTERY_VOLTAGE_EMPTY;
     }
 
-    power_p->updated.stored_energy_level = (sample / 10);
+    /* Calculate the battery voltage. */
+    battery_voltage = (BATTERY_VOLTAGE_EMPTY +
+                       BATTERY_VOLTAGE_PER_SAMPLE * (sample - ANALOG_SAMPLE_EMPTY));
+
+    /* Use the battery voltage to calculate the stored energy level. */
+    if (battery_voltage < BATTERY_VOLTAGE_EMPTY) {
+        stored_energy_level = 0;
+    } else if (battery_voltage > power_p->battery_voltage_full) {
+        stored_energy_level = 100;
+    } else {
+        stored_energy_level = ((100.0f * (battery_voltage - BATTERY_VOLTAGE_EMPTY))
+                               / (power_p->battery_voltage_full - BATTERY_VOLTAGE_EMPTY));
+    }
+
+    power_p->updated.battery_voltage = battery_voltage;
+    power_p->updated.stored_energy_level = stored_energy_level;
 
     return (0);
 }
@@ -75,4 +121,9 @@ int power_update(struct power_t *power_p)
 int power_get_stored_energy_level(struct power_t *power_p)
 {
     return (power_p->updated.stored_energy_level);
+}
+
+float power_get_battery_voltage(struct power_t *power_p)
+{
+    return (power_p->updated.battery_voltage);
 }
