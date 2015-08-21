@@ -21,6 +21,16 @@
 #include "simba.h"
 #include "romeo.h"
 
+/**
+ * Relations of sampled values and voltages.
+ *
+ * analog voltage:  0.0                3.83    4.0        5.0
+ * analog sample:     0                 785    820       1024
+ * battery voltage: 0.0                11.5   12.0       15.0
+ *
+ *                    |-------------------|------|----------|
+ */
+
 #define ANALOG_VOLTAGE_MAX 5.0f
 #define ANALOG_SAMPLES_MAX 1024
 #define ANALOG_VOLTAGE_PER_SAMPLE               \
@@ -49,7 +59,6 @@ int power_init(struct power_t *power_p,
                struct adc_device_t *dev_p,
                struct pin_device_t *pin_dev_p)
 {
-    /* Go to charging station when started. */
     power_p->battery_voltage_full = FS_PARAMETER(power_param_battery_voltage_full);
 
     adc_init(&power_p->adc,
