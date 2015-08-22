@@ -92,9 +92,9 @@ int battery_update(struct battery_t *battery_p)
 
     /* Use the battery voltage to calculate the stored energy level. */
     if (battery_voltage < BATTERY_VOLTAGE_EMPTY) {
-        stored_energy_level = 0;
+        stored_energy_level = POWER_STORED_ENERGY_LEVEL_MIN;
     } else if (battery_voltage > battery_p->battery_voltage_full) {
-        stored_energy_level = 100;
+        stored_energy_level = POWER_STORED_ENERGY_LEVEL_MAX;
     } else {
         stored_energy_level = ((100.0f * (battery_voltage - BATTERY_VOLTAGE_EMPTY))
                                / (battery_p->battery_voltage_full - BATTERY_VOLTAGE_EMPTY));
