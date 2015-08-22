@@ -1,5 +1,5 @@
 /**
- * @file romeo/power.h
+ * @file romeo/battery.h
  * @version 0.1
  *
  * @section License
@@ -27,7 +27,7 @@
 #define POWER_STORED_ENERGY_LEVEL_MIN   0
 #define POWER_STORED_ENERGY_LEVEL_MAX 100
 
-struct power_t {
+struct battery_t {
     struct adc_driver_t adc;
     float battery_voltage_full;
     struct {
@@ -41,50 +41,50 @@ struct power_t {
 };
 
 /**
- * Initialize power object.
- * @param[out] power_p Object to initialize.
+ * Initialize battery object.
+ * @param[out] battery_p Object to initialize.
  * @return zero(0) or negative error code
  */
-int power_init(struct power_t *power_p,
+int battery_init(struct battery_t *battery_p,
                struct adc_device_t *dev_p,
                struct pin_device_t *pin_dev_p);
 
 /**
- * Start an asynchronous convertion of the power level. Call
- * power_async_wait() to save the converted value in this object.
- * @param[in] power_p Initialized power object.
+ * Start an asynchronous convertion of the battery level. Call
+ * battery_async_wait() to save the converted value in this object.
+ * @param[in] battery_p Initialized battery object.
  * @return zero(0) or negative error code
  */
-int power_async_convert(struct power_t *power_p);
+int battery_async_convert(struct battery_t *battery_p);
 
 /**
  * Wait for the asynchronous convertion to finish.
- * @param[in] power_p Initialized power object.
+ * @param[in] battery_p Initialized battery object.
  * @return zero(0) or negative error code
  */
-int power_async_wait(struct power_t *power_p);
+int battery_async_wait(struct battery_t *battery_p);
 
 /**
  * Update the object from the latest coverted samples.
- * @param[in] power_p Initialized power object.
+ * @param[in] battery_p Initialized battery object.
  * @return zero(0) or negative error code.
  */
-int power_update(struct power_t *power_p);
+int battery_update(struct battery_t *battery_p);
 
 /**
  * Get the value of the stored energy level.
- * @param[in] power_p Initialized power object.
+ * @param[in] battery_p Initialized battery object.
  * @return Linerar scale from 0 to 100, where 0 means no energy stored
  *         and 100 means that the maximum amount of energy is stored.
  *         Otherwise negative error code.
  */
-int power_get_stored_energy_level(struct power_t *power_p);
+int battery_get_stored_energy_level(struct battery_t *battery_p);
 
 /**
  * Get the value of the current battery voltage.
- * @param[in] power_p Initialized power object.
+ * @param[in] battery_p Initialized battery object.
  * @return Battery voltage.
  */
-float power_get_battery_voltage(struct power_t *power_p);
+float battery_get_battery_voltage(struct battery_t *battery_p);
 
 #endif

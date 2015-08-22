@@ -25,7 +25,7 @@ SRC += \
 	main.c \
 	motor_stub.c \
 	perimeter_wire_rx_stub.c \
-	power_stub.c \
+	battery_stub.c \
 	testdata.c \
 	watchdog_stub.c
 

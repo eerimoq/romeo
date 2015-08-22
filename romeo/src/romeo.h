@@ -29,7 +29,7 @@
 #include "romeo/controller.h"
 #include "romeo/motor.h"
 #include "romeo/cutter.h"
-#include "romeo/power.h"
+#include "romeo/battery.h"
 #include "romeo/watchdog.h"
 #include "romeo/robot.h"
 #include "romeo/base_station.h"

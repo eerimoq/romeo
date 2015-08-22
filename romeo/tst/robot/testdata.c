@@ -50,7 +50,7 @@ FAR const struct testdata_t test_automatic_testdata[] = {
     /* don't stuck, move again. */
     { 12, {  30,  50.0f,    0.0f }, { 1, 1.570795f,  1.570795f } },
 
-    /* no power available. stop. */
+    /* no battery available. stop. */
     { 13, {  20,  50.0f,    0.0f }, { 1, 0.0f,       0.0f } },
     /* transition gives no output. */
     { 14, {  20,  50.0f,    0.0f }, { 0, 0.0f,       0.0f } },

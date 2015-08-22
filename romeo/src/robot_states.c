@@ -46,7 +46,7 @@ FS_PARAMETER_DEFINE("/robot/parameters/charging", robot_parameter_charging, int,
 
 static int is_time_to_search_for_base_station(struct robot_t *robot_p)
 {
-    return (power_get_stored_energy_level(&robot_p->power) <= 20);
+    return (battery_get_stored_energy_level(&robot_p->battery) <= 20);
 }
 
 static int is_inside_perimeter_wire(float signal)
@@ -351,7 +351,7 @@ int robot_state_in_base_station(struct robot_t *robot_p)
     FS_COUNTER_INC(robot_state_in_base_station, 1);
 
     /* Wait until plenty of energy is available. */
-    if (power_get_stored_energy_level(&robot_p->power)
+    if (battery_get_stored_energy_level(&robot_p->battery)
         == POWER_STORED_ENERGY_LEVEL_MAX) {
         robot_p->substate.cutting.ticks_left = CUTTING_STATE_BACKWARDS_TICKS;
         robot_p->substate.cutting.state = CUTTING_STATE_BACKWARDS;

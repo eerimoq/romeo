@@ -35,8 +35,8 @@ extern float motor_stub_current[16];
 extern int perimeter_wire_rx_stub_signal_next;
 extern float perimeter_wire_rx_stub_signal[16];
 
-extern int power_stub_energy_level_next;
-extern int power_stub_energy_level[16];
+extern int battery_stub_energy_level_next;
+extern int battery_stub_energy_level[16];
 
 static int float_close_to_zero(float value)
 {
@@ -73,11 +73,11 @@ static int test_automatic(struct harness_t *harness_p)
         motor_stub_omega_next = 0;
         motor_stub_current_next = 0;
         perimeter_wire_rx_stub_signal_next = 0;
-        power_stub_energy_level_next = 0;
+        battery_stub_energy_level_next = 0;
 
         motor_stub_current[0] = testdata_p->input.motor_current;
         perimeter_wire_rx_stub_signal[0] = testdata_p->input.perimeter_signal;
-        power_stub_energy_level[0] = testdata_p->input.energy_level;
+        battery_stub_energy_level[0] = testdata_p->input.energy_level;
 
         /* Tick the robot. */
         robot_tick(&robot);

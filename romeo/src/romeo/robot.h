@@ -94,7 +94,7 @@ struct robot_t {
     struct motor_t right_motor;
     struct perimeter_wire_rx_t perimeter;
     struct controller_pid_t follow_pid_controller;
-    struct power_t power;
+    struct battery_t battery;
     struct watchdog_t watchdog;
     struct {
         int tick_time;

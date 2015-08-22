@@ -1,5 +1,5 @@
 /**
- * @file power.c
+ * @file battery.c
  * @version 0.1
  *
  * @section License
@@ -33,15 +33,15 @@
 #define BATTERY_VOLTAGE_PER_SAMPLE (BATTERY_VOLTAGE_MAX / ANALOG_SAMPLES_MAX)
 #define BATTERY_VOLTAGE_EMPTY (11.5f)
 
-FS_PARAMETER_DEFINE("/robot/power/set_battery_voltage_full", power_param_battery_voltage_full, int, 13);
+FS_PARAMETER_DEFINE("/robot/battery/set_battery_voltage_full", battery_param_battery_voltage_full, int, 13);
 
-int power_init(struct power_t *power_p,
+int battery_init(struct battery_t *battery_p,
                struct adc_device_t *dev_p,
                struct pin_device_t *pin_dev_p)
 {
-    power_p->battery_voltage_full = FS_PARAMETER(power_param_battery_voltage_full);
+    battery_p->battery_voltage_full = FS_PARAMETER(battery_param_battery_voltage_full);
 
-    adc_init(&power_p->adc,
+    adc_init(&battery_p->adc,
              dev_p,
              pin_dev_p,
              ADC_REFERENCE_VCC,
@@ -50,41 +50,41 @@ int power_init(struct power_t *power_p,
     return (0);
 }
 
-int power_async_convert(struct power_t *power_p)
+int battery_async_convert(struct battery_t *battery_p)
 {
     /* Start asynchronous convertion. */
-    return (adc_async_convert(&power_p->adc,
-                              power_p->ongoing.samples,
-                              membersof(power_p->ongoing.samples)));
+    return (adc_async_convert(&battery_p->adc,
+                              battery_p->ongoing.samples,
+                              membersof(battery_p->ongoing.samples)));
 }
 
-int power_async_wait(struct power_t *power_p)
+int battery_async_wait(struct battery_t *battery_p)
 {
     /* Wait for ongoing asynchronous convertion to finish. */
-    if (!adc_async_wait(&power_p->adc)) {
-        std_printk(STD_LOG_WARNING, FSTR("power convertion has not finished"));
+    if (!adc_async_wait(&battery_p->adc)) {
+        std_printk(STD_LOG_WARNING, FSTR("battery convertion has not finished"));
     }
 
     return (0);
 }
 
-int power_update(struct power_t *power_p)
+int battery_update(struct battery_t *battery_p)
 {
     int sample, stored_energy_level;
     float battery_voltage;
 
     /* Save latest sample. */
-    memcpy(power_p->updated.samples,
-           power_p->ongoing.samples,
-           sizeof(power_p->updated.samples));
+    memcpy(battery_p->updated.samples,
+           battery_p->ongoing.samples,
+           sizeof(battery_p->updated.samples));
 
-    sample = power_p->updated.samples[0];
+    sample = battery_p->updated.samples[0];
 
     /* Remove when measured after charging. */
-    power_p->battery_voltage_full = FS_PARAMETER(power_param_battery_voltage_full);
+    battery_p->battery_voltage_full = FS_PARAMETER(battery_param_battery_voltage_full);
 
-    if (power_p->battery_voltage_full < BATTERY_VOLTAGE_EMPTY) {
-        power_p->battery_voltage_full = BATTERY_VOLTAGE_EMPTY;
+    if (battery_p->battery_voltage_full < BATTERY_VOLTAGE_EMPTY) {
+        battery_p->battery_voltage_full = BATTERY_VOLTAGE_EMPTY;
     }
 
     /* Calculate the battery voltage. */
@@ -93,25 +93,25 @@ int power_update(struct power_t *power_p)
     /* Use the battery voltage to calculate the stored energy level. */
     if (battery_voltage < BATTERY_VOLTAGE_EMPTY) {
         stored_energy_level = 0;
-    } else if (battery_voltage > power_p->battery_voltage_full) {
+    } else if (battery_voltage > battery_p->battery_voltage_full) {
         stored_energy_level = 100;
     } else {
         stored_energy_level = ((100.0f * (battery_voltage - BATTERY_VOLTAGE_EMPTY))
-                               / (power_p->battery_voltage_full - BATTERY_VOLTAGE_EMPTY));
+                               / (battery_p->battery_voltage_full - BATTERY_VOLTAGE_EMPTY));
     }
 
-    power_p->updated.battery_voltage = battery_voltage;
-    power_p->updated.stored_energy_level = stored_energy_level;
+    battery_p->updated.battery_voltage = battery_voltage;
+    battery_p->updated.stored_energy_level = stored_energy_level;
 
     return (0);
 }
 
-int power_get_stored_energy_level(struct power_t *power_p)
+int battery_get_stored_energy_level(struct battery_t *battery_p)
 {
-    return (power_p->updated.stored_energy_level);
+    return (battery_p->updated.stored_energy_level);
 }
 
-float power_get_battery_voltage(struct power_t *power_p)
+float battery_get_battery_voltage(struct battery_t *battery_p)
 {
-    return (power_p->updated.battery_voltage);
+    return (battery_p->updated.battery_voltage);
 }

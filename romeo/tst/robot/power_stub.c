@@ -1,5 +1,5 @@
 /**
- * @file power_stub.c
+ * @file battery_stub.c
  * @version 0.1
  *
  * @section License
@@ -22,40 +22,40 @@
 #include "romeo.h"
 #include "testdata.h"
 
-int power_stub_energy_level_next;
-int power_stub_energy_level[16];
+int battery_stub_energy_level_next;
+int battery_stub_energy_level[16];
 
-int power_init(struct power_t *power_p,
+int battery_init(struct battery_t *battery_p,
                struct adc_device_t *dev_p,
                struct pin_device_t *pin_dev_p)
 {
     return (0);
 }
 
-int power_async_convert(struct power_t *power_p)
+int battery_async_convert(struct battery_t *battery_p)
 {
     return (0);
 }
 
-int power_async_wait(struct power_t *power_p)
+int battery_async_wait(struct battery_t *battery_p)
 {
     return (0);
 }
 
-int power_update(struct power_t *power_p)
+int battery_update(struct battery_t *battery_p)
 {
     return (0);
 }
 
-int power_get_stored_energy_level(struct power_t *power_p)
+int battery_get_stored_energy_level(struct battery_t *battery_p)
 {
     int energy_level;
 
-    energy_level = power_stub_energy_level[0];
+    energy_level = battery_stub_energy_level[0];
 
 
     std_printk(STD_LOG_NOTICE,
-               FSTR("power_stub: energy_level = %d"),
+               FSTR("battery_stub: energy_level = %d"),
                energy_level);
     
     return (energy_level);

@@ -32,7 +32,7 @@ ROMEO_SRC = \
 	motor.c \
 	movement.c \
 	perimeter_wire_rx.c \
-	power.c \
+	battery.c \
 	robot.c \
 	robot_states.c \
 	robot_transitions.c \

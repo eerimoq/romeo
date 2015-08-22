@@ -157,8 +157,8 @@ int robot_cmd_status(int argc,
 		robot.debug.tick_time,
 		perimeter_wire_rx_get_signal(&robot.perimeter),
 		perimeter_wire_rx_get_quality(&robot.perimeter),
-		power_get_battery_voltage(&robot.power),
-		power_get_stored_energy_level(&robot.power),
+		battery_get_battery_voltage(&robot.battery),
+		battery_get_stored_energy_level(&robot.battery),
 		motor_get_current(&robot.left_motor),
 		motor_get_current(&robot.right_motor),
                 robot.watchdog.count);
@@ -254,12 +254,12 @@ int robot_cmd_sensors(int argc,
                     robot.right_motor.current.updated.samples[i]);
     }
 
-    std_fprintf(out_p, FSTR("\r\npower level:\r\n"));
+    std_fprintf(out_p, FSTR("\r\nbattery level:\r\n"));
 
-    for (i = 0; i < membersof(robot.power.updated.samples); i++) {
+    for (i = 0; i < membersof(robot.battery.updated.samples); i++) {
         std_fprintf(out_p, FSTR("  [%2d]: %4d\r\n"),
                     i,
-                    robot.power.updated.samples[i]);
+                    robot.battery.updated.samples[i]);
     }
 
     return (0);

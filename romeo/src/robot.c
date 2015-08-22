@@ -47,93 +47,93 @@ static int handle_state_transition(struct robot_t *robot_p)
     switch (current) {
 
     case ROBOT_STATE_IDLE:
-	switch (next) {
-	case ROBOT_STATE_STARTING:
-	    callback = robot_transition__idle__starting;
-	    break;
-	default:
-	    break;
-	}
-	break;
+        switch (next) {
+        case ROBOT_STATE_STARTING:
+            callback = robot_transition__idle__starting;
+            break;
+        default:
+            break;
+        }
+        break;
 
     case ROBOT_STATE_STARTING:
-	switch (next) {
-	case ROBOT_STATE_CUTTING:
-	    callback = robot_transition__starting__cutting;
-	    break;
-	case ROBOT_STATE_IN_BASE_STATION:
-	    callback = robot_transition__starting__in_base_station;
-	    break;
-	default:
-	    break;
-	}
-	break;
+        switch (next) {
+        case ROBOT_STATE_CUTTING:
+            callback = robot_transition__starting__cutting;
+            break;
+        case ROBOT_STATE_IN_BASE_STATION:
+            callback = robot_transition__starting__in_base_station;
+            break;
+        default:
+            break;
+        }
+        break;
 
     case ROBOT_STATE_CUTTING:
-	switch (next) {
-	case ROBOT_STATE_SEARCHING_FOR_BASE_STATION:
-	    callback = robot_transition__cutting__searching_for_base_station;
-	    break;
-	case ROBOT_STATE_IDLE:
-	    callback = robot_transition__cutting__idle;
-	    break;
-	default:
-	    break;
-	}
-	break;
+        switch (next) {
+        case ROBOT_STATE_SEARCHING_FOR_BASE_STATION:
+            callback = robot_transition__cutting__searching_for_base_station;
+            break;
+        case ROBOT_STATE_IDLE:
+            callback = robot_transition__cutting__idle;
+            break;
+        default:
+            break;
+        }
+        break;
 
     case ROBOT_STATE_SEARCHING_FOR_BASE_STATION:
-	switch (next) {
-	case ROBOT_STATE_IN_BASE_STATION:
-	    callback = robot_transition__searching_for_base_station__in_base_station;
-	    break;
-	case ROBOT_STATE_IDLE:
-	    callback = robot_transition__searching_for_base_station__idle;
-	    break;
-	default:
-	    break;
-	}
-	break;
+        switch (next) {
+        case ROBOT_STATE_IN_BASE_STATION:
+            callback = robot_transition__searching_for_base_station__in_base_station;
+            break;
+        case ROBOT_STATE_IDLE:
+            callback = robot_transition__searching_for_base_station__idle;
+            break;
+        default:
+            break;
+        }
+        break;
 
     case ROBOT_STATE_IN_BASE_STATION:
-	switch (next) {
-	case ROBOT_STATE_CUTTING:
-	    callback = robot_transition__in_base_station__cutting;
-	    break;
-	case ROBOT_STATE_IDLE:
-	    callback = robot_transition__in_base_station__idle;
-	    break;
-	default:
-	    break;
-	}
-	break;
+        switch (next) {
+        case ROBOT_STATE_CUTTING:
+            callback = robot_transition__in_base_station__cutting;
+            break;
+        case ROBOT_STATE_IDLE:
+            callback = robot_transition__in_base_station__idle;
+            break;
+        default:
+            break;
+        }
+        break;
 
     default:
-	break;
+        break;
     }
 
     /* Bad state transition. */
     if (callback == NULL) {
-	std_printk(STD_LOG_ERR,
-		   FSTR("bad state transistion %d -> %d"),
-		   current,
-		   next);
-	return (-1);
+        std_printk(STD_LOG_ERR,
+                   FSTR("bad state transistion %d -> %d"),
+                   current,
+                   next);
+        return (-1);
     }
 
     std_printk(STD_LOG_NOTICE,
-	       FSTR("state transistion %d -> %d"),
-	       current,
-	       next);
+               FSTR("state transistion %d -> %d"),
+               current,
+               next);
 
     /* Call the transition callback. */
     state_callback = callback(robot_p);
     if (state_callback == NULL) {
-	std_printk(STD_LOG_NOTICE,
-		   FSTR("failed state transistion %d -> %d"),
-		   current,
-		   next);
-	return (-1);
+        std_printk(STD_LOG_NOTICE,
+                   FSTR("failed state transistion %d -> %d"),
+                   current,
+                   next);
+        return (-1);
     }
 
     /* Update state on successful state transition. */
@@ -153,38 +153,38 @@ int robot_init(struct robot_t *robot_p)
     robot_p->mode = ROBOT_MODE_AUTOMATIC;
 
     perimeter_wire_rx_init(&robot_p->perimeter,
-			   &adc_0_dev,
-			   &pin_a0_dev);
+                           &adc_0_dev,
+                           &pin_a0_dev);
 
-    power_init(&robot_p->power,
-	       &adc_0_dev,
-	       &pin_a1_dev);
+    battery_init(&robot_p->battery,
+                 &adc_0_dev,
+                 &pin_a1_dev);
 
     motor_init(&robot_p->left_motor,
-	       &pin_d2_dev,
-	       &pin_d3_dev,
-	       &pwm_d10_dev,
-	       &adc_0_dev,
-	       &pin_a2_dev);
+               &pin_d2_dev,
+               &pin_d3_dev,
+               &pwm_d10_dev,
+               &adc_0_dev,
+               &pin_a2_dev);
 
     motor_init(&robot_p->right_motor,
-	       &pin_d5_dev,
-	       &pin_d6_dev,
-	       &pwm_d11_dev,
-	       &adc_0_dev,
-	       &pin_a3_dev);
+               &pin_d5_dev,
+               &pin_d6_dev,
+               &pwm_d11_dev,
+               &adc_0_dev,
+               &pin_a3_dev);
 
     controller_pid_init(&robot_p->follow_pid_controller,
-			FOLLOW_KP,
-			FOLLOW_KI,
-			FOLLOW_KD);
+                        FOLLOW_KP,
+                        FOLLOW_KI,
+                        FOLLOW_KD);
 
     watchdog_init(&robot_p->watchdog,
-		  WATCHDOG_TIMEOUT_TICKS);
+                  WATCHDOG_TIMEOUT_TICKS);
 
     /* Start convertion of sensor data. */
     perimeter_wire_rx_async_convert(&robot_p->perimeter);
-    power_async_convert(&robot_p->power);
+    battery_async_convert(&robot_p->battery);
     motor_async_convert(&robot_p->left_motor);
     motor_async_convert(&robot_p->right_motor);
 
@@ -216,17 +216,17 @@ int robot_tick(struct robot_t *robot_p)
     /* Stop the robot if the watchdog is enabled and has not been
        kicked recently. */
     if (FS_PARAMETER(robot_parameter_watchdog_enabled) == 1) {
-	if (watchdog_tick(&robot_p->watchdog) == 0) {
-	    robot_p->state.next = ROBOT_STATE_IDLE;
-	}
+        if (watchdog_tick(&robot_p->watchdog) == 0) {
+            robot_p->state.next = ROBOT_STATE_IDLE;
+        }
     }
 
     /* Read sensor data and update the sensor objects. */
     perimeter_wire_rx_async_wait(&robot_p->perimeter);
     perimeter_wire_rx_update(&robot_p->perimeter);
 
-    power_async_wait(&robot_p->power);
-    power_update(&robot_p->power);
+    battery_async_wait(&robot_p->battery);
+    battery_update(&robot_p->battery);
 
     motor_async_wait(&robot_p->left_motor);
     motor_async_wait(&robot_p->right_motor);
@@ -235,15 +235,15 @@ int robot_tick(struct robot_t *robot_p)
 
     /* Start next convertion of sensor data. */
     perimeter_wire_rx_async_convert(&robot_p->perimeter);
-    power_async_convert(&robot_p->power);
+    battery_async_convert(&robot_p->battery);
     motor_async_convert(&robot_p->left_motor);
     motor_async_convert(&robot_p->right_motor);
 
     /* Execute robot state machine. */
     if (robot_p->state.current == robot_p->state.next) {
-	return (robot_p->state.callback(robot_p));
+        return (robot_p->state.callback(robot_p));
     } else {
-	return (handle_state_transition(robot_p));
+        return (handle_state_transition(robot_p));
     }
 }
 

@@ -29,7 +29,7 @@ ROMEO_SRC ?= \
 	movement.c \
 	perimeter_wire_rx.c \
 	perimeter_wire_tx.c \
-	power.c \
+	battery.c \
 	robot.c \
 	robot_states.c \
 	robot_transitions.c \
