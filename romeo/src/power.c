@@ -21,37 +21,17 @@
 #include "simba.h"
 #include "romeo.h"
 
-/**
- * Relations of sampled values and voltages.
- *
- * analog voltage:  0.0                3.83    4.0        5.0
- * analog sample:     0                 785    820       1024
- * battery voltage: 0.0                11.5   12.0       15.0
- *
- *                    |-------------------|------|----------|
- */
-
+/* Analog pin constants. */
 #define ANALOG_VOLTAGE_MAX 5.0f
 #define ANALOG_SAMPLES_MAX 1024
-#define ANALOG_VOLTAGE_PER_SAMPLE               \
-    (ANALOG_VOLTAGE_MAX / ANALOG_SAMPLES_MAX)
-#define ANALOG_SAMPLE_AT_4V                             \
-    ((ANALOG_SAMPLES_MAX * 4) / ANALOG_VOLTAGE_MAX)
 
 /* Measure over one of three resistors. */
-#define VOLTAGE_DIVIDER_GAIN 3
+#define VOLTAGE_DIVIDER_GAIN 3.0f
 
-#define BATTERY_VOLTAGE_PER_SAMPLE                      \
-    (VOLTAGE_DIVIDER_GAIN * ANALOG_VOLTAGE_PER_SAMPLE)
-
-#define BATTERY_VOLTAGE_WHEN_ANALOG_VOLTAGE_IS_4V (12.0f)
-
+/* Battery constants. */
+#define BATTERY_VOLTAGE_MAX (VOLTAGE_DIVIDER_GAIN * ANALOG_VOLTAGE_MAX)
+#define BATTERY_VOLTAGE_PER_SAMPLE (BATTERY_VOLTAGE_MAX / ANALOG_SAMPLES_MAX)
 #define BATTERY_VOLTAGE_EMPTY (11.5f)
-#define ANALOG_SAMPLE_EMPTY                             \
-    (ANALOG_SAMPLE_AT_4V -                              \
-    ((BATTERY_VOLTAGE_WHEN_ANALOG_VOLTAGE_IS_4V -       \
-      BATTERY_VOLTAGE_EMPTY) /                          \
-     BATTERY_VOLTAGE_PER_SAMPLE))
 
 FS_PARAMETER_DEFINE("/robot/power/set_battery_voltage_full", power_param_battery_voltage_full, int, 13);
 
@@ -108,8 +88,7 @@ int power_update(struct power_t *power_p)
     }
 
     /* Calculate the battery voltage. */
-    battery_voltage = (BATTERY_VOLTAGE_EMPTY +
-                       BATTERY_VOLTAGE_PER_SAMPLE * (sample - ANALOG_SAMPLE_EMPTY));
+    battery_voltage = (sample * BATTERY_VOLTAGE_PER_SAMPLE);
 
     /* Use the battery voltage to calculate the stored energy level. */
     if (battery_voltage < BATTERY_VOLTAGE_EMPTY) {
