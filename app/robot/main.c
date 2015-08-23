@@ -39,10 +39,10 @@ FS_COMMAND_DEFINE("/robot/sensors", robot_cmd_sensors);
 FS_COMMAND_DEFINE("/robot/watchdog/kick", robot_cmd_watchdog_kick);
 
 static struct uart_driver_t uart;
-static char qinbuf[32];
+static char qinbuf[64];
 
 static struct uart_driver_t uart3;
-static char qinbuf3[32];
+static char qinbuf3[64];
 
 static struct robot_t robot;
 static struct timer_t ticker;
