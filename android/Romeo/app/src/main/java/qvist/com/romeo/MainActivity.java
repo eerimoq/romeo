@@ -2,39 +2,23 @@ package qvist.com.romeo;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.provider.SyncStateContract;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.ListView;
-import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.BluetoothDevice;
-import android.widget.Toast;
-
-import java.util.ArrayList;
-import java.util.Set;
 
 import qvist.com.romeo.util.Constants;
 
 public class MainActivity extends ActionBarActivity {
 
+    private final int RESULT_BLUETOOTH_DEVICE_PICKER = 0;
+    private final int RESULT_PIN_CODE = 1;
+
     // Used when logging
     private static final String TAG = "MainActivity";
-
-    // Intent request codes
-    private static final int REQUEST_ENABLE_BLUETOOTH = 1;
-
-    private ArrayAdapter<String> mDevicesListAdapter;
-    ArrayList<String> mDevicesListMacAddresses;
-
-    // The bluetooth adapter
-    private BluetoothAdapter mBluetoothAdapter;
-
+    private String mPinCode = "1234";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,48 +27,10 @@ public class MainActivity extends ActionBarActivity {
 
         Log.d(TAG, "onCreate");
 
-        // Get the local Bluetooth adapter
-        mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-
-        if (mBluetoothAdapter == null) {
-            Toast.makeText(this, "Bluetooth is not available.", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        // Create ArrayAdapter
-        ArrayList<String> devices = new ArrayList<String>();
-        mDevicesListAdapter = new ArrayAdapter<String>(this, R.layout.devices_list_row, devices);
-
-        mDevicesListMacAddresses = new ArrayList<String>();
-
-        // Get the devices list reference
-        ListView devicesListView = (ListView)findViewById(R.id.devices_list);
-        devicesListView.setAdapter(mDevicesListAdapter);
-
-        // Add device item clicked listener
-        devicesListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            public void onItemClick(AdapterView<?> parent,
-                                    View view,
-                                    int position,
-                                    long id) {
-                Log.i(TAG, "Devices list item " + position
-                        + " pressed (" + mDevicesListAdapter.getItem(position) + ").");
-                startController(mDevicesListMacAddresses.get(position));
-            }
-        });
-    }
-
-    @Override
-    public void onStart() {
-        super.onStart();
-
-        // Request disabled bluetooth service to be enabled
-        if (!mBluetoothAdapter.isEnabled()) {
-            Log.i(TAG, "Bluetooth disabled. Send request to enable it.");
-            Intent intent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-            startActivityForResult(intent, REQUEST_ENABLE_BLUETOOTH);
-        } else {
-            populateDevicesList();
+        if (savedInstanceState == null) {
+            // start the bluetooth device picker
+            Intent intent = new Intent(this, BluetoothDevicePickerActivity.class);
+            startActivityForResult(intent, RESULT_BLUETOOTH_DEVICE_PICKER);
         }
     }
 
@@ -112,41 +58,50 @@ public class MainActivity extends ActionBarActivity {
 
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         switch (requestCode) {
-            case REQUEST_ENABLE_BLUETOOTH:
-                // When the request to enable Bluetooth returns
+            case RESULT_BLUETOOTH_DEVICE_PICKER:
                 if (resultCode == Activity.RESULT_OK) {
-                    // Bluetooth is now enabled, so set up a chat session
-                    Log.i(TAG, "Bluetooth enabled.");
-                    populateDevicesList();
-                } else {
-                    // User did not enable Bluetooth or an error occurred
-                    Log.d(TAG, "Bluetooth disabled");
-                    Toast.makeText(this, "Bluetooth disabled", Toast.LENGTH_SHORT).show();
-                    this.finish();
+                    String macAddress = data.getExtras().getString(Constants.INTENT_EXTRA_MAC_ADDRESS);
+                    Log.d(TAG, macAddress);
+
+                    // start the bluetooth device service
+                    BluetoothService bluetoothService = new BluetoothService(macAddress);
+
+                    if (!bluetoothService.connect()) {
+                        Log.d(TAG, "failed to connect to bluetooth device " + macAddress);
+                        return;
+                    }
+
+                    RomeoApplication app = (RomeoApplication)getApplication();
+                    app.mBluetoothService = bluetoothService;
+
+                    // start the pin code dialog
+                    Intent intent = new Intent(this, PinCodeActivity.class);
+                    startActivityForResult(intent, RESULT_PIN_CODE);
                 }
+                break;
+
+            case RESULT_PIN_CODE:
+                if (resultCode == Activity.RESULT_OK) {
+                    String pinCode = data.getExtras().getString(Constants.INTENT_EXTRA_PIN_CODE);
+
+                    if (pinCode.equals(mPinCode)) {
+
+                    } else {
+                        Log.i(TAG, "wrong pin code '" + pinCode + "'");
+                    }
+                }
+                break;
         }
     }
 
-    public void onScanForDevices(View v) {
-        Log.i(TAG, "Scan for devices button pressed.");
-    }
-
-    private void populateDevicesList() {
-        // Get a set of currently paired devices
-        Set<BluetoothDevice> mPairedDevices = mBluetoothAdapter.getBondedDevices();
-
-        mDevicesListMacAddresses.clear();
-        mDevicesListAdapter.clear();
-
-        for (BluetoothDevice device : mPairedDevices) {
-            mDevicesListMacAddresses.add(device.getAddress());
-            mDevicesListAdapter.add(device.getName());
-        }
-    }
-
-    private void startController(String macAddress) {
+    public void onManualButtonClick(View view) {
         Intent intent = new Intent(this, ControllerActivity.class);
-        intent.putExtra(Constants.INTENT_EXTRA_MAC_ADDRESS, macAddress);
         startActivity(intent);
+    }
+
+    public void onAutomaticButtonClick(View view) {
+    }
+
+    public void onGraphsButtonClick(View view) {
     }
 }

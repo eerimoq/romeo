@@ -9,4 +9,14 @@
     <string name="dummy_button">Dummy Button</string>
     <string name="dummy_content">DUMMY\nCONTENT</string>
     <string name="status_text_empty">p: -, b: -%</string>
+    <string name="ok">Ok</string>
+    <string name="cancel">Cancel</string>
+    <string name="title_activity_bluetooth_device_picket">BluetoothDevicePicketActivity</string>
+
+    <string name="hello_world">Hello world!</string>
+    <string name="title_activity_pin_code">PinCodeActivity</string>
+    <string name="pin_code_hint">1234</string>
+    <string name="manual">Manual</string>
+    <string name="automatic">Automatic</string>
+    <string name="graphs">Graphs</string>
 </resources>

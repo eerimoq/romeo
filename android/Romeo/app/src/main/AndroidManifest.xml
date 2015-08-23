@@ -1,20 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="qvist.com.romeo"
     android:versionCode="1"
-    android:versionName="0.1"
-    package="qvist.com.romeo" >
+    android:versionName="0.1" >
 
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
     <uses-permission android:name="android.permission.BLUETOOTH" />
-    <uses-permission android:name="android.permission.VIBRATE"/>
+    <uses-permission android:name="android.permission.VIBRATE" />
 
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
-        android:theme="@style/AppTheme" >
-
+        android:theme="@style/AppTheme"
+        android:name=".RomeoApplication">
         <activity
             android:name=".MainActivity"
             android:label="@string/app_name" >
@@ -24,19 +23,28 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
         <activity
             android:name=".ControllerActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/title_activity_controller"
             android:parentActivityName=".MainActivity"
             android:screenOrientation="landscape"
-            android:theme="@style/FullscreenTheme">
+            android:theme="@style/FullscreenTheme" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="qvist.com.romeo.MainActivity" />
         </activity>
-
+        <activity
+            android:name=".BluetoothDevicePickerActivity"
+            android:configChanges="orientation|keyboardHidden"
+            android:label="@string/title_activity_bluetooth_device_picket"
+            android:theme="@android:style/Theme.Holo.Dialog" >
+        </activity>
+        <activity
+            android:name=".PinCodeActivity"
+            android:label="@string/title_activity_pin_code"
+            android:theme="@android:style/Theme.Holo.Dialog" >
+        </activity>
     </application>
 
 </manifest>
