@@ -310,6 +310,8 @@ static int init()
     /* Start the shell. */
     shell_default.args.chin_p = &uart.chin;
     shell_default.args.chout_p = &uart.chout;
+    shell_default.args.username_p = "root";
+    shell_default.args.password_p = "1234";
     thrd_spawn(shell_entry,
                &shell_default.args,
                20,
@@ -319,6 +321,8 @@ static int init()
     /* Start the shell. */
     shell_bluetooth.args.chin_p = &uart3.chin;
     shell_bluetooth.args.chout_p = &uart3.chout;
+    shell_bluetooth.args.username_p = "root";
+    shell_bluetooth.args.password_p = "1234";
     thrd_spawn(shell_entry,
                &shell_bluetooth.args,
                20,
