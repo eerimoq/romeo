@@ -6,6 +6,7 @@ import android.bluetooth.BluetoothSocket;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
+import android.widget.Toast;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -35,6 +36,7 @@ public class BluetoothService {
     private ControllerThread mControllerThread;
     private BluetoothAdapter mBluetoothAdapter;
     private Handler mHandler = null;
+    private BluetoothDevice mDevice;
     private BluetoothSocket mSocket;
     private InputStream mInputStream = null;
     private OutputStream mOutputStream = null;
@@ -45,13 +47,13 @@ public class BluetoothService {
 
     public boolean connect() {
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-        BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(mMacAddress);
+        mDevice = mBluetoothAdapter.getRemoteDevice(mMacAddress);
 
         // Connect to the bluetooth device
         try {
             mBluetoothAdapter.cancelDiscovery();
 
-            mSocket = device.createInsecureRfcommSocketToServiceRecord(
+            mSocket = mDevice.createInsecureRfcommSocketToServiceRecord(
                     ROMEO_CONTROLLER_UUID_INSECURE);
 
             // This is a blocking call and will only return on a
@@ -63,14 +65,28 @@ public class BluetoothService {
             Log.e(TAG, "Failed to connect to bluetooth device.", e);
             return false;
         }
-        // Start controller thread
-        mControllerThread = new ControllerThread(device);
-        mControllerThread.start();
 
         return true;
     }
 
     public void disconnect() {
+    }
+
+    public boolean login(String username, String password) {
+        boolean result;
+
+        // Start controller thread
+        mControllerThread = new ControllerThread(mDevice, username, password);
+        result = mControllerThread.login();
+
+        if (result) {
+            mControllerThread.start();
+        }
+
+        return result;
+    }
+
+    public void logout() {
         mControllerThread.kill();
     }
 
@@ -87,7 +103,9 @@ public class BluetoothService {
     }
 
     private class ControllerThread extends Thread {
-        private final BluetoothDevice mDevice;
+        private BluetoothDevice mDevice;
+        private String mUsername;
+        private String mPassword;
         private String mMovementMessage = null;
         private LinkedList<String> mCommandMessages = new LinkedList<String>();
         private boolean mRunning = true;
@@ -98,16 +116,35 @@ public class BluetoothService {
         private final Pattern re_mode =
                 Pattern.compile("^mode = (.*)$");
 
-        public ControllerThread(BluetoothDevice device) {
+        public ControllerThread(BluetoothDevice device, String username, String password) {
             mDevice = device;
+            mUsername = username;
+            mPassword = password;
+        }
+
+        public boolean login() {
+            boolean result = true;
+
+            // login
+            write("\n");
+            write(mUsername + "\n");
+            write(mPassword + "\n");
 
             try {
-                mSocket = device.createInsecureRfcommSocketToServiceRecord(
-                        ROMEO_CONTROLLER_UUID_INSECURE);
+                String output = waitForPrompt();
+                if (output == null) {
+                    Log.d(TAG, "login failed");
+                    result = false;
+                } else {
+                    Log.d(TAG, "logged in");
+                }
+            } catch (InterruptedException e) {
+                result = false;
             } catch (IOException e) {
-                Log.e(TAG, "failed to create bluetooth socket", e);
+                result = false;
             }
 
+            return result;
         }
 
         private void notifyActivity(int message_id, String message) {
@@ -150,6 +187,8 @@ public class BluetoothService {
             }
 
             try {
+                write("\n");
+                write("logout\n");
                 mSocket.close();
             } catch (IOException e) {
             }
@@ -266,6 +305,10 @@ public class BluetoothService {
             }
 
             return result;
+        }
+
+        private void write(String data) {
+            write(data.getBytes());
         }
 
         private void write(byte[] data) {

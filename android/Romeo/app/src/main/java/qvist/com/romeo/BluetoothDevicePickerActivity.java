@@ -64,7 +64,7 @@ public class BluetoothDevicePickerActivity extends Activity {
                                     int position,
                                     long id) {
                 Log.i(TAG, "Devices list item " + position
-                        + " pressed (" + mDevicesListAdapter.getItem(position) + ").");
+                        + " pressed (" + mDevicesListMacAddresses.get(position) + ").");
                 passMacAddressToParent(mDevicesListMacAddresses.get(position));
             }
         });
@@ -82,13 +82,6 @@ public class BluetoothDevicePickerActivity extends Activity {
         } else {
             populateDevicesList();
         }
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_bluetooth_device_picket, menu);
-        return true;
     }
 
     @Override
