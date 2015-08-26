@@ -8,17 +8,36 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
+import android.widget.Toast;
+
+import java.util.ArrayList;
 
 import qvist.com.romeo.util.Constants;
 
 public class MainActivity extends ActionBarActivity {
 
-    private final int RESULT_BLUETOOTH_DEVICE_PICKER = 0;
-    private final int RESULT_PIN_CODE = 1;
-
     // Used when logging
     private static final String TAG = "MainActivity";
-    private String mPinCode = "1234";
+
+    private ArrayAdapter<String> mRobotsListAdapter;
+    private ArrayList<String> mRobotsListData;
+    private ArrayList<RobotCredentials> mRobots = new ArrayList<RobotCredentials>();
+
+    private class RobotCredentials {
+
+        public String mName;
+        public String mBluetoothMacAddress;
+        public String mPassword;
+
+        RobotCredentials(String name, String bluetoothMacAddress, String password) {
+            mName = name;
+            mBluetoothMacAddress = bluetoothMacAddress;
+            mPassword = password;
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -27,11 +46,47 @@ public class MainActivity extends ActionBarActivity {
 
         Log.d(TAG, "onCreate");
 
-        if (savedInstanceState == null) {
-            // start the bluetooth device picker
-            Intent intent = new Intent(this, BluetoothDevicePickerActivity.class);
-            startActivityForResult(intent, RESULT_BLUETOOTH_DEVICE_PICKER);
+        mRobots.add(new RobotCredentials("Evil", "20:15:07:02:07:36", "1234"));
+
+        // Create ArrayAdapter
+        ArrayList<String> robots = new ArrayList<String>();
+        mRobotsListAdapter = new ArrayAdapter<String>(this, R.layout.robots_list_row, robots);
+
+        for (RobotCredentials robot : mRobots) {
+            mRobotsListAdapter.add(robot.mName);
         }
+
+        // Get the devices list reference
+        ListView robotsListView = (ListView)findViewById(R.id.robots_list);
+        robotsListView.setAdapter(mRobotsListAdapter);
+
+        // Add device item clicked listener
+        robotsListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            public void onItemClick(AdapterView<?> parent,
+                                    View view,
+                                    int position,
+                                    long id) {
+                // Connect to the robo
+                RobotCredentials robot = mRobots.get(position);
+                String macAddress = robot.mBluetoothMacAddress;
+                Log.d(TAG, macAddress);
+
+                // start the bluetooth device service
+                if (bluetoothConnect(robot.mName, robot.mBluetoothMacAddress)) {
+                    if (getBluetoothService().login("root", robot.mPassword)) {
+                        Toast toast = Toast.makeText(getApplicationContext(), "Logged in", Toast.LENGTH_LONG);
+                        toast.show();
+
+                        // start the robot activity
+                        Intent intent = new Intent(getBaseContext(), RobotActivity.class);
+                        startActivity(intent);
+                    } else {
+                        Toast toast = Toast.makeText(getApplicationContext(), "Login failed", Toast.LENGTH_LONG);
+                        toast.show();
+                    }
+                }
+            }
+        });
     }
 
     @Override
@@ -56,52 +111,38 @@ public class MainActivity extends ActionBarActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        switch (requestCode) {
-            case RESULT_BLUETOOTH_DEVICE_PICKER:
-                if (resultCode == Activity.RESULT_OK) {
-                    String macAddress = data.getExtras().getString(Constants.INTENT_EXTRA_MAC_ADDRESS);
-                    Log.d(TAG, macAddress);
+    private boolean bluetoothConnect(String robotName, String macAddress) {
+        boolean connected;
+        String toastText;
+        BluetoothService bluetoothService = new BluetoothService(macAddress);
 
-                    // start the bluetooth device service
-                    BluetoothService bluetoothService = new BluetoothService(macAddress);
+        Toast toast = Toast.makeText(getApplicationContext(),
+                "Connecting to " + robotName + " ...",
+                Toast.LENGTH_LONG);
+        toast.show();
 
-                    if (!bluetoothService.connect()) {
-                        Log.d(TAG, "failed to connect to bluetooth device " + macAddress);
-                        return;
-                    }
+        connected = bluetoothService.connect();
 
-                    RomeoApplication app = (RomeoApplication)getApplication();
-                    app.mBluetoothService = bluetoothService;
+        if (!connected) {
+            Log.d(TAG, "failed to connect to bluetooth device " + macAddress);
+            toastText = "Connection failed";
+        } else {
+            Log.d(TAG, "Connected to " + macAddress);
 
-                    // start the pin code dialog
-                    Intent intent = new Intent(this, PinCodeActivity.class);
-                    startActivityForResult(intent, RESULT_PIN_CODE);
-                }
-                break;
+            toastText = "Connected";
 
-            case RESULT_PIN_CODE:
-                if (resultCode == Activity.RESULT_OK) {
-                    String pinCode = data.getExtras().getString(Constants.INTENT_EXTRA_PIN_CODE);
-
-                    if (pinCode.equals(mPinCode)) {
-
-                    } else {
-                        Log.i(TAG, "wrong pin code '" + pinCode + "'");
-                    }
-                }
-                break;
+            RomeoApplication app = (RomeoApplication) getApplication();
+            app.mBluetoothService = bluetoothService;
         }
+
+        toast = Toast.makeText(getApplicationContext(), toastText, Toast.LENGTH_LONG);
+        toast.show();
+
+        return connected;
     }
 
-    public void onManualButtonClick(View view) {
-        Intent intent = new Intent(this, ControllerActivity.class);
-        startActivity(intent);
-    }
-
-    public void onAutomaticButtonClick(View view) {
-    }
-
-    public void onGraphsButtonClick(View view) {
+    private BluetoothService getBluetoothService() {
+        RomeoApplication app = (RomeoApplication) getApplication();
+        return app.mBluetoothService;
     }
 }

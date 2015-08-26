@@ -4,26 +4,28 @@ import android.app.Activity;
 import android.content.Intent;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.EditText;
 
 import qvist.com.romeo.util.Constants;
 
+public class RobotActivity extends ActionBarActivity {
 
-public class PinCodeActivity extends Activity {
+    // Used when logging
+    private static final String TAG = "RobotActivity";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_pin_code);
+        setContentView(R.layout.activity_robot);
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_pin_code, menu);
+        getMenuInflater().inflate(R.menu.menu_robot, menu);
         return true;
     }
 
@@ -42,20 +44,25 @@ public class PinCodeActivity extends Activity {
         return super.onOptionsItemSelected(item);
     }
 
-    public void onCancelButtonClick(View view) {
-        setResult(Activity.RESULT_CANCELED);
-        finish();
+    public void onManualButtonClick(View view) {
+        Intent intent = new Intent(this, ControllerActivity.class);
+        startActivity(intent);
     }
 
-    public void onOkButtonClick(View view) {
-        EditText pinCode;
-        Intent intent;
+    public void onAutomaticButtonClick(View view) {
+        BluetoothService bluetoothService;
 
-        // pass pin code to parent activity
-        pinCode = (EditText)findViewById(R.id.pin_code);
-        intent = new Intent(this, ControllerActivity.class);
-        intent.putExtra(Constants.INTENT_EXTRA_PIN_CODE, pinCode.getText().toString());
-        setResult(Activity.RESULT_OK, intent);setResult(Activity.RESULT_OK, intent);
-        finish();
+        RomeoApplication app = (RomeoApplication)getApplication();
+        bluetoothService = app.mBluetoothService;
+        bluetoothService.setHandler(null);
+
+        bluetoothService.sendCommand("");
+        bluetoothService.sendCommand("robot/stop");
+        bluetoothService.sendCommand("robot/mode/set automatic");
+        bluetoothService.sendCommand("robot/parameters/watchdog/enabled 0");
+        bluetoothService.sendCommand("robot/start");
+    }
+
+    public void onGraphsButtonClick(View view) {
     }
 }
