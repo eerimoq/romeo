@@ -46,11 +46,11 @@
 
 /* Searching for base station states. */
 #define SEARCHING_STATE_SEARCHING_FOR_PERIMETER_WIRE 0
-#define SEARCHING_STATE_FOLLOWING_PERIMETER_WIRE      1
+#define SEARCHING_STATE_FOLLOWING_PERIMETER_WIRE     1
 
 /* Drive backwards a number of ticks. */
 #ifndef CUTTING_STATE_BACKWARDS_TICKS
-#    define CUTTING_STATE_BACKWARDS_TICKS 64
+#    define CUTTING_STATE_BACKWARDS_TICKS 32
 #endif
 
 #ifndef WATCHDOG_TIMEOUT_TICKS
@@ -60,7 +60,7 @@
 /* Rotate a random number of ticks. */
 #ifndef CUTTING_STATE_ROTATING_TICKS
 #    include <math.h>
-#    define CUTTING_STATE_ROTATING_TICKS  (31 + (rand() & 0x3f))
+#    define CUTTING_STATE_ROTATING_TICKS  (15 + (rand() & 0xf))
 #endif
 
 struct robot_t;

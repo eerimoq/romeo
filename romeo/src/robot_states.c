@@ -225,7 +225,7 @@ static int cutting_automatic(struct robot_t *robot_p,
             FS_COUNTER_INC(robot_cutting_state_rotating, 1);
 
             *speed_p = 0.0f;
-            *omega_p = 0.1f;
+            *omega_p = 0.4f;
 
             if (cutting_p->ticks_left == 0) {
                 if (is_inside_perimeter_wire(signal)) {
