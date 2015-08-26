@@ -46,23 +46,27 @@ static int test_calculate_wheels_omega(struct harness_t *harness_p)
     float left_wheel_omega;
     float right_wheel_omega;
     int i;
+    struct movement_t movement;
 
     static struct testdata_t testdata[] = {
         /* Standing still. */
         { 0.0f, 0.0f, 0.0f, 0.0f },
         /* Moving in a straight line with a speed of 0.2 m/s. */
-        { 0.2f, 0.0f, PI, PI },
+        { 0.32f, 0.0f, PI, PI },
         /* Moving in a straight line with a speed of -0.2 m/s. */
-        { -0.2f, 0.0f, -PI, -PI },
+        { -0.32f, 0.0f, -PI, -PI },
         /* Truning in place with the angular velocity 1.0 rad/s. */
-        { 0.0f, 1.0f, 2.356f, -2.356f },
+        { 0.0f, 1.57f, 2.356f, -2.356f },
         /* Combined turning and speed. */
-        { 0.1f, 0.1f, 1.8064f, 1.3352f }
+        { 0.1f, 0.538f, 1.8064f, 0.193f }
     };
+
+    movement_init(&movement, 0.3f, 0.1f);
 
     for (i = 0; i < membersof(testdata); i++) {
         std_printf(FSTR("testdata index: %d\r\n"), i);
-        movement_calculate_wheels_omega(testdata[i].speed,
+        movement_calculate_wheels_omega(&movement,
+                                        testdata[i].speed,
                                         testdata[i].omega,
                                         &left_wheel_omega,
                                         &right_wheel_omega);

@@ -24,8 +24,11 @@
 #include "simba.h"
 #include "romeo.h"
 
-#define MOTOR_OMEGA_MAX PI
+/* Maximum motor rpm and angular velocity. */
+#define MOTOR_RPM_MAX   30
+#define MOTOR_OMEGA_MAX (((2 * PI) * MOTOR_RPM_MAX) / 60)
 
+/* Motor rotation direction. */
 #define MOTOR_DIRECTION_CW  0
 #define MOTOR_DIRECTION_CCW 1
 

@@ -26,6 +26,9 @@
 #define FOLLOW_KI  0.0
 #define FOLLOW_KD -0.1
 
+#define ROBOT_WHEEL_DISTANCE 0.3f
+#define ROBOT_WHEEL_RADIUS   0.09f
+
 FS_PARAMETER_DEFINE("/robot/parameters/watchdog/enabled", robot_parameter_watchdog_enabled, int, 1);
 
 FS_COUNTER_DEFINE(robot_tick);
@@ -159,6 +162,10 @@ int robot_init(struct robot_t *robot_p)
     battery_init(&robot_p->battery,
                  &adc_0_dev,
                  &pin_a1_dev);
+
+    movement_init(&robot_p->movement,
+                  ROBOT_WHEEL_DISTANCE,
+                  ROBOT_WHEEL_RADIUS);
 
     motor_init(&robot_p->left_motor,
                &pin_d2_dev,

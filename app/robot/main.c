@@ -206,12 +206,16 @@ int robot_cmd_manual_movement_set(int argc,
 
     long speed;
     long omega;
+    float speed_max = movement_get_maximum_speed(&robot.movement);
+    float omega_max = movement_get_maximum_omega(&robot.movement);
 
     std_strtol(argv[1], &speed);
     std_strtol(argv[2], &omega);
 
-    robot.manual.speed = 0.1f * (((float)speed) / 100.0f);
-    robot.manual.omega = 0.4f * (((float)omega) / 100.0f);
+    /* Overflow in the movement calculation will occur if both speed
+       and omega are close to the maximum. */
+    robot.manual.speed = speed_max * (((float)speed) / 100.0f);
+    robot.manual.omega = omega_max * (((float)omega) / 100.0f);
 
     return (0);
 }

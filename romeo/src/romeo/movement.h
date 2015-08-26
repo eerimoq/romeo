@@ -24,6 +24,22 @@
 #include "simba.h"
 #include "romeo.h"
 
+struct movement_t {
+    float wheel_distance_in_meters;
+    float wheel_radius_in_meters;
+};
+
+/**
+ * Initialize movement object with given geometry.
+ * @param[out] movement_p Obkect to initialize.
+ * @param[in] wheel_distance_in_meters
+ * @param[out] wheel_radius_in_meters.
+ * @return zero(0) or negative error code.
+ */
+int movement_init(struct movement_t *movement_p,
+                  float wheel_distance_in_meters,
+                  float wheel_radius_in_meters);
+
 /**
  * Calculate wheel turn rates from given robot speed and rotation.
  * @param[in] movement_p Movement instance.
@@ -36,9 +52,24 @@
  *         are successfully calculated and within allowed ranges,
  *         otherwise negative error code
  */
-int movement_calculate_wheels_omega(float speed,
+int movement_calculate_wheels_omega(struct movement_t *movement_p,
+                                    float speed,
                                     float omega,
                                     float *left_wheel_omega_p,
                                     float *right_wheel_omega_p);
+
+/**
+ * Get the maximum speed.
+ * @param[in] movement_p Movement instance.
+ * @return the maximum speed
+ */
+float movement_get_maximum_speed(struct movement_t *movement_p);
+
+/**
+ * Get the maximum omega.
+ * @param[in] movement_p Movement instance.
+ * @return the maximum omega
+ */
+float movement_get_maximum_omega(struct movement_t *movement_p);
 
 #endif

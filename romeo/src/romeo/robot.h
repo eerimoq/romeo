@@ -90,6 +90,7 @@ struct robot_t {
         struct cutting_state_t cutting;
         struct searching_for_base_station_state_t searching;
     } substate;
+    struct movement_t movement;
     struct motor_t left_motor;
     struct motor_t right_motor;
     struct perimeter_wire_rx_t perimeter;

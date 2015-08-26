@@ -141,7 +141,8 @@ static int follow_perimeter_wire(struct robot_t *robot_p,
     }
 
     /* Calculate new driver motor speeds and set them. */
-    movement_calculate_wheels_omega(speed,
+    movement_calculate_wheels_omega(&robot_p->movement,
+                                    speed,
                                     omega,
                                     left_wheel_omega_p,
                                     right_wheel_omega_p);
@@ -285,7 +286,8 @@ int robot_state_cutting(struct robot_t *robot_p)
     }
 
     /* Convert the robot speeds to wheel motor angular velocities. */
-    movement_calculate_wheels_omega(speed,
+    movement_calculate_wheels_omega(&robot_p->movement,
+                                    speed,
                                     omega,
                                     &left_wheel_omega,
                                     &right_wheel_omega);
