@@ -43,9 +43,21 @@ FS_COUNTER_DEFINE(robot_is_inside_perimeter_wire);
 FS_COUNTER_DEFINE(robot_is_outside_perimeter_wire);
 
 FS_PARAMETER_DEFINE("/robot/parameters/charging", robot_parameter_charging, int, 0);
+FS_PARAMETER_DEFINE("/robot/parameters/search_for_the_base_station", robot_parameter_search_for_the_base_station, int, -1);
 
+/**
+ * @return true(1) if the robot should start searching for the base
+ *         station, otherwise false(0).
+ */
 static int is_time_to_search_for_base_station(struct robot_t *robot_p)
 {
+    int search_for_the_base_station =
+        FS_PARAMETER(robot_parameter_search_for_the_base_station);
+
+    if (search_for_the_base_station != -1) {
+        return (search_for_the_base_station != 0);
+    }
+
     return (battery_get_stored_energy_level(&robot_p->battery) <= 20);
 }
 
@@ -158,6 +170,7 @@ static int cutting_manual(struct robot_t *robot_p,
         *speed = robot_p->manual.speed;
         *omega = robot_p->manual.omega;
     } else {
+        /* In manual mode, stand still when the robot is stuck. */
         *speed = 0.0f;
         *omega = 0.0f;
     }
