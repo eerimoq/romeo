@@ -21,7 +21,7 @@
 #include "simba.h"
 #include "romeo.h"
 
-FS_COUNTER_DEFINE(perimeter_timer_callback);
+FS_COUNTER_DEFINE("robot/counters/perimeter_timer_callback", perimeter_timer_callback);
 
 #define PERIOD_NS 100000L
 

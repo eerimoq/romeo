@@ -25,22 +25,22 @@
 
 #define CONTROL_ROTATE_THRESHOLD 1.0f
 
-FS_COUNTER_DEFINE(robot_state_idle);
-FS_COUNTER_DEFINE(robot_state_starting);
-FS_COUNTER_DEFINE(robot_state_cutting);
-FS_COUNTER_DEFINE(robot_state_searching_for_base_station);
-FS_COUNTER_DEFINE(robot_state_in_base_station);
+FS_COUNTER_DEFINE("robot/counters/state_idle", robot_state_idle);
+FS_COUNTER_DEFINE("robot/counters/state_starting", robot_state_starting);
+FS_COUNTER_DEFINE("robot/counters/state_cutting", robot_state_cutting);
+FS_COUNTER_DEFINE("robot/counters/state_searching_for_base_station", robot_state_searching_for_base_station);
+FS_COUNTER_DEFINE("robot/counters/state_in_base_station", robot_state_in_base_station);
 
-FS_COUNTER_DEFINE(robot_cutting_state_forward);
-FS_COUNTER_DEFINE(robot_cutting_state_backwards);
-FS_COUNTER_DEFINE(robot_cutting_state_rotating);
+FS_COUNTER_DEFINE("robot/counters/cutting_state_forward", robot_cutting_state_forward);
+FS_COUNTER_DEFINE("robot/counters/cutting_state_backwards", robot_cutting_state_backwards);
+FS_COUNTER_DEFINE("robot/counters/cutting_state_rotating", robot_cutting_state_rotating);
 
-FS_COUNTER_DEFINE(robot_odometer);
+FS_COUNTER_DEFINE("robot/counters/odometer", robot_odometer);
 
-FS_COUNTER_DEFINE(robot_is_stuck);
+FS_COUNTER_DEFINE("robot/counters/is_Stuck", robot_is_stuck);
 
-FS_COUNTER_DEFINE(robot_is_inside_perimeter_wire);
-FS_COUNTER_DEFINE(robot_is_outside_perimeter_wire);
+FS_COUNTER_DEFINE("robot/counters/is_inside_perimeter_wire", robot_is_inside_perimeter_wire);
+FS_COUNTER_DEFINE("robot/counters/is_outside_perimeter_wire", robot_is_outside_perimeter_wire);
 
 FS_PARAMETER_DEFINE("/robot/parameters/charging", robot_parameter_charging, int, 0);
 FS_PARAMETER_DEFINE("/robot/parameters/search_for_the_base_station", robot_parameter_search_for_the_base_station, int, -1);

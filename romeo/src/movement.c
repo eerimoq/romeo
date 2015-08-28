@@ -21,8 +21,8 @@
 #include "simba.h"
 #include "romeo.h"
 
-FS_COUNTER_DEFINE(robot_movement_left_omega_too_big);
-FS_COUNTER_DEFINE(robot_movement_right_omega_too_big);
+FS_COUNTER_DEFINE("robot/counters/movement_left_omega_too_big", robot_movement_left_omega_too_big);
+FS_COUNTER_DEFINE("robot/counters/movement_right_omega_too_big", robot_movement_right_omega_too_big);
 
 /**
  * Robot sketch with definitions of velocity and angular velocity

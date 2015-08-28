@@ -21,7 +21,7 @@
 #include "simba.h"
 #include "romeo.h"
 
-FS_COUNTER_DEFINE(base_station_tick);
+FS_COUNTER_DEFINE("base_station/counters/tick", base_station_tick);
 
 int base_station_init(struct base_station_t *base_station_p)
 {
