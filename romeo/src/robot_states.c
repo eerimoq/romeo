@@ -25,6 +25,11 @@
 
 #define CONTROL_ROTATE_THRESHOLD 1.0f
 
+#define FOLLOW_KP  1.0
+#define FOLLOW_KI  0.0
+#define FOLLOW_KD -0.1
+
+/* Counters. */
 FS_COUNTER_DEFINE("robot/counters/state_idle", robot_state_idle);
 FS_COUNTER_DEFINE("robot/counters/state_starting", robot_state_starting);
 FS_COUNTER_DEFINE("robot/counters/state_cutting", robot_state_cutting);
@@ -42,6 +47,7 @@ FS_COUNTER_DEFINE("robot/counters/is_Stuck", robot_is_stuck);
 FS_COUNTER_DEFINE("robot/counters/is_inside_perimeter_wire", robot_is_inside_perimeter_wire);
 FS_COUNTER_DEFINE("robot/counters/is_outside_perimeter_wire", robot_is_outside_perimeter_wire);
 
+/* Parameters. */
 FS_PARAMETER_DEFINE("/robot/parameters/charging", robot_parameter_charging, int, 0);
 FS_PARAMETER_DEFINE("/robot/parameters/search_for_the_base_station", robot_parameter_search_for_the_base_station, int, -1);
 
@@ -106,24 +112,23 @@ static int is_arriving_to_base_station(struct robot_t *robot_p)
  * should be positive.
  */
 static int follow_perimeter_wire(struct robot_t *robot_p,
-                                 float *left_wheel_omega_p,
-                                 float *right_wheel_omega_p,
+                                 struct searching_for_base_station_state_t *searching_p,
+                                 float *speed_p,
+                                 float *omega_p,
                                  float signal)
 {
     float control;
-    float speed, omega;
 
-    /* Just wait if the robot is stuck. */
+    /* Just wait if the robot is stuck. The default speed and omeg are
+       zero. */
     if (is_stuck(robot_p)) {
-        *left_wheel_omega_p = 0.0f;
-        *right_wheel_omega_p = 0.0f;
         return (0);
     }
 
     /* Try to stay on top of the wire, hence set the actual value to
        0.0f. The returned control value is used to calculate motor
        speeds. */
-    control = controller_pid_calculate(&robot_p->follow_pid_controller,
+    control = controller_pid_calculate(&searching_p->pid_controller,
                                        0.0f,
                                        signal);
 
@@ -132,32 +137,22 @@ static int follow_perimeter_wire(struct robot_t *robot_p,
                (int)signal,
                (int)(100 * control));
 
-    /* A big control value indicates the robot is off follow, so just
-       rotate the robot. Start driving forward when the control value
-       is sufficiantly small. */
-    speed = 0.0f;
-
+    /* A big control value indicates that the robot is off track. Just
+       rotate back towards the wire and start driving forward when the
+       control value is sufficiantly small again. */
     if (control > CONTROL_ROTATE_THRESHOLD) {
         /* The robot is inside the perimeter wire, turn left towards
            the wire.*/
-        omega = -0.2f;
+        *omega_p = -0.1f;
     } else if (control < -CONTROL_ROTATE_THRESHOLD) {
         /* The robot is outside the perimeter wire, turn right towards
            the wire.*/
-        omega = 0.2f;
+        *omega_p = 0.1f;
     } else {
-        /* Give the robot some speed forwards and try to follow the
-           line. */
-        speed = 0.1f;
-        omega = -control / 4.0f;
+        /* Follow the line. */
+        *speed_p = 0.05f;
+        *omega_p = -control / 4.0f;
     }
-
-    /* Calculate new driver motor speeds and set them. */
-    movement_calculate_wheels_omega(&robot_p->movement,
-                                    speed,
-                                    omega,
-                                    left_wheel_omega_p,
-                                    right_wheel_omega_p);
 
     return (0);
 }
@@ -320,13 +315,15 @@ int robot_state_cutting(struct robot_t *robot_p)
 int robot_state_searching_for_base_station(struct robot_t *robot_p)
 {
     float signal;
+    float speed;
+    float omega;
     float left_wheel_omega;
     float right_wheel_omega;
     struct searching_for_base_station_state_t *searching_p =
         &robot_p->substate.searching;
 
-    left_wheel_omega = 0.0f;
-    right_wheel_omega = 0.0f;
+    speed = 0.0f;
+    omega = 0.0f;
 
     signal = perimeter_wire_rx_get_signal(&robot_p->perimeter);
 
@@ -337,11 +334,17 @@ int robot_state_searching_for_base_station(struct robot_t *robot_p)
         if (!is_stuck(robot_p)) {
             /* Find the perimeter wire. */
             if (is_inside_perimeter_wire(signal)) {
-                left_wheel_omega = 0.05f;
-                right_wheel_omega = 0.05f;
+                speed = 0.1f;
+                omega = 0.0f;
             } else {
                 /* Perimeter wire found. */
                 searching_p->state = SEARCHING_STATE_FOLLOWING_PERIMETER_WIRE;
+
+                /* Initialize the PID controller. */
+                controller_pid_init(&searching_p->pid_controller,
+                                    FOLLOW_KP,
+                                    FOLLOW_KI,
+                                    FOLLOW_KD);
             }
         } else {
             /* TODO: try to get free */
@@ -349,11 +352,22 @@ int robot_state_searching_for_base_station(struct robot_t *robot_p)
     } else {
         /* Follow the perimeter wire to the base station. */
         if (!is_arriving_to_base_station(robot_p)) {
-            follow_perimeter_wire(robot_p, &left_wheel_omega, &right_wheel_omega, signal);
+            follow_perimeter_wire(robot_p,
+                                  searching_p,
+                                  &speed,
+                                  &omega,
+                                  signal);
         } else {
             robot_p->state.next = ROBOT_STATE_IN_BASE_STATION;
         }
     }
+
+    /* Convert the robot speeds to wheel motor angular velocities. */
+    movement_calculate_wheels_omega(&robot_p->movement,
+                                    speed,
+                                    omega,
+                                    &left_wheel_omega,
+                                    &right_wheel_omega);
 
     motor_set_omega(&robot_p->left_motor, left_wheel_omega);
     motor_set_omega(&robot_p->right_motor, right_wheel_omega);

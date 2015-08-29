@@ -22,10 +22,6 @@
 #include "romeo.h"
 #include "robot.h"
 
-#define FOLLOW_KP  1.0
-#define FOLLOW_KI  0.0
-#define FOLLOW_KD -0.1
-
 #define ROBOT_WHEEL_DISTANCE 0.3f
 #define ROBOT_WHEEL_RADIUS   0.09f
 
@@ -180,11 +176,6 @@ int robot_init(struct robot_t *robot_p)
                &pwm_d11_dev,
                &adc_0_dev,
                &pin_a3_dev);
-
-    controller_pid_init(&robot_p->follow_pid_controller,
-                        FOLLOW_KP,
-                        FOLLOW_KI,
-                        FOLLOW_KD);
 
     watchdog_init(&robot_p->watchdog,
                   WATCHDOG_TIMEOUT_TICKS);

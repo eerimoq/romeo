@@ -81,6 +81,7 @@ struct cutting_state_t {
 
 struct searching_for_base_station_state_t {
     int state;
+    struct controller_pid_t pid_controller;
 };
 
 struct robot_t {
@@ -94,7 +95,6 @@ struct robot_t {
     struct motor_t left_motor;
     struct motor_t right_motor;
     struct perimeter_wire_rx_t perimeter;
-    struct controller_pid_t follow_pid_controller;
     struct battery_t battery;
     struct watchdog_t watchdog;
     struct {
