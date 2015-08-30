@@ -24,7 +24,7 @@
 #define VERSION_STR "0.1.0"
 
 struct shell_config_t {
-    char stack[456];
+    char stack[784];
     struct shell_args_t args;
     struct queue_t input_channel;
     char input_channel_buf[2];
@@ -43,6 +43,8 @@ static char qinbuf[64];
 
 static struct uart_driver_t uart3;
 static char qinbuf3[64];
+
+struct queue_t qperiodic;
 
 static struct robot_t robot;
 static struct timer_t ticker;
@@ -138,6 +140,7 @@ int robot_cmd_status(int argc,
     case ROBOT_STATE_SEARCHING_FOR_BASE_STATION:
 	std_fprintf(out_p, FSTR("/"));
 	std_fprintf(out_p, searching_state_as_string[robot.substate.searching.state]);
+	std_fprintf(out_p, FSTR("\r\ncontrol = %f"), robot.substate.searching.control);
 	break;
     }
 
@@ -150,8 +153,10 @@ int robot_cmd_status(int argc,
 		     "perimeter signal quality = %f\r\n"
 		     "battery voltage = %f V\r\n"
 		     "battery energy level = %d%%\r\n"
-		     "left motor current = %f\r\n"
-		     "right motor current = %f\r\n"
+		     "left motor direction = %d\r\n"
+		     "left motor duty = %d\r\n"
+		     "right motor direction = %d\r\n"
+		     "right motor duty = %d\r\n"
                      "watchdog count = %d\r\n"),
 		(int)T2ST(&time),
 		robot.debug.tick_time,
@@ -159,8 +164,10 @@ int robot_cmd_status(int argc,
 		perimeter_wire_rx_get_quality(&robot.perimeter),
 		battery_get_battery_voltage(&robot.battery),
 		battery_get_stored_energy_level(&robot.battery),
-		motor_get_current(&robot.left_motor),
-		motor_get_current(&robot.right_motor),
+		motor_get_direction(&robot.left_motor),
+		motor_get_duty_cycle(&robot.left_motor),
+		motor_get_direction(&robot.right_motor),
+		motor_get_duty_cycle(&robot.right_motor),
                 robot.watchdog.count);
 
     if (robot.mode == ROBOT_MODE_MANUAL) {
@@ -279,9 +286,9 @@ int robot_cmd_watchdog_kick(int argc,
 
 static void timer_callback(void *arg_p)
 {
-    struct thrd_t *thrd_p = arg_p;
+    char buf[1];
 
-    thrd_resume_irq(thrd_p, 0);
+    queue_write_irq(&qperiodic, buf, sizeof(buf));
 }
 
 static int init()
@@ -305,6 +312,8 @@ static int init()
     queue_init(&shell_bluetooth.input_channel,
                shell_bluetooth.input_channel_buf,
                sizeof(shell_bluetooth.input_channel_buf));
+
+    queue_init(&qperiodic, NULL, 0);
 
     robot_init(&robot);
 
@@ -340,6 +349,7 @@ int main()
 {
     struct time_t timeout;
     struct time_t start_time;
+    char buf[1];
 
     init();
 
@@ -350,15 +360,15 @@ int main()
     timeout.nanoseconds = PROCESS_PERIOD_NS;
 
     timer_set(&ticker,
-	      &timeout,
-	      timer_callback,
-	      self_p,
-	      TIMER_PERIODIC);
+              &timeout,
+              timer_callback,
+              self_p,
+              TIMER_PERIODIC);
 
     /* Robot main loop. */
     while (1) {
 	/* Timer callback resumes this thread. */
-	thrd_suspend(NULL);
+	chan_read(&qperiodic, buf, sizeof(buf));
 
         time_get(&start_time);
 

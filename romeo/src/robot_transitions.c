@@ -27,9 +27,11 @@ static int enter_cutting(struct robot_t *robot_p)
     robot_p->substate.cutting.state = CUTTING_STATE_FORWARD;
 
     /* Low sensitivity on sensors and actuators. */
-    perimeter_wire_rx_set_filter_weight(&robot_p->perimeter, 9.0f);
-    motor_set_filter_weight(&robot_p->left_motor, 3.0f);
-    motor_set_filter_weight(&robot_p->right_motor, 3.0f);
+    perimeter_wire_rx_set_filter_weight(&robot_p->perimeter, 15.0f);
+    motor_set_filter_weight(&robot_p->left_motor, 30.0f);
+    motor_set_filter_weight(&robot_p->right_motor, 30.0f);
+
+    return (0);
 }
 
 state_callback_t robot_transition__idle__starting(struct robot_t *robot_p)

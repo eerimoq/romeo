@@ -35,6 +35,8 @@
 struct motor_t {
     float omega;
     float filter_weight;
+    int direction;
+    int duty;
     struct pin_driver_t in1;
     struct pin_driver_t in2;
     struct pwm_driver_t enable;
@@ -123,5 +125,19 @@ float motor_get_current(struct motor_t *motor_p);
  */
 int motor_set_filter_weight(struct motor_t *motor_p,
                             float weight);
+
+/**
+ * Get motor rotation direction.
+ * @param[in] motor_p Initialized motor object.
+ * @return Motor rotation direction.
+ */
+int motor_get_direction(struct motor_t *motor_p);
+
+/**
+ * Get motor duty cycle.
+ * @param[in] motor_p Initialized motor object.
+ * @return Motor dut cycle [0..255].
+ */
+int motor_get_duty_cycle(struct motor_t *motor_p);
 
 #endif

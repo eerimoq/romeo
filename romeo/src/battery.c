@@ -33,7 +33,7 @@
 #define BATTERY_VOLTAGE_PER_SAMPLE (BATTERY_VOLTAGE_MAX / ANALOG_SAMPLES_MAX)
 #define BATTERY_VOLTAGE_EMPTY (11.5f)
 
-FS_PARAMETER_DEFINE("/robot/battery/set_battery_voltage_full", battery_param_battery_voltage_full, int, 13);
+FS_PARAMETER_DEFINE("/robot/parameters/set_battery_voltage_full", battery_param_battery_voltage_full, int, 13);
 
 int battery_init(struct battery_t *battery_p,
                struct adc_device_t *dev_p,

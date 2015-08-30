@@ -27,7 +27,7 @@
 
 struct perimeter_wire_rx_t {
     struct adc_driver_t adc;
-    float filter_delay;
+    float filter_weight;
     struct {
         int samples[PERIMETER_WIRE_RX_SAMPLES_MAX];
     } ongoing;
@@ -92,7 +92,7 @@ float perimeter_wire_rx_get_quality(struct perimeter_wire_rx_t *perimeter_p);
  * @param[in] weight Weight to put on the average.
  * @return zero(0) or negative error code.
  */
-int perimeter_set_filter_weight(struct perimeter_t *perimeter_p,
-                                float weight);
+int perimeter_wire_rx_set_filter_weight(struct perimeter_wire_rx_t *perimeter_p,
+                                        float weight);
 
 #endif

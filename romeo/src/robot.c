@@ -22,13 +22,13 @@
 #include "romeo.h"
 #include "robot.h"
 
-#define ROBOT_WHEEL_DISTANCE 0.3f
-#define ROBOT_WHEEL_RADIUS   0.09f
+#define ROBOT_WHEEL_DISTANCE 0.2f
+#define ROBOT_WHEEL_RADIUS   0.04f
 
 FS_PARAMETER_DEFINE("/robot/parameters/watchdog/enabled", robot_parameter_watchdog_enabled, int, 1);
 
-FS_COUNTER_DEFINE("robot/counters/tick", robot_tick);
-FS_COUNTER_DEFINE("robot/counters/number_of_state_transitions", number_of_state_transitions);
+FS_COUNTER_DEFINE("/robot/counters/tick", robot_tick);
+FS_COUNTER_DEFINE("/robot/counters/number_of_state_transitions", number_of_state_transitions);
 
 /**
  * Handle state transition.

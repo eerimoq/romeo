@@ -23,29 +23,27 @@
 #include "robot.h"
 #include <math.h>
 
-#define CONTROL_ROTATE_THRESHOLD 1.0f
-
-#define FOLLOW_KP  1.0
-#define FOLLOW_KI  0.0
-#define FOLLOW_KD -0.1
+#define FOLLOW_KP 1.0f
+#define FOLLOW_KI 0.0f
+#define FOLLOW_KD 0.5f
 
 /* Counters. */
-FS_COUNTER_DEFINE("robot/counters/state_idle", robot_state_idle);
-FS_COUNTER_DEFINE("robot/counters/state_starting", robot_state_starting);
-FS_COUNTER_DEFINE("robot/counters/state_cutting", robot_state_cutting);
-FS_COUNTER_DEFINE("robot/counters/state_searching_for_base_station", robot_state_searching_for_base_station);
-FS_COUNTER_DEFINE("robot/counters/state_in_base_station", robot_state_in_base_station);
+FS_COUNTER_DEFINE("/robot/counters/state_idle", robot_state_idle);
+FS_COUNTER_DEFINE("/robot/counters/state_starting", robot_state_starting);
+FS_COUNTER_DEFINE("/robot/counters/state_cutting", robot_state_cutting);
+FS_COUNTER_DEFINE("/robot/counters/state_searching_for_base_station", robot_state_searching_for_base_station);
+FS_COUNTER_DEFINE("/robot/counters/state_in_base_station", robot_state_in_base_station);
 
-FS_COUNTER_DEFINE("robot/counters/cutting_state_forward", robot_cutting_state_forward);
-FS_COUNTER_DEFINE("robot/counters/cutting_state_backwards", robot_cutting_state_backwards);
-FS_COUNTER_DEFINE("robot/counters/cutting_state_rotating", robot_cutting_state_rotating);
+FS_COUNTER_DEFINE("/robot/counters/cutting_state_forward", robot_cutting_state_forward);
+FS_COUNTER_DEFINE("/robot/counters/cutting_state_backwards", robot_cutting_state_backwards);
+FS_COUNTER_DEFINE("/robot/counters/cutting_state_rotating", robot_cutting_state_rotating);
 
-FS_COUNTER_DEFINE("robot/counters/odometer", robot_odometer);
+FS_COUNTER_DEFINE("/robot/counters/odometer", robot_odometer);
 
-FS_COUNTER_DEFINE("robot/counters/is_Stuck", robot_is_stuck);
+FS_COUNTER_DEFINE("/robot/counters/is_stuck", robot_is_stuck);
 
-FS_COUNTER_DEFINE("robot/counters/is_inside_perimeter_wire", robot_is_inside_perimeter_wire);
-FS_COUNTER_DEFINE("robot/counters/is_outside_perimeter_wire", robot_is_outside_perimeter_wire);
+FS_COUNTER_DEFINE("/robot/counters/is_inside_perimeter_wire", robot_is_inside_perimeter_wire);
+FS_COUNTER_DEFINE("/robot/counters/is_outside_perimeter_wire", robot_is_outside_perimeter_wire);
 
 /* Parameters. */
 FS_PARAMETER_DEFINE("/robot/parameters/charging", robot_parameter_charging, int, 0);
@@ -126,32 +124,20 @@ static int follow_perimeter_wire(struct robot_t *robot_p,
     }
 
     /* Try to stay on top of the wire, hence set the actual value to
-       0.0f. The returned control value is used to calculate motor
-       speeds. */
+       0.0f. */
     control = controller_pid_calculate(&searching_p->pid_controller,
                                        0.0f,
                                        signal);
+    
+    /* For debug. */
+    searching_p->control = control;
 
-    std_printk(STD_LOG_INFO,
-               FSTR("follow: signal = %d, control = %d"),
-               (int)signal,
-               (int)(100 * control));
+    *speed_p = 0.07f;
 
-    /* A big control value indicates that the robot is off track. Just
-       rotate back towards the wire and start driving forward when the
-       control value is sufficiantly small again. */
-    if (control > CONTROL_ROTATE_THRESHOLD) {
-        /* The robot is inside the perimeter wire, turn left towards
-           the wire.*/
-        *omega_p = -0.1f;
-    } else if (control < -CONTROL_ROTATE_THRESHOLD) {
-        /* The robot is outside the perimeter wire, turn right towards
-           the wire.*/
-        *omega_p = 0.1f;
+    if (fabs(control) < 11.0f) {
+        *omega_p = (0.05f * (control / 10.0f));
     } else {
-        /* Follow the line. */
-        *speed_p = 0.05f;
-        *omega_p = -control / 4.0f;
+        *omega_p = (0.6f * (control / 9.0f));
     }
 
     return (0);
@@ -341,20 +327,22 @@ int robot_state_searching_for_base_station(struct robot_t *robot_p)
                 searching_p->state = SEARCHING_STATE_FOLLOWING_PERIMETER_WIRE;
 
                 /* High sensitivity on sensors and actuators when following the wire. */
-                perimeter_wire_rx_set_filter_weight(1.0f);
-                motor_set_filter_weight(&robot_p->left_motor, 0.0f);
-                motor_set_filter_weight(&robot_p->right_motor, 0.0f);
+                perimeter_wire_rx_set_filter_weight(&robot_p->perimeter, 2.0f);
+                motor_set_filter_weight(&robot_p->left_motor, 1.0f);
+                motor_set_filter_weight(&robot_p->right_motor, 1.0f);
 
                 /* Initialize the PID controller. */
                 controller_pid_init(&searching_p->pid_controller,
                                     FOLLOW_KP,
                                     FOLLOW_KI,
                                     FOLLOW_KD);
+                searching_p->tick.is_inside = 0;
+                searching_p->tick.count = 0;
             }
         } else {
             /* TODO: try to get free */
         }
-    } else {
+    } else if (searching_p->state == SEARCHING_STATE_FOLLOWING_PERIMETER_WIRE) {
         /* Follow the perimeter wire to the base station. */
         if (!is_arriving_to_base_station(robot_p)) {
             follow_perimeter_wire(robot_p,
@@ -365,6 +353,9 @@ int robot_state_searching_for_base_station(struct robot_t *robot_p)
         } else {
             robot_p->state.next = ROBOT_STATE_IN_BASE_STATION;
         }
+    } else {
+        /* Should not happen. */
+        robot_p->state.next = ROBOT_STATE_IDLE;
     }
 
     /* Convert the robot speeds to wheel motor angular velocities. */

@@ -124,6 +124,10 @@ int motor_set_omega(struct motor_t *motor_p,
     duty = (255.0f * omega) / MOTOR_OMEGA_MAX;
     pwm_set_duty(&motor_p->enable, duty);
 
+    /* For debugging. */
+    motor_p->direction = direction;
+    motor_p->duty = duty;
+
     std_printk(STD_LOG_DEBUG,
                FSTR("motor: direction = %d, duty = %u"),
                direction,
@@ -138,4 +142,14 @@ int motor_set_filter_weight(struct motor_t *motor_p,
     motor_p->filter_weight = weight;
 
     return (0);
+}
+
+int motor_get_direction(struct motor_t *motor_p)
+{
+    return (motor_p->direction);
+}
+
+int motor_get_duty_cycle(struct motor_t *motor_p)
+{
+    return (motor_p->duty);
 }

@@ -83,6 +83,11 @@ struct cutting_state_t {
 struct searching_for_base_station_state_t {
     int state;
     struct controller_pid_t pid_controller;
+    float control;
+    struct {
+        int is_inside;
+        int count;
+    } tick;
 };
 
 struct robot_t {
