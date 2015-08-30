@@ -66,4 +66,13 @@ int filter_fir(const int *input_p,
                 size_t number_of_coefficients,
                 int *output_p);
 
+/**
+ * Weighted average calculation.
+ * @param[in] weight Weight to put on the average.
+ * @param[in] average The previously calculated average.
+ * @param[in] value The new value to add to the average.
+ * @return The new average.
+ */
+float filter_weighted_average(float weight, float average, float value);
+
 #endif

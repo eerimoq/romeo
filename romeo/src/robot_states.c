@@ -340,6 +340,11 @@ int robot_state_searching_for_base_station(struct robot_t *robot_p)
                 /* Perimeter wire found. */
                 searching_p->state = SEARCHING_STATE_FOLLOWING_PERIMETER_WIRE;
 
+                /* High sensitivity on sensors and actuators when following the wire. */
+                perimeter_wire_rx_set_filter_weight(1.0f);
+                motor_set_filter_weight(&robot_p->left_motor, 0.0f);
+                motor_set_filter_weight(&robot_p->right_motor, 0.0f);
+
                 /* Initialize the PID controller. */
                 controller_pid_init(&searching_p->pid_controller,
                                     FOLLOW_KP,

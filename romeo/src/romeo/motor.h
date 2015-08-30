@@ -34,6 +34,7 @@
 
 struct motor_t {
     float omega;
+    float filter_weight;
     struct pin_driver_t in1;
     struct pin_driver_t in2;
     struct pwm_driver_t enable;
@@ -112,5 +113,15 @@ int motor_update(struct motor_t *motor_p);
  * @return Motor current consumption.
  */
 float motor_get_current(struct motor_t *motor_p);
+
+/**
+ * Set the motor low pass filter delay. It control how quickly
+ * the motor should react to changes in speed.
+ * @param[in] motor_p Initialized motor object.
+ * @param[in] weight Weight to put on the average.
+ * @return zero(0) or negative error code.
+ */
+int motor_set_filter_weight(struct motor_t *motor_p,
+                            float weight);
 
 #endif

@@ -22,6 +22,16 @@
 #include "romeo.h"
 #include "robot.h"
 
+static int enter_cutting(struct robot_t *robot_p)
+{
+    robot_p->substate.cutting.state = CUTTING_STATE_FORWARD;
+
+    /* Low sensitivity on sensors and actuators. */
+    perimeter_wire_rx_set_filter_weight(&robot_p->perimeter, 9.0f);
+    motor_set_filter_weight(&robot_p->left_motor, 3.0f);
+    motor_set_filter_weight(&robot_p->right_motor, 3.0f);
+}
+
 state_callback_t robot_transition__idle__starting(struct robot_t *robot_p)
 {
     return (robot_state_starting);
@@ -29,7 +39,7 @@ state_callback_t robot_transition__idle__starting(struct robot_t *robot_p)
 
 state_callback_t robot_transition__starting__cutting(struct robot_t *robot_p)
 {
-    robot_p->substate.cutting.state = CUTTING_STATE_FORWARD;
+    enter_cutting(robot_p);
 
     return (robot_state_cutting);
 }
@@ -63,6 +73,8 @@ state_callback_t robot_transition__searching_for_base_station__idle(struct robot
 
 state_callback_t robot_transition__in_base_station__cutting(struct robot_t *robot_p)
 {
+    enter_cutting(robot_p);
+
     return (robot_state_cutting);
 }
 

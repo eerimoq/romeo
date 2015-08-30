@@ -64,3 +64,8 @@ int filter_fir(const int *input_p,
 
     return (0);
 }
+
+float filter_weighted_average(float weight, float average, float value)
+{
+    return ((weight * average + value) / (weight + 1.0f));
+}

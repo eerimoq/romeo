@@ -29,28 +29,29 @@
 
 /* The coefficients used as a reference in the matched filter. */
 static int coefficients[COEFFICIENTS_MAX] = {
-     1,  1,  1,  1,  0,  0,  0,  0,
+    1,  1,  1,  1,  0,  0,  0,  0,
     -1, -1, -1, -1, -0, -0, -0, -0,
-     1,  1,  1,  1, -1, -1, -1, -1,
-     1,  1,  1,  1, -1, -1, -1, -1,
+    1,  1,  1,  1, -1, -1, -1, -1,
+    1,  1,  1,  1, -1, -1, -1, -1,
     -0, -0, -0, -0,  1,  1,  1,  1,
     -1, -1, -1, -1,  1,  1,  1,  1,
-     0,  0,  0,  0, -1, -1, -1, -1,
+    0,  0,  0,  0, -1, -1, -1, -1,
     -0, -0, -0, -0,  1,  1,  1,  1,
     -1, -1, -1, -1,  0,  0,  0,  0,
-     1,  1,  1,  1, -1, -1, -1, -1,
+    1,  1,  1,  1, -1, -1, -1, -1,
     -0, -0, -0, -0,  1,  1,  1,  1,
-     0,  0,  0,  0, -1, -1, -1, -1
+    0,  0,  0,  0, -1, -1, -1, -1
 };
 
-int perimeter_wire_rx_init(struct perimeter_wire_rx_t *perimeter_wire_p,
+int perimeter_wire_rx_init(struct perimeter_wire_rx_t *perimeter_p,
                            struct adc_device_t *dev_p,
                            struct pin_device_t *pin_dev_p)
 {
-    perimeter_wire_p->updated.signal = 0.0f;
-    perimeter_wire_p->updated.quality = 0.0f;
+    perimeter_p->updated.signal = 0.0f;
+    perimeter_p->updated.quality = 0.0f;
+    perimeter_p->filter_weight = 0.0f;
 
-    adc_init(&perimeter_wire_p->adc,
+    adc_init(&perimeter_p->adc,
              dev_p,
              pin_dev_p,
              ADC_REFERENCE_VCC,
@@ -59,25 +60,25 @@ int perimeter_wire_rx_init(struct perimeter_wire_rx_t *perimeter_wire_p,
     return (0);
 }
 
-int perimeter_wire_rx_async_convert(struct perimeter_wire_rx_t *perimeter_wire_p)
+int perimeter_wire_rx_async_convert(struct perimeter_wire_rx_t *perimeter_p)
 {
     /* Start first asynchronous convertion. */
-    return (adc_async_convert(&perimeter_wire_p->adc,
-                              perimeter_wire_p->ongoing.samples,
-                              membersof(perimeter_wire_p->ongoing.samples)));
+    return (adc_async_convert(&perimeter_p->adc,
+                              perimeter_p->ongoing.samples,
+                              membersof(perimeter_p->ongoing.samples)));
 }
 
-int perimeter_wire_rx_async_wait(struct perimeter_wire_rx_t *perimeter_wire_p)
+int perimeter_wire_rx_async_wait(struct perimeter_wire_rx_t *perimeter_p)
 {
     /* Wait for ongoing asynchronous convertion to finish. */
-    if (!adc_async_wait(&perimeter_wire_p->adc)) {
+    if (!adc_async_wait(&perimeter_p->adc)) {
         std_printk(STD_LOG_WARNING, FSTR("convertion has not finished"));
     }
 
     return (0);
 }
 
-int perimeter_wire_rx_update(struct perimeter_wire_rx_t *perimeter_wire_p)
+int perimeter_wire_rx_update(struct perimeter_wire_rx_t *perimeter_p)
 {
     int i, i_mod;
     /* Input and output buffers holds values in the range -512..511. */
@@ -87,14 +88,14 @@ int perimeter_wire_rx_update(struct perimeter_wire_rx_t *perimeter_wire_p)
     float signal, quality;
 
     /* Save latest sample. */
-    memcpy(perimeter_wire_p->updated.samples,
-           perimeter_wire_p->ongoing.samples,
-           sizeof(perimeter_wire_p->ongoing.samples));
+    memcpy(perimeter_p->updated.samples,
+           perimeter_p->ongoing.samples,
+           sizeof(perimeter_p->ongoing.samples));
 
     /* Copy samples to filter input buffer. */
     for (i = 0; i < INPUT_MAX; i++) {
         i_mod = (i % PERIMETER_WIRE_RX_SAMPLES_MAX);
-        input[i] = (perimeter_wire_p->updated.samples[i_mod] - 512);
+        input[i] = (perimeter_p->updated.samples[i_mod] - 512);
     }
 
     filter_fir(input,
@@ -128,21 +129,33 @@ int perimeter_wire_rx_update(struct perimeter_wire_rx_t *perimeter_wire_p)
     signal /= NUMBER_OF_NON_ZERO_COEFFICIENTS;
 
     /* Low pass filtering of the signal. */
-    signal = (9.0f * perimeter_wire_p->updated.signal + 1.0f * signal) / 10.0f;
-    quality = (9.0f * perimeter_wire_p->updated.quality + 1.0f * quality) / 10.0f;
+    signal = filter_weighted_average(perimeter_p->filter_weight,
+                                     perimeter_p->updated.signal,
+                                     signal);
+    quality = filter_weighted_average(perimeter_p->filter_weight,
+                                      perimeter_p->updated.quality,
+                                      quality);
 
-    perimeter_wire_p->updated.signal = signal;
-    perimeter_wire_p->updated.quality = quality;
+    perimeter_p->updated.signal = signal;
+    perimeter_p->updated.quality = quality;
 
     return (0);
 }
 
-float perimeter_wire_rx_get_signal(struct perimeter_wire_rx_t *perimeter_wire_p)
+float perimeter_wire_rx_get_signal(struct perimeter_wire_rx_t *perimeter_p)
 {
-    return (perimeter_wire_p->updated.signal);
+    return (perimeter_p->updated.signal);
 }
 
-float perimeter_wire_rx_get_quality(struct perimeter_wire_rx_t *perimeter_wire_p)
+float perimeter_wire_rx_get_quality(struct perimeter_wire_rx_t *perimeter_p)
 {
-    return (perimeter_wire_p->updated.quality);
+    return (perimeter_p->updated.quality);
+}
+
+int perimeter_wire_rx_set_filter_weight(struct perimeter_wire_rx_t *perimeter_p,
+                                        float weight)
+{
+    perimeter_p->filter_weight = weight;
+
+    return (0);
 }

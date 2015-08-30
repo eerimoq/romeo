@@ -25,7 +25,7 @@
 #include "romeo.h"
 
 /* The processing loop period in milliseconds. */
-#define PROCESS_PERIOD_MS 50L
+#define PROCESS_PERIOD_MS 30L
 #define PROCESS_PERIOD_NS (PROCESS_PERIOD_MS * 1000000L)
 
 /* Robot modes. */
@@ -50,17 +50,18 @@
 
 /* Drive backwards a number of ticks. */
 #ifndef CUTTING_STATE_BACKWARDS_TICKS
-#    define CUTTING_STATE_BACKWARDS_TICKS 32
+#    define CUTTING_STATE_BACKWARDS_TICKS (1500L / PROCESS_PERIOD_MS)
 #endif
 
 #ifndef WATCHDOG_TIMEOUT_TICKS
-#    define WATCHDOG_TIMEOUT_TICKS 40
+#    define WATCHDOG_TIMEOUT_TICKS (1500L / PROCESS_PERIOD_MS)
 #endif
 
 /* Rotate a random number of ticks. */
 #ifndef CUTTING_STATE_ROTATING_TICKS
 #    include <math.h>
-#    define CUTTING_STATE_ROTATING_TICKS  (15 + (rand() & 0xf))
+#    define CUTTING_STATE_ROTATING_TICKS                \
+    ((500L + (rand() % 512L)) / PROCESS_PERIOD_MS)
 #endif
 
 struct robot_t;

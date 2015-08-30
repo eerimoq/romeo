@@ -29,6 +29,7 @@ int motor_init(struct motor_t *motor_p,
                struct pin_device_t *current_dev_p)
 {
     motor_p->omega = 0.0f;
+    motor_p->filter_weight = 0.0f;
 
     /* Initialize all pins connected to the motor controllers. */
     pin_init(&motor_p->in1, in1_p, PIN_OUTPUT);
@@ -113,7 +114,9 @@ int motor_set_omega(struct motor_t *motor_p,
     motor_set_direction(motor_p, direction);
 
     /* Low pass filtering of the angular velocity. */
-    omega = (2.0f * motor_p->omega + 1.0f * omega) / 3.0f;
+    omega = filter_weighted_average(motor_p->filter_weight,
+                                    motor_p->omega,
+                                    omega);
 
     motor_p->omega = omega;
 
@@ -125,6 +128,14 @@ int motor_set_omega(struct motor_t *motor_p,
                FSTR("motor: direction = %d, duty = %u"),
                direction,
                duty);
+
+    return (0);
+}
+
+int motor_set_filter_weight(struct motor_t *motor_p,
+                            float weight)
+{
+    motor_p->filter_weight = weight;
 
     return (0);
 }
