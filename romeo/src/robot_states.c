@@ -105,9 +105,9 @@ static int is_arriving_to_base_station(struct robot_t *robot_p)
 }
 
 /**
- * Follow the wire clockwise. The signal on the left hand side of the
- * robot should be negative, while the signal on the right hand side
- * should be positive.
+ * Follow the wire counter clockwise. The signal on the left hand side
+ * of the robot should be positive, while the signal on the right hand
+ * side should be negative.
  */
 static int follow_perimeter_wire(struct robot_t *robot_p,
                                  struct searching_for_base_station_state_t *searching_p,
@@ -128,7 +128,7 @@ static int follow_perimeter_wire(struct robot_t *robot_p,
     control = controller_pid_calculate(&searching_p->pid_controller,
                                        0.0f,
                                        signal);
-    
+
     /* For debug. */
     searching_p->control = control;
 
@@ -322,6 +322,19 @@ int robot_state_searching_for_base_station(struct robot_t *robot_p)
             if (is_inside_perimeter_wire(signal)) {
                 speed = 0.1f;
                 omega = 0.0f;
+            } else {
+                /* Perimeter wire found. */
+                searching_p->state = SEARCHING_STATE_ALIGNING_WITH_WIRE;
+            }
+        } else {
+            /* TODO: try to get free */
+        }
+    } else if (searching_p->state == SEARCHING_STATE_ALIGNING_WITH_WIRE) {
+        /* No movement if the robot is stuck. */
+        if (!is_stuck(robot_p)) {
+            /* Rotate until the robot is within the perimeter wire again. */
+            if (!is_inside_perimeter_wire(signal)) {
+                omega = 0.4f;
             } else {
                 /* Perimeter wire found. */
                 searching_p->state = SEARCHING_STATE_FOLLOWING_PERIMETER_WIRE;

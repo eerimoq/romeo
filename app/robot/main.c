@@ -91,11 +91,14 @@ FAR const char FAR *cutting_state_as_string[] = {
 /* Searching for base station states as strings. */
 static FAR const char searching_state_searching_for_perimeter_wire_string[] =
     "searching_for_perimeter_wire";
+static FAR const char searching_state_aligning_with_wire_string[] =
+    "aligning_with_wire";
 static FAR const char searching_state_following_perimeter_wire_string[] =
     "following_perimeter_wire";
 
 FAR const char FAR *searching_state_as_string[] = {
     searching_state_searching_for_perimeter_wire_string,
+    searching_state_aligning_with_wire_string,
     searching_state_following_perimeter_wire_string,
 };
 
@@ -298,7 +301,7 @@ static int init()
     adc_module_init();
 
     /* Setup UART. */
-    uart_init(&uart, &uart_device[0], 38400, qinbuf, sizeof(qinbuf));
+    uart_init(&uart, &uart_device[0], 57600, qinbuf, sizeof(qinbuf));
     uart_start(&uart);
     sys_set_stdout(&uart.chout);
 
@@ -323,6 +326,7 @@ static int init()
     /* Start the shell. */
     shell_default.args.chin_p = &uart.chin;
     shell_default.args.chout_p = &uart.chout;
+    shell_default.args.name_p = "shell0";
     shell_default.args.username_p = "root";
     shell_default.args.password_p = "1234";
     thrd_spawn(shell_entry,
@@ -334,6 +338,7 @@ static int init()
     /* Start the shell. */
     shell_bluetooth.args.chin_p = &uart3.chin;
     shell_bluetooth.args.chout_p = &uart3.chout;
+    shell_bluetooth.args.name_p = "shell3";
     shell_bluetooth.args.username_p = "root";
     shell_bluetooth.args.password_p = "1234";
     thrd_spawn(shell_entry,

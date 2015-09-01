@@ -46,7 +46,8 @@
 
 /* Searching for base station states. */
 #define SEARCHING_STATE_SEARCHING_FOR_PERIMETER_WIRE 0
-#define SEARCHING_STATE_FOLLOWING_PERIMETER_WIRE     1
+#define SEARCHING_STATE_ALIGNING_WITH_WIRE           1
+#define SEARCHING_STATE_FOLLOWING_PERIMETER_WIRE     2
 
 /* Drive backwards a number of ticks. */
 #ifndef CUTTING_STATE_BACKWARDS_TICKS
