@@ -62,7 +62,7 @@ int battery_async_wait(struct battery_t *battery_p)
 {
     /* Wait for ongoing asynchronous convertion to finish. */
     if (!adc_async_wait(&battery_p->adc)) {
-        std_printk(STD_LOG_WARNING, FSTR("battery convertion has not finished"));
+        LOG(WARNING, "battery convertion has not finished");
     }
 
     return (0);

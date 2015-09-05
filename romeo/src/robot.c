@@ -113,25 +113,16 @@ static int handle_state_transition(struct robot_t *robot_p)
 
     /* Bad state transition. */
     if (callback == NULL) {
-        std_printk(STD_LOG_ERR,
-                   FSTR("bad state transistion %d -> %d"),
-                   current,
-                   next);
+        LOG(ERR, "bad state transistion %d -> %d", current, next);
         return (-1);
     }
 
-    std_printk(STD_LOG_NOTICE,
-               FSTR("state transistion %d -> %d"),
-               current,
-               next);
+    LOG(NOTICE, "state transistion %d -> %d", current, next);
 
     /* Call the transition callback. */
     state_callback = callback(robot_p);
     if (state_callback == NULL) {
-        std_printk(STD_LOG_NOTICE,
-                   FSTR("failed state transistion %d -> %d"),
-                   current,
-                   next);
+        LOG(NOTICE, "failed state transistion %d -> %d", current, next);
         return (-1);
     }
 
@@ -236,6 +227,8 @@ int robot_tick(struct robot_t *robot_p)
     battery_async_convert(&robot_p->battery);
     motor_async_convert(&robot_p->left_motor);
     motor_async_convert(&robot_p->right_motor);
+
+    LOG(INFO, "current state: %d", robot_p->state.current);
 
     /* Execute robot state machine. */
     if (robot_p->state.current == robot_p->state.next) {

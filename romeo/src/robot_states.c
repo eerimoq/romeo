@@ -172,7 +172,7 @@ static int cutting_automatic(struct robot_t *robot_p,
 
     if (is_stuck(robot_p)) {
         /* TODO: try to get free */
-        std_printk(STD_LOG_NOTICE, FSTR("cutting stuck"));
+        LOG(NOTICE, "cutting stuck");
         return (0);
     }
 

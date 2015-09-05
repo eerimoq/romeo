@@ -301,7 +301,7 @@ static int init()
     adc_module_init();
 
     /* Setup UART. */
-    uart_init(&uart, &uart_device[0], 57600, qinbuf, sizeof(qinbuf));
+    uart_init(&uart, &uart_device[0], 38400, qinbuf, sizeof(qinbuf));
     uart_start(&uart);
     sys_set_stdout(&uart.chout);
 

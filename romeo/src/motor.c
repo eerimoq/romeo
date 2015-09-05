@@ -58,7 +58,7 @@ int motor_async_wait(struct motor_t *motor_p)
 {
     /* Wait for ongoing asynchronous convertion to finish. */
     if (!adc_async_wait(&motor_p->current.adc)) {
-        std_printk(STD_LOG_WARNING, FSTR("motor convertion has not finished"));
+        LOG(WARNING, "motor convertion has not finished");
     }
 
     return (0);
@@ -128,10 +128,7 @@ int motor_set_omega(struct motor_t *motor_p,
     motor_p->direction = direction;
     motor_p->duty = duty;
 
-    std_printk(STD_LOG_DEBUG,
-               FSTR("motor: direction = %d, duty = %u"),
-               direction,
-               duty);
+    LOG(ERR, "motor: direction = %d, duty = %u", direction, duty);
 
     return (0);
 }
