@@ -23,6 +23,8 @@
 
 #define VERSION_STR "0.1.0"
 
+#define TICK_EVENT 0x1
+
 struct shell_config_t {
     char stack[784];
     struct shell_args_t args;
@@ -44,7 +46,7 @@ static char qinbuf[64];
 static struct uart_driver_t uart3;
 static char qinbuf3[64];
 
-struct queue_t qperiodic;
+struct event_t event_periodic;
 
 static struct robot_t robot;
 static struct timer_t ticker;
@@ -289,9 +291,10 @@ int robot_cmd_watchdog_kick(int argc,
 
 static void timer_callback(void *arg_p)
 {
-    char buf[1];
+    uint32_t mask;
 
-    queue_write_irq(&qperiodic, buf, sizeof(buf));
+    mask = TICK_EVENT;
+    event_write_irq(&event_periodic, &mask, sizeof(mask));
 }
 
 static int init()
@@ -316,7 +319,7 @@ static int init()
                shell_bluetooth.input_channel_buf,
                sizeof(shell_bluetooth.input_channel_buf));
 
-    queue_init(&qperiodic, NULL, 0);
+    event_init(&event_periodic);
 
     robot_init(&robot);
 
@@ -354,7 +357,7 @@ int main()
 {
     struct time_t timeout;
     struct time_t start_time;
-    char buf[1];
+    uint32_t mask;
 
     init();
 
@@ -373,7 +376,8 @@ int main()
     /* Robot main loop. */
     while (1) {
 	/* Timer callback resumes this thread. */
-	chan_read(&qperiodic, buf, sizeof(buf));
+        mask = TICK_EVENT;
+	chan_read(&event_periodic, &mask, sizeof(mask));
 
         time_get(&start_time);
 
