@@ -19,6 +19,8 @@
 #
 
 NAME = robot
+VERSION = 0.2.0
+
 BOARD = linux
 
 SRC += main.c

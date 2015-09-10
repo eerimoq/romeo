@@ -109,8 +109,7 @@ int perimeter_wire_tx_init(struct perimeter_wire_tx_t *perimeter_wire_p,
 
 int perimeter_wire_tx_start(struct perimeter_wire_tx_t *perimeter_wire_p)
 {
-    std_printk(STD_LOG_NOTICE,
-               FSTR("Starting transmitting signal on perimeter wire"));
+    std_printf(FSTR("Starting transmitting signal on perimeter wire"));
 
     perimeter_wires[0] = perimeter_wire_p;
 

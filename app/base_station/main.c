@@ -21,8 +21,6 @@
 #include "simba.h"
 #include "romeo.h"
 
-#define VERSION_STR "0.1.0"
-
 FS_COMMAND_DEFINE("/base_station/status", base_station_cmd_status);
 
 static struct uart_driver_t uart;

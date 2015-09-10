@@ -19,6 +19,8 @@
 #
 
 NAME = base_station
+VERSION = 0.1.0
+
 BOARD = linux
 SRC += main.c
 DRIVERS_SRC = uart.c pin.c adc.c

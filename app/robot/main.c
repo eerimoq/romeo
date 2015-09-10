@@ -21,8 +21,6 @@
 #include "simba.h"
 #include "romeo.h"
 
-#define VERSION_STR "0.1.0"
-
 #define TICK_EVENT 0x1
 
 struct shell_config_t {
