@@ -239,12 +239,22 @@ int robot_cmd_shell_set_password(int argc,
                                  void *out_p,
                                  void *in_p)
 {
+    if (argc != 2) {
+        std_fprintf(out_p, FSTR("Usage: set_password <password>\r\n"));
+        return (1);
+    }
+
+    if (strlen(argv[1]) >= SETTINGS_SHELL_PASSWORD_SIZE) {
+        std_fprintf(out_p, FSTR("%s: password too long\r\n"), argv[1]);
+        return (1);
+    }
+
     /* Update password in settings area. */
     settings_write(SETTINGS_SHELL_PASSWORD_ADDR,
                    argv[1],
                    SETTINGS_SHELL_PASSWORD_SIZE);
 
-    /* Read shell password from settings. */
+    /* Read shell password from settings area. */
     settings_read(password,
                   SETTINGS_SHELL_PASSWORD_ADDR,
                   sizeof(password));
