@@ -39,6 +39,8 @@ FS_COMMAND_DEFINE("/robot/manual/movement/set", robot_cmd_manual_movement_set);
 FS_COMMAND_DEFINE("/robot/sensors", robot_cmd_sensors);
 FS_COMMAND_DEFINE("/robot/watchdog/kick", robot_cmd_watchdog_kick);
 
+FS_COMMAND_DEFINE("/robot/shell/set_password", robot_cmd_shell_set_password);
+
 static struct uart_driver_t uart;
 static char qinbuf[64];
 
@@ -228,6 +230,24 @@ int robot_cmd_manual_movement_set(int argc,
        and omega are close to the maximum. */
     robot.manual.speed = speed_max * (((float)speed) / 100.0f);
     robot.manual.omega = omega_max * (((float)omega) / 100.0f);
+
+    return (0);
+}
+
+int robot_cmd_shell_set_password(int argc,
+                                 const char *argv[],
+                                 void *out_p,
+                                 void *in_p)
+{
+    /* Update password in settings area. */
+    settings_write(SETTINGS_SHELL_PASSWORD_ADDR,
+                   argv[1],
+                   SETTINGS_SHELL_PASSWORD_SIZE);
+
+    /* Read shell password from settings. */
+    settings_read(password,
+                  SETTINGS_SHELL_PASSWORD_ADDR,
+                  sizeof(password));
 
     return (0);
 }
