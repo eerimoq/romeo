@@ -20,6 +20,7 @@
 
 #include "simba.h"
 #include "romeo.h"
+#include "settings.h"
 
 #define TICK_EVENT 0x1
 
@@ -50,6 +51,7 @@ static struct robot_t robot;
 static struct timer_t ticker;
 static struct thrd_t *self_p;
 
+static char password[SETTINGS_SHELL_PASSWORD_SIZE];
 static struct shell_config_t shell_default;
 static struct shell_config_t shell_bluetooth;
 
@@ -324,12 +326,17 @@ static int init()
     self_p = thrd_self();
     thrd_set_name("robot");
 
+    /* Read shell password from settings. */
+    settings_read(password,
+                  SETTINGS_SHELL_PASSWORD_ADDR,
+                  sizeof(password));
+
     /* Start the shell. */
     shell_default.args.chin_p = &uart.chin;
     shell_default.args.chout_p = &uart.chout;
     shell_default.args.name_p = "shell0";
     shell_default.args.username_p = "root";
-    shell_default.args.password_p = "1234";
+    shell_default.args.password_p = password;
     thrd_spawn(shell_entry,
                &shell_default.args,
                20,
@@ -341,7 +348,7 @@ static int init()
     shell_bluetooth.args.chout_p = &uart3.chout;
     shell_bluetooth.args.name_p = "shell3";
     shell_bluetooth.args.username_p = "root";
-    shell_bluetooth.args.password_p = "1234";
+    shell_bluetooth.args.password_p = password;
     thrd_spawn(shell_entry,
                &shell_bluetooth.args,
                20,

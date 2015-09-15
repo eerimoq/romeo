@@ -23,6 +23,8 @@ VERSION = 0.2.0
 
 BOARD = linux
 
+SETTINGS_INI = settings.ini
+
 SRC += main.c
 
 DRIVERS_SRC = uart.c pin.c pwm.c adc.c

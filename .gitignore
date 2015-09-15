@@ -34,8 +34,12 @@ deps
 *.map
 obj
 run.log
-romeo/tst/*/fs
-app/*/fs
+romeo/tst/*/gen
+romeo/tst/*/settings.h
+romeo/tst/*/settings.bin
+app/*/gen
+app/*/settings.h
+app/*/settings.bin
 size.log
 *.gcov
 index.*html
