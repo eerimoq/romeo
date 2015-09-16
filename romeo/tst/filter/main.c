@@ -71,7 +71,7 @@ static int test_firf(struct harness_t *harness_p)
                          input,
                          coefficients,
                          ref_output);
-        std_printk(STD_LOG_NOTICE, FSTR("enter: %s"), description);
+        std_printf(FSTR("enter: %s\r\n"), description);
 
         BTASSERT(filter_firf(input,
                              NUMBER_OF_INPUT_SAMPLES,
@@ -79,7 +79,7 @@ static int test_firf(struct harness_t *harness_p)
                              NUMBER_OF_COEFFICIENTS,
                              output) == 0);
 
-        std_printk(STD_LOG_NOTICE, FSTR("exit: %s"), description);
+        std_printf(FSTR("exit: %s\r\n"), description);
 
         for (i = 0; i < membersof(output); i++) {
             BTASSERT(float_close_to_zero(ref_output[i] - output[i]),

@@ -21,8 +21,8 @@
 #include "simba.h"
 #include "romeo.h"
 
-FS_COUNTER_DEFINE("/robot/counters/movement_left_omega_too_big", robot_movement_left_omega_too_big);
-FS_COUNTER_DEFINE("/robot/counters/movement_right_omega_too_big", robot_movement_right_omega_too_big);
+COUNTER_DEFINE("/robot/counters/movement_left_omega_too_big", robot_movement_left_omega_too_big);
+COUNTER_DEFINE("/robot/counters/movement_right_omega_too_big", robot_movement_right_omega_too_big);
 
 /**
  * Robot sketch with definitions of velocity and angular velocity
@@ -120,11 +120,11 @@ int movement_calculate_wheels_omega(struct movement_t *movement_p,
 
     /* Omega cannot be bigger than the maximum motor omega. */
     if (limit_wheel_omega_to_motor_omega(&left_wheel_omega) != 1) {
-        FS_COUNTER_INC(robot_movement_left_omega_too_big, 1);
+        COUNTER_INC(robot_movement_left_omega_too_big, 1);
     }
 
     if (limit_wheel_omega_to_motor_omega(&right_wheel_omega) != 1) {
-        FS_COUNTER_INC(robot_movement_right_omega_too_big, 1);
+        COUNTER_INC(robot_movement_right_omega_too_big, 1);
     }
 
     *left_wheel_omega_p = left_wheel_omega;

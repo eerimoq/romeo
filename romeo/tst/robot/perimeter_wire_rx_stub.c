@@ -53,9 +53,15 @@ float perimeter_wire_rx_get_signal(struct perimeter_wire_rx_t *perimeter_wire_p)
 
     signal = perimeter_wire_rx_stub_signal[0];
 
-    std_printk(STD_LOG_NOTICE,
-               FSTR("perimeter_wire_rx_stub: perimeter_signal = %d"),
-               (int)signal);
+    std_printf(FSTR("perimeter_wire_rx_stub: perimeter_signal = %d\r\n"), (int)signal);
 
     return (signal);
+}
+
+int perimeter_wire_rx_set_filter_weight(struct perimeter_wire_rx_t *perimeter_p,
+                                        float weight)
+{
+    perimeter_p->filter_weight = weight;
+
+    return (0);
 }

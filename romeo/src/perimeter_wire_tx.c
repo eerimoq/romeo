@@ -21,7 +21,7 @@
 #include "simba.h"
 #include "romeo.h"
 
-FS_COUNTER_DEFINE("/robot/counters/perimeter_timer_callback", perimeter_timer_callback);
+COUNTER_DEFINE("/robot/counters/perimeter_timer_callback", perimeter_timer_callback);
 
 #define PERIOD_NS 100000L
 
@@ -63,7 +63,7 @@ static void timer_callback(void *arg_p)
         }
     }
 
-    FS_COUNTER_INC(perimeter_timer_callback, 1);
+    COUNTER_INC(perimeter_timer_callback, 1);
 }
 
 int perimeter_wire_tx_module_init(void)
@@ -109,7 +109,7 @@ int perimeter_wire_tx_init(struct perimeter_wire_tx_t *perimeter_wire_p,
 
 int perimeter_wire_tx_start(struct perimeter_wire_tx_t *perimeter_wire_p)
 {
-    std_printf(FSTR("Starting transmitting signal on perimeter wire"));
+    std_printf(FSTR("Starting transmitting signal on perimeter wire\r\n"));
 
     perimeter_wires[0] = perimeter_wire_p;
 

@@ -250,14 +250,14 @@ int robot_cmd_shell_set_password(int argc,
     }
 
     /* Update password in settings area. */
-    settings_write(SETTINGS_SHELL_PASSWORD_ADDR,
-                   argv[1],
-                   SETTINGS_SHELL_PASSWORD_SIZE);
+    setting_write(SETTINGS_SHELL_PASSWORD_ADDR,
+                  argv[1],
+                  SETTINGS_SHELL_PASSWORD_SIZE);
 
     /* Read shell password from settings area. */
-    settings_read(password,
-                  SETTINGS_SHELL_PASSWORD_ADDR,
-                  sizeof(password));
+    setting_read(password,
+                 SETTINGS_SHELL_PASSWORD_ADDR,
+                 sizeof(password));
 
     return (0);
 }
@@ -357,9 +357,9 @@ static int init()
     thrd_set_name("robot");
 
     /* Read shell password from settings. */
-    settings_read(password,
-                  SETTINGS_SHELL_PASSWORD_ADDR,
-                  sizeof(password));
+    setting_read(password,
+                 SETTINGS_SHELL_PASSWORD_ADDR,
+                 sizeof(password));
 
     /* Start the shell. */
     shell_default.args.chin_p = &uart.chin;

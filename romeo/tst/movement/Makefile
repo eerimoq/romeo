@@ -22,7 +22,7 @@ NAME = movement_suite
 BOARD = linux
 SRC += main.c
 SLIB_SRC = harness.c
-DRIVERS_SRC = uart.c
+DRIVERS_SRC = uart.c pin.c pwm.c adc.c
 
 ROMEO = ../../src
 include $(ROMEO)/romeo.mk

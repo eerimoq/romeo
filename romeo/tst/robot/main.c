@@ -20,7 +20,7 @@
 
 #include "simba.h"
 
-extern int FS_PARAMETER(robot_parameter_charging);
+extern int PARAMETER(robot_parameter_charging);
 
 #include "simba.h"
 #include "romeo.h"
@@ -50,7 +50,7 @@ static int test_automatic(struct harness_t *harness_p)
     struct robot_t robot;
     const struct testdata_t FAR *testdata_p;
 
-    FS_PARAMETER(robot_parameter_charging) = 1;
+    PARAMETER(robot_parameter_charging) = 1;
 
     robot_init(&robot);
     robot_start(&robot);
@@ -67,7 +67,7 @@ static int test_automatic(struct harness_t *harness_p)
     i = 0;
 
     while (testdata_p->input.energy_level != -1) {
-        std_printk(STD_LOG_NOTICE, FSTR("id: %d"), testdata_p->id);
+        std_printf(FSTR("id: %d\r\n"), testdata_p->id);
 
         /* Prepare the stubs. */
         motor_stub_omega_next = 0;

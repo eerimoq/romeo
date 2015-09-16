@@ -39,14 +39,14 @@ int watchdog_stop(struct watchdog_t *watchdog_p)
 
 int watchdog_tick(struct watchdog_t *watchdog_p)
 {
-    std_printk(STD_LOG_NOTICE, FSTR("watchdog_stub: tick"));
+    std_printf(FSTR("watchdog_stub: tick\r\n"));
 
     return (1);
 }
 
 int watchdog_kick(struct watchdog_t *watchdog_p)
 {
-    std_printk(STD_LOG_NOTICE, FSTR("watchdog_stub: kicked"));
+    std_printf(FSTR("watchdog_stub: kicked\r\n"));
 
     return (0);
 }

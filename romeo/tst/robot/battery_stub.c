@@ -54,9 +54,7 @@ int battery_get_stored_energy_level(struct battery_t *battery_p)
     energy_level = battery_stub_energy_level[0];
 
 
-    std_printk(STD_LOG_NOTICE,
-               FSTR("battery_stub: energy_level = %d"),
-               energy_level);
+    std_printf(FSTR("battery_stub: energy_level = %d\r\n"), energy_level);
     
     return (energy_level);
 }

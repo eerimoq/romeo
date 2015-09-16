@@ -58,11 +58,17 @@ float motor_get_current(struct motor_t *motor_p)
 
     current = motor_stub_current[0];
 
-    std_printk(STD_LOG_NOTICE,
-               FSTR("motor_stub: motor_current = %d"),
-               (int)current);
+    std_printf(FSTR("motor_stub: motor_current = %d\r\n"), (int)current);
 
     return (current);
+}
+
+int motor_set_filter_weight(struct motor_t *motor_p,
+                            float weight)
+{
+    motor_p->filter_weight = weight;
+
+    return (0);
 }
 
 int motor_set_direction(struct motor_t *motor_p,
@@ -74,7 +80,7 @@ int motor_set_direction(struct motor_t *motor_p,
 int motor_set_omega(struct motor_t *motor_p,
                     float omega)
 {
-    std_printk(STD_LOG_NOTICE, FSTR("motor_stub: robot called motor_set_omega(%d)"), (int)omega);
+    std_printf(FSTR("motor_stub: robot called motor_set_omega(%f)\r\n"), omega);
 
     motor_stub_omega[motor_stub_omega_next++] = omega;
 
