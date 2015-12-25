@@ -36,9 +36,11 @@ obj
 run.log
 romeo/tst/*/gen
 romeo/tst/*/settings.h
+romeo/tst/*/settings.c
 romeo/tst/*/settings.bin
 app/*/gen
 app/*/settings.h
+app/*/settings.c
 app/*/settings.bin
 size.log
 *.gcov

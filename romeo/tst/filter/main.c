@@ -83,7 +83,7 @@ static int test_firf(struct harness_t *harness_p)
 
         for (i = 0; i < membersof(output); i++) {
             BTASSERT(float_close_to_zero(ref_output[i] - output[i]),
-                     FSTR("i = %d"), i);
+                     "i = %d", i);
         }
     }
 

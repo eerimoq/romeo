@@ -19,10 +19,9 @@
 #
 
 NAME = robot_suite
-BOARD = linux
+BOARD ?= linux
 
 SRC += \
-	main.c \
 	motor_stub.c \
 	perimeter_wire_rx_stub.c \
 	battery_stub.c \
