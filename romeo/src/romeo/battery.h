@@ -31,7 +31,7 @@ struct battery_t {
     struct adc_driver_t adc;
     float battery_voltage_full;
     struct {
-        int samples[1];
+        uint16_t samples[1];
     } ongoing;
     struct {
         int samples[1];

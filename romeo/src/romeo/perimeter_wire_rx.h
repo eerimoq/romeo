@@ -29,10 +29,10 @@ struct perimeter_wire_rx_t {
     struct adc_driver_t adc;
     float filter_weight;
     struct {
-        int samples[PERIMETER_WIRE_RX_SAMPLES_MAX];
+        uint16_t samples[PERIMETER_WIRE_RX_SAMPLES_MAX];
     } ongoing;
     struct {
-        int samples[PERIMETER_WIRE_RX_SAMPLES_MAX];
+        uint16_t samples[PERIMETER_WIRE_RX_SAMPLES_MAX];
         float signal;
         float quality;
     } updated;

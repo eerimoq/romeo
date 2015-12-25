@@ -43,10 +43,10 @@ struct motor_t {
     struct {
         struct adc_driver_t adc;
         struct {
-            int samples[1];
+            uint16_t samples[1];
         } ongoing;
         struct {
-            int samples[1];
+            uint16_t samples[1];
             int value;
         } updated;
     } current;

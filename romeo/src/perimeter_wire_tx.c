@@ -118,7 +118,7 @@ int perimeter_wire_tx_start(struct perimeter_wire_tx_t *perimeter_wire_p)
 
 float perimeter_wire_tx_get_current(struct perimeter_wire_tx_t *perimeter_wire_p)
 {
-    int sample;
+    uint16_t sample;
 
     adc_convert(&perimeter_wire_p->current_adc, &sample, 1);
     perimeter_wire_p->current = ((sample * 30.0f) / 1024.0f);
