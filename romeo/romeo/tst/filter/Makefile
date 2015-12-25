@@ -18,32 +18,13 @@
 # This file is part of the Romeo project.
 #
 
-NAME = robot_suite
+NAME = filter_suite
 BOARD ?= linux
 
-SRC += \
-	motor_stub.c \
-	perimeter_wire_rx_stub.c \
-	battery_stub.c \
-	testdata.c \
-	watchdog_stub.c
-
 SLIB_SRC = harness.c
-
-DRIVERS_SRC = uart.c
-
-ROMEO_SRC = \
-	robot.c \
-	robot_states.c \
-	robot_transitions.c \
-	movement.c \
-	controller.c
-
-CFLAGS_EXTRA = -DCUTTING_STATE_BACKWARDS_TICKS=2 \
-	-DCUTTING_STATE_ROTATING_TICKS=2 \
-	-DWATCHDOG_TIMEOUT_TICKS=10
+DRIVERS_SRC = uart.c pin.c pwm.c adc.c
 
 ROMEO = ../../src
 include $(ROMEO)/romeo.mk
-SIMBA = ../../../../simba
+SIMBA = ../../../../../simba
 include $(SIMBA)/make/app.mk

@@ -25,7 +25,7 @@ BOARD = arduino_nano
 DRIVERS_SRC = uart.c pin.c adc.c
 ROMEO_SRC = perimeter_wire_tx.c base_station.c
 
-ROMEO = ../../romeo/src
+ROMEO = ../../romeo/romeo/src
 include $(ROMEO)/romeo.mk
 SIMBA = ../../../simba
 include $(SIMBA)/make/app.mk

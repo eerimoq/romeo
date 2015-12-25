@@ -40,7 +40,7 @@ ROMEO_SRC = \
 	robot_transitions.c \
 	watchdog.c
 
-ROMEO = ../../romeo/src
+ROMEO = ../../romeo/romeo/src
 include $(ROMEO)/romeo.mk
 SIMBA = ../../../simba
 include $(SIMBA)/make/app.mk
