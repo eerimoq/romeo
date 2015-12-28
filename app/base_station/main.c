@@ -52,7 +52,7 @@ static void timer_callback(void *arg_p)
 {
     struct thrd_t *thrd_p = arg_p;
 
-    thrd_resume_irq(thrd_p, 0);
+    thrd_resume_isr(thrd_p, 0);
 }
 
 static int init()

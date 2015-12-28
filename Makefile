@@ -18,7 +18,7 @@
 # This file is part of the Romeo project.
 #
 
-TESTS = $(addprefix romeo/tst/, $(shell ls romeo/tst))
+TESTS = $(addprefix romeo/romeo/tst/, $(shell ls romeo/romeo/tst))
 APPS = $(addprefix app/, base_station robot)
 TESTS_AND_APPS = $(TESTS) $(APPS)
 

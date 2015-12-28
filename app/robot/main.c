@@ -165,7 +165,7 @@ int robot_cmd_status(int argc,
 		     "right motor direction = %d\r\n"
 		     "right motor duty = %d\r\n"
                      "watchdog count = %d\r\n"),
-		(int)T2ST(&time),
+		(int)t2st(&time),
 		robot.debug.tick_time,
 		perimeter_wire_rx_get_signal(&robot.perimeter),
 		perimeter_wire_rx_get_quality(&robot.perimeter),
@@ -324,7 +324,7 @@ static void timer_callback(void *arg_p)
     uint32_t mask;
 
     mask = TICK_EVENT;
-    event_write_irq(&event_periodic, &mask, sizeof(mask));
+    event_write_isr(&event_periodic, &mask, sizeof(mask));
 }
 
 static int init()
