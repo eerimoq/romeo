@@ -33,13 +33,13 @@
 #define BATTERY_VOLTAGE_PER_SAMPLE (BATTERY_VOLTAGE_MAX / ANALOG_SAMPLES_MAX)
 #define BATTERY_VOLTAGE_EMPTY (11.5f)
 
-PARAMETER_DEFINE("/robot/parameters/set_battery_voltage_full", battery_param_battery_voltage_full, int, 13);
+FS_PARAMETER_DEFINE("/robot/parameters/set_battery_voltage_full", battery_param_battery_voltage_full, int, 13);
 
 int battery_init(struct battery_t *battery_p,
                struct adc_device_t *dev_p,
                struct pin_device_t *pin_dev_p)
 {
-    battery_p->battery_voltage_full = PARAMETER(battery_param_battery_voltage_full);
+    battery_p->battery_voltage_full = FS_PARAMETER(battery_param_battery_voltage_full);
 
     adc_init(&battery_p->adc,
              dev_p,
@@ -62,7 +62,7 @@ int battery_async_wait(struct battery_t *battery_p)
 {
     /* Wait for ongoing asynchronous convertion to finish. */
     if (!adc_async_wait(&battery_p->adc)) {
-        LOG(WARNING, "battery convertion has not finished");
+        return (1);
     }
 
     return (0);
@@ -81,7 +81,7 @@ int battery_update(struct battery_t *battery_p)
     sample = battery_p->updated.samples[0];
 
     /* Remove when measured after charging. */
-    battery_p->battery_voltage_full = PARAMETER(battery_param_battery_voltage_full);
+    battery_p->battery_voltage_full = FS_PARAMETER(battery_param_battery_voltage_full);
 
     if (battery_p->battery_voltage_full < BATTERY_VOLTAGE_EMPTY) {
         battery_p->battery_voltage_full = BATTERY_VOLTAGE_EMPTY;

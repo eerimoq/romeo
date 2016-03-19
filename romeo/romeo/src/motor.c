@@ -30,7 +30,7 @@ int motor_init(struct motor_t *motor_p,
 {
     motor_p->omega = 0.0f;
     motor_p->filter_weight = 0.0f;
-
+    
     /* Initialize all pins connected to the motor controllers. */
     pin_init(&motor_p->in1, in1_p, PIN_OUTPUT);
     pin_init(&motor_p->in2, in2_p, PIN_OUTPUT);
@@ -58,7 +58,7 @@ int motor_async_wait(struct motor_t *motor_p)
 {
     /* Wait for ongoing asynchronous convertion to finish. */
     if (!adc_async_wait(&motor_p->current.adc)) {
-        LOG(WARNING, "motor convertion has not finished");
+        return (1);
     }
 
     return (0);
@@ -127,8 +127,6 @@ int motor_set_omega(struct motor_t *motor_p,
     /* For debugging. */
     motor_p->direction = direction;
     motor_p->duty = duty;
-
-    LOG(ERR, "motor: direction = %d, duty = %u", direction, duty);
 
     return (0);
 }

@@ -72,7 +72,7 @@ int perimeter_wire_rx_async_wait(struct perimeter_wire_rx_t *perimeter_p)
 {
     /* Wait for ongoing asynchronous convertion to finish. */
     if (!adc_async_wait(&perimeter_p->adc)) {
-        LOG(WARNING, "convertion has not finished");
+        return (1);
     }
 
     return (0);

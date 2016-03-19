@@ -25,10 +25,10 @@
 #define ROBOT_WHEEL_DISTANCE 0.2f
 #define ROBOT_WHEEL_RADIUS   0.04f
 
-PARAMETER_DEFINE("/robot/parameters/watchdog/enabled", robot_parameter_watchdog_enabled, int, 1);
+FS_PARAMETER_DEFINE("/robot/parameters/watchdog/enabled", robot_parameter_watchdog_enabled, int, 1);
 
-COUNTER_DEFINE("/robot/counters/tick", robot_tick);
-COUNTER_DEFINE("/robot/counters/number_of_state_transitions", number_of_state_transitions);
+FS_COUNTER_DEFINE("/robot/counters/tick", robot_tick);
+FS_COUNTER_DEFINE("/robot/counters/number_of_state_transitions", number_of_state_transitions);
 
 /**
  * Handle state transition.
@@ -113,16 +113,28 @@ static int handle_state_transition(struct robot_t *robot_p)
 
     /* Bad state transition. */
     if (callback == NULL) {
-        LOG(ERR, "bad state transistion %d -> %d", current, next);
+        log_object_print(NULL,
+                         LOG_ERR,
+                         FSTR("bad state transistion %d -> %d\r\n"),
+                         current,
+                         next);
         return (-1);
     }
 
-    LOG(NOTICE, "state transistion %d -> %d", current, next);
+    log_object_print(NULL,
+                     LOG_NOTICE,
+                     FSTR("state transistion %d -> %d\r\n"),
+                     current,
+                     next);
 
     /* Call the transition callback. */
     state_callback = callback(robot_p);
     if (state_callback == NULL) {
-        LOG(NOTICE, "failed state transistion %d -> %d", current, next);
+        log_object_print(NULL,
+                         LOG_NOTICE,
+                         FSTR("failed state transistion %d -> %d\r\n"),
+                         current,
+                         next);
         return (-1);
     }
 
@@ -130,7 +142,7 @@ static int handle_state_transition(struct robot_t *robot_p)
     robot_p->state.current = next;
     robot_p->state.callback = state_callback;
 
-    COUNTER_INC(number_of_state_transitions, 1);
+    FS_COUNTER_INC(number_of_state_transitions, 1);
 
     return (0);
 }
@@ -200,11 +212,11 @@ int robot_stop(struct robot_t *robot_p)
 
 int robot_tick(struct robot_t *robot_p)
 {
-    COUNTER_INC(robot_tick, 1);
+    FS_COUNTER_INC(robot_tick, 1);
 
     /* Stop the robot if the watchdog is enabled and has not been
        kicked recently. */
-    if (PARAMETER(robot_parameter_watchdog_enabled) == 1) {
+    if (FS_PARAMETER(robot_parameter_watchdog_enabled) == 1) {
         if (watchdog_tick(&robot_p->watchdog) == 0) {
             robot_p->state.next = ROBOT_STATE_IDLE;
         }
@@ -228,7 +240,10 @@ int robot_tick(struct robot_t *robot_p)
     motor_async_convert(&robot_p->left_motor);
     motor_async_convert(&robot_p->right_motor);
 
-    LOG(INFO, "current state: %d", robot_p->state.current);
+    log_object_print(NULL,
+                     LOG_INFO,
+                     FSTR("current state: %d\r\n"),
+                     robot_p->state.current);
 
     /* Execute robot state machine. */
     if (robot_p->state.current == robot_p->state.next) {

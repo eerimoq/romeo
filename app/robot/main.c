@@ -53,7 +53,7 @@ static struct robot_t robot;
 static struct timer_t ticker;
 static struct thrd_t *self_p;
 
-static char password[SETTINGS_SHELL_PASSWORD_SIZE];
+static char password[SETTING_SHELL_PASSWORD_SIZE];
 static struct shell_config_t shell_default;
 static struct shell_config_t shell_bluetooth;
 
@@ -244,19 +244,19 @@ int robot_cmd_shell_set_password(int argc,
         return (1);
     }
 
-    if (strlen(argv[1]) >= SETTINGS_SHELL_PASSWORD_SIZE) {
+    if (strlen(argv[1]) >= SETTING_SHELL_PASSWORD_SIZE) {
         std_fprintf(out_p, FSTR("%s: password too long\r\n"), argv[1]);
         return (1);
     }
 
     /* Update password in settings area. */
-    setting_write(SETTINGS_SHELL_PASSWORD_ADDR,
+    setting_write(SETTING_SHELL_PASSWORD_ADDR,
                   argv[1],
-                  SETTINGS_SHELL_PASSWORD_SIZE);
+                  SETTING_SHELL_PASSWORD_SIZE);
 
     /* Read shell password from settings area. */
     setting_read(password,
-                 SETTINGS_SHELL_PASSWORD_ADDR,
+                 SETTING_SHELL_PASSWORD_ADDR,
                  sizeof(password));
 
     return (0);
@@ -358,7 +358,7 @@ static int init()
 
     /* Read shell password from settings. */
     setting_read(password,
-                 SETTINGS_SHELL_PASSWORD_ADDR,
+                 SETTING_SHELL_PASSWORD_ADDR,
                  sizeof(password));
 
     /* Start the shell. */
@@ -367,7 +367,7 @@ static int init()
     shell_default.args.name_p = "shell0";
     shell_default.args.username_p = "root";
     shell_default.args.password_p = password;
-    thrd_spawn(shell_entry,
+    thrd_spawn(shell_main,
                &shell_default.args,
                20,
                shell_default.stack,
@@ -379,7 +379,7 @@ static int init()
     shell_bluetooth.args.name_p = "shell3";
     shell_bluetooth.args.username_p = "root";
     shell_bluetooth.args.password_p = password;
-    thrd_spawn(shell_entry,
+    thrd_spawn(shell_main,
                &shell_bluetooth.args,
                20,
                shell_bluetooth.stack,
@@ -402,11 +402,12 @@ int main()
     timeout.seconds = 0;
     timeout.nanoseconds = PROCESS_PERIOD_NS;
 
-    timer_set(&ticker,
-              &timeout,
-              timer_callback,
-              self_p,
-              TIMER_PERIODIC);
+    timer_init(&ticker,
+               &timeout,
+               timer_callback,
+               self_p,
+               TIMER_PERIODIC);
+    timer_start(&ticker);
 
     /* Robot main loop. */
     while (1) {
