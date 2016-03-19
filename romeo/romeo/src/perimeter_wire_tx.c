@@ -21,7 +21,7 @@
 #include "simba.h"
 #include "romeo.h"
 
-COUNTER_DEFINE("/robot/counters/perimeter_timer_callback", perimeter_timer_callback);
+FS_COUNTER_DEFINE("/robot/counters/perimeter_timer_callback", perimeter_timer_callback);
 
 #define PERIOD_NS 100000L
 
@@ -63,7 +63,7 @@ static void timer_callback(void *arg_p)
         }
     }
 
-    COUNTER_INC(perimeter_timer_callback, 1);
+    FS_COUNTER_INC(perimeter_timer_callback, 1);
 }
 
 int perimeter_wire_tx_module_init(void)
@@ -79,11 +79,13 @@ int perimeter_wire_tx_module_init(void)
     timeout.seconds = 0;
     timeout.nanoseconds = PERIOD_NS;
 
-    return (timer_set(&timer,
-                      &timeout,
-                      timer_callback,
-                      NULL,
-                      TIMER_PERIODIC));
+    timer_init(&timer,
+               &timeout,
+               timer_callback,
+               NULL,
+               TIMER_PERIODIC);
+
+    return (timer_start(&timer));
 }
 
 int perimeter_wire_tx_init(struct perimeter_wire_tx_t *perimeter_wire_p,

@@ -78,7 +78,7 @@ static int init()
     /* Start the shell. */
     shell_args.chin_p = &uart.chin;
     shell_args.chout_p = &uart.chout;
-    thrd_spawn(shell_entry,
+    thrd_spawn(shell_main,
                &shell_args,
                20,
                shell_stack,
@@ -99,11 +99,13 @@ int main()
     timeout.seconds = 0;
     timeout.nanoseconds = PROCESS_PERIOD_NS;
 
-    timer_set(&ticker,
-	      &timeout,
-	      timer_callback,
-	      self_p,
-	      TIMER_PERIODIC);
+    timer_init(&ticker,
+               &timeout,
+               timer_callback,
+               self_p,
+               TIMER_PERIODIC);
+
+    timer_start(&ticker);
 
     base_station_start(&base_station);
 
