@@ -25,10 +25,13 @@
 #define ROBOT_WHEEL_DISTANCE 0.2f
 #define ROBOT_WHEEL_RADIUS   0.04f
 
-FS_PARAMETER_DEFINE("/robot/parameters/watchdog/enabled", robot_parameter_watchdog_enabled, int, 1);
+/* Parameters. */
+static int parameter_watchdog_enabled_value = 1;
+static struct fs_parameter_t parameter_watchdog_enabled;
 
-FS_COUNTER_DEFINE("/robot/counters/tick", robot_tick);
-FS_COUNTER_DEFINE("/robot/counters/number_of_state_transitions", number_of_state_transitions);
+/* Counters. */
+static struct fs_counter_t counter_tick;
+static struct fs_counter_t counter_number_of_state_transitions;
 
 /**
  * Handle state transition.
@@ -142,7 +145,30 @@ static int handle_state_transition(struct robot_t *robot_p)
     robot_p->state.current = next;
     robot_p->state.callback = state_callback;
 
-    FS_COUNTER_INC(number_of_state_transitions, 1);
+    fs_counter_increment(&counter_number_of_state_transitions, 1);
+
+    return (0);
+}
+
+int robot_module_init(void)
+{
+    fs_parameter_init(&parameter_watchdog_enabled,
+                      FSTR("/robot/parameters/watchdog/enabled"),
+                      fs_cmd_parameter_int,
+                      &parameter_watchdog_enabled_value);
+    fs_parameter_register(&parameter_watchdog_enabled);
+
+    fs_counter_init(&counter_tick,
+                    FSTR("/robot/counters/tick"),
+                    0);
+    fs_counter_register(&counter_tick);
+
+    fs_counter_init(&counter_number_of_state_transitions,
+                    FSTR("/robot/counters/number_of_state_transitions"),
+                    0);
+    fs_counter_register(&counter_number_of_state_transitions);
+
+    robot_states_module_init();
 
     return (0);
 }
@@ -158,10 +184,12 @@ int robot_init(struct robot_t *robot_p)
                            &adc_0_dev,
                            &pin_a0_dev);
 
+    battery_module_init();
     battery_init(&robot_p->battery,
                  &adc_0_dev,
                  &pin_a1_dev);
 
+    movement_module_init();
     movement_init(&robot_p->movement,
                   ROBOT_WHEEL_DISTANCE,
                   ROBOT_WHEEL_RADIUS);
@@ -212,11 +240,11 @@ int robot_stop(struct robot_t *robot_p)
 
 int robot_tick(struct robot_t *robot_p)
 {
-    FS_COUNTER_INC(robot_tick, 1);
+    fs_counter_increment(&counter_tick, 1);
 
     /* Stop the robot if the watchdog is enabled and has not been
        kicked recently. */
-    if (FS_PARAMETER(robot_parameter_watchdog_enabled) == 1) {
+    if (parameter_watchdog_enabled_value == 1) {
         if (watchdog_tick(&robot_p->watchdog) == 0) {
             robot_p->state.next = ROBOT_STATE_IDLE;
         }

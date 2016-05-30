@@ -22,9 +22,6 @@ NAME = base_station
 VERSION = 0.1.0
 BOARD = arduino_nano
 
-DRIVERS_SRC = uart.c pin.c adc.c
-ROMEO_SRC = perimeter_wire_tx.c base_station.c
-
 ROMEO = ../../romeo/romeo/src
 include $(ROMEO)/romeo.mk
 SIMBA = ../../../simba

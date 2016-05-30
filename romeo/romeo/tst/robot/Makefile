@@ -28,10 +28,6 @@ SRC += \
 	testdata.c \
 	watchdog_stub.c
 
-SLIB_SRC = harness.c
-
-DRIVERS_SRC = uart.c
-
 ROMEO_SRC = \
 	robot.c \
 	robot_states.c \

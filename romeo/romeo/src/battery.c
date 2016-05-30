@@ -33,13 +33,25 @@
 #define BATTERY_VOLTAGE_PER_SAMPLE (BATTERY_VOLTAGE_MAX / ANALOG_SAMPLES_MAX)
 #define BATTERY_VOLTAGE_EMPTY (11.5f)
 
-FS_PARAMETER_DEFINE("/robot/parameters/set_battery_voltage_full", battery_param_battery_voltage_full, int, 13);
+static int parameter_battery_param_battery_voltage_full_value = 13;
+static struct fs_parameter_t parameter_battery_param_battery_voltage_full;
+
+int battery_module_init()
+{
+    fs_parameter_init(&parameter_battery_param_battery_voltage_full,
+                      FSTR("/robot/parameters/set_battery_voltage_full"),
+                      fs_cmd_parameter_int,
+                      &parameter_battery_param_battery_voltage_full_value);
+    fs_parameter_register(&parameter_battery_param_battery_voltage_full);
+
+    return (0);
+}
 
 int battery_init(struct battery_t *battery_p,
                struct adc_device_t *dev_p,
                struct pin_device_t *pin_dev_p)
 {
-    battery_p->battery_voltage_full = FS_PARAMETER(battery_param_battery_voltage_full);
+    battery_p->battery_voltage_full = parameter_battery_param_battery_voltage_full_value;
 
     adc_init(&battery_p->adc,
              dev_p,
@@ -81,7 +93,7 @@ int battery_update(struct battery_t *battery_p)
     sample = battery_p->updated.samples[0];
 
     /* Remove when measured after charging. */
-    battery_p->battery_voltage_full = FS_PARAMETER(battery_param_battery_voltage_full);
+    battery_p->battery_voltage_full = parameter_battery_param_battery_voltage_full_value;
 
     if (battery_p->battery_voltage_full < BATTERY_VOLTAGE_EMPTY) {
         battery_p->battery_voltage_full = BATTERY_VOLTAGE_EMPTY;

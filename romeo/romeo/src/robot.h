@@ -24,6 +24,12 @@
 #include "simba.h"
 #include "romeo.h"
 
+/**
+ * Initialize the robot state module.
+ * @return zero(0) or negative error code
+ */
+int robot_states_module_init(void);
+
 int robot_state_idle(struct robot_t *robot_p);
 int robot_state_starting(struct robot_t *robot_p);
 int robot_state_cutting(struct robot_t *robot_p);

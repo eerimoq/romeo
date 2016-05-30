@@ -21,7 +21,7 @@
 #include "simba.h"
 #include "romeo.h"
 
-FS_COMMAND_DEFINE("/base_station/status", base_station_cmd_status);
+static struct fs_command_t command_status;
 
 static struct uart_driver_t uart;
 static char qinbuf[32];
@@ -31,12 +31,14 @@ static struct base_station_t base_station;
 static struct timer_t ticker;
 static struct thrd_t *self_p;
 
-static char shell_stack[350];
+static char shell_stack[1024];
 
-int base_station_cmd_status(int argc,
-                            const char *argv[],
-                            void *out_p,
-                            void *in_p)
+static int command_status_cb(int argc,
+                             const char *argv[],
+                             chan_t *out_p,
+                             chan_t *in_p,
+                             void *arg_p,
+                             void *call_arg_p)
 {
     UNUSED(in_p);
 
@@ -59,6 +61,12 @@ static int init()
 {
     sys_start();
     uart_module_init();
+
+    fs_command_init(&command_status,
+                    FSTR("/base_station/status"),
+                    command_status_cb,
+                    NULL);
+    fs_command_register(&command_status);
 
     /* Setup UART. */
     uart_init(&uart, &uart_device[0], 38400, qinbuf, sizeof(qinbuf));

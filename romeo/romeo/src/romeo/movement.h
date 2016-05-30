@@ -30,6 +30,12 @@ struct movement_t {
 };
 
 /**
+ * Initialize the movement module.
+ * @return zero(0) or negative error code
+ */
+int movement_module_init(void);
+
+/**
  * Initialize movement object with given geometry.
  * @param[out] movement_p Obkect to initialize.
  * @param[in] wheel_distance_in_meters

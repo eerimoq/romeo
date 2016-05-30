@@ -20,7 +20,7 @@
 
 #include "simba.h"
 
-extern int FS_PARAMETER(robot_parameter_charging);
+extern int parameter_charging_value;
 
 #include "simba.h"
 #include "romeo.h"
@@ -50,8 +50,9 @@ static int test_automatic(struct harness_t *harness_p)
     struct robot_t robot;
     const struct testdata_t FAR *testdata_p;
 
-    FS_PARAMETER(robot_parameter_charging) = 1;
+    parameter_charging_value = 1;
 
+    robot_module_init();
     robot_init(&robot);
     robot_start(&robot);
 

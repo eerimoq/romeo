@@ -41,6 +41,12 @@ struct battery_t {
 };
 
 /**
+ * Initialize the battery module.
+ * @return zero(0) or negative error code
+ */
+int battery_module_init(void);
+
+/**
  * Initialize battery object.
  * @param[out] battery_p Object to initialize.
  * @return zero(0) or negative error code

@@ -25,6 +25,11 @@
 int battery_stub_energy_level_next;
 int battery_stub_energy_level[16];
 
+int battery_module_init()
+{
+    return (0);
+}
+
 int battery_init(struct battery_t *battery_p,
                struct adc_device_t *dev_p,
                struct pin_device_t *pin_dev_p)

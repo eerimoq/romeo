@@ -34,6 +34,12 @@ struct base_station_t {
 };
 
 /**
+ * Initialize the base station module.
+ * @return zero(0) or negative error code
+ */
+int base_station_module_init(void);
+
+/**
  * Initialize base station object.
  * @param[out] base_station_p Base_Station object to initialize.
  * @return zero(0) or negative error code

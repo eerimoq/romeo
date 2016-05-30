@@ -50,3 +50,7 @@ profile.log
 
 # exported slides from office
 *_slide.jpg
+
+settings.[hc]
+settings.bin
+gen

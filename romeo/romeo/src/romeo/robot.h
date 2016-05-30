@@ -114,6 +114,12 @@ struct robot_t {
 };
 
 /**
+ * Initialize the robot module.
+ * @return zero(0) or negative error code
+ */
+int robot_module_init(void);
+
+/**
  * Initialize robot object.
  * @param[out] robot_p Robot object to initialize.
  * @return zero(0) or negative error code

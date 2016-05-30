@@ -61,6 +61,7 @@ static int test_calculate_wheels_omega(struct harness_t *harness_p)
         { 0.1f, 0.538f, 1.8064f, 0.193f }
     };
 
+    movement_module_init();
     movement_init(&movement, 0.3f, 0.1f);
 
     for (i = 0; i < membersof(testdata); i++) {

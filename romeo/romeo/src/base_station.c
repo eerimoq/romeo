@@ -21,7 +21,17 @@
 #include "simba.h"
 #include "romeo.h"
 
-FS_COUNTER_DEFINE("/base_station/counters/tick", base_station_tick);
+static struct fs_counter_t counter_base_station_tick;
+
+int base_station_module_init()
+{
+    fs_counter_init(&counter_base_station_tick,
+                    FSTR("/base_station/counters/tick"),
+                    0);
+    fs_counter_register(&counter_base_station_tick);
+
+    return (0);
+}
 
 int base_station_init(struct base_station_t *base_station_p)
 {
@@ -50,7 +60,7 @@ int base_station_stop(struct base_station_t *base_station_p)
 
 int base_station_tick(struct base_station_t *base_station_p)
 {
-    FS_COUNTER_INC(base_station_tick, 1);
+    fs_counter_increment(&counter_base_station_tick, 1);
 
     perimeter_wire_tx_get_current(&base_station_p->perimeter);
 

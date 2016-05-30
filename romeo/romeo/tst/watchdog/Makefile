@@ -21,9 +21,6 @@
 NAME = watchdog_suite
 BOARD ?= linux
 
-SLIB_SRC = harness.c
-DRIVERS_SRC = uart.c pin.c pwm.c adc.c
-
 ROMEO = ../../src
 include $(ROMEO)/romeo.mk
 SIMBA = ../../../../../simba

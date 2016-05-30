@@ -24,4 +24,39 @@
 /* System tick period of 1ms. */
 #define SYS_TICK_FREQUENCY 9615
 
+/**
+ * Build with assert.
+ */
+#ifndef CONFIG_ASSERT
+#    define CONFIG_ASSERT               1
+#endif
+
+/**
+ * Build with debug.
+ */
+#ifndef CONFIG_DEBUG
+#    define CONFIG_DEBUG                1
+#endif
+
+/**
+ * Stack profiling.
+ */
+#ifndef CONFIG_PROFILE_STACK
+#    define CONFIG_PROFILE_STACK        1
+#endif
+
+/**
+ * Use a preemptive scheduler.
+ */
+#ifndef CONFIG_PREEMPTIVE_SCHEDULER
+#    define CONFIG_PREEMPTIVE_SCHEDULER 0
+#endif
+
+/**
+ * Start the monitor thread.
+ */
+#ifndef CONFIG_MONITOR_THREAD
+#    define CONFIG_MONITOR_THREAD       0
+#endif
+
 #endif

@@ -31,15 +31,15 @@ struct shell_config_t {
     char input_channel_buf[2];
 };
 
-FS_COMMAND_DEFINE("/robot/start", robot_cmd_start);
-FS_COMMAND_DEFINE("/robot/stop", robot_cmd_stop);
-FS_COMMAND_DEFINE("/robot/status", robot_cmd_status);
-FS_COMMAND_DEFINE("/robot/mode/set", robot_cmd_mode_set);
-FS_COMMAND_DEFINE("/robot/manual/movement/set", robot_cmd_manual_movement_set);
-FS_COMMAND_DEFINE("/robot/sensors", robot_cmd_sensors);
-FS_COMMAND_DEFINE("/robot/watchdog/kick", robot_cmd_watchdog_kick);
-
-FS_COMMAND_DEFINE("/robot/shell/set_password", robot_cmd_shell_set_password);
+/* Commands. */
+static struct fs_command_t command_start;
+static struct fs_command_t command_stop;
+static struct fs_command_t command_status;
+static struct fs_command_t command_mode_set;
+static struct fs_command_t command_manual_movement_set;
+static struct fs_command_t command_sensors;
+static struct fs_command_t command_watchdog_kick;
+static struct fs_command_t command_shell_set_password;
 
 static struct uart_driver_t uart;
 static char qinbuf[64];
@@ -106,32 +106,39 @@ FAR const char FAR *searching_state_as_string[] = {
     searching_state_following_perimeter_wire_string,
 };
 
-int robot_cmd_start(int argc,
-		    const char *argv[],
-		    void *out_p,
-		    void *in_p)
+static int command_start_cb(int argc,
+                            const char *argv[],
+                            chan_t *out_p,
+                            chan_t *in_p,
+                            void *arg_p,
+                            void *call_arg_p)
 {
     robot_start(&robot);
 
     return (0);
 }
 
-int robot_cmd_stop(int argc,
-		   const char *argv[],
-		   void *out_p,
-		   void *in_p)
+static int command_stop_cb(int argc,
+                           const char *argv[],
+                           chan_t *out_p,
+                           chan_t *in_p,
+                           void *arg_p,
+                           void *call_arg_p)
 {
     robot_stop(&robot);
 
     return (0);
 }
 
-int robot_cmd_status(int argc,
-		     const char *argv[],
-		     void *out_p,
-		     void *in_p)
+static int command_status_cb(int argc,
+                             const char *argv[],
+                             chan_t *out_p,
+                             chan_t *in_p,
+                             void *arg_p,
+                             void *call_arg_p)
 {
     UNUSED(in_p);
+
     struct time_t time;
 
     std_fprintf(out_p, FSTR("mode = "));
@@ -188,10 +195,12 @@ int robot_cmd_status(int argc,
     return (0);
 }
 
-int robot_cmd_mode_set(int argc,
-		       const char *argv[],
-		       void *out_p,
-		       void *in_p)
+static int command_mode_set_cb(int argc,
+                               const char *argv[],
+                               chan_t *out_p,
+                               chan_t *in_p,
+                               void *arg_p,
+                               void *call_arg_p)
 {
     UNUSED(in_p);
 
@@ -211,10 +220,12 @@ int robot_cmd_mode_set(int argc,
     return (0);
 }
 
-int robot_cmd_manual_movement_set(int argc,
-				  const char *argv[],
-				  void *out_p,
-				  void *in_p)
+static int command_manual_movement_set_cb(int argc,
+                                          const char *argv[],
+                                          chan_t *out_p,
+                                          chan_t *in_p,
+                                          void *arg_p,
+                                          void *call_arg_p)
 {
     UNUSED(in_p);
 
@@ -234,10 +245,12 @@ int robot_cmd_manual_movement_set(int argc,
     return (0);
 }
 
-int robot_cmd_shell_set_password(int argc,
-                                 const char *argv[],
-                                 void *out_p,
-                                 void *in_p)
+static int command_shell_set_password_cb(int argc,
+                                         const char *argv[],
+                                         chan_t *out_p,
+                                         chan_t *in_p,
+                                         void *arg_p,
+                                         void *call_arg_p)
 {
     if (argc != 2) {
         std_fprintf(out_p, FSTR("Usage: set_password <password>\r\n"));
@@ -262,10 +275,12 @@ int robot_cmd_shell_set_password(int argc,
     return (0);
 }
 
-int robot_cmd_sensors(int argc,
-                      const char *argv[],
-                      void *out_p,
-                      void *in_p)
+static int command_sensors_cb(int argc,
+                              const char *argv[],
+                              chan_t *out_p,
+                              chan_t *in_p,
+                              void *arg_p,
+                              void *call_arg_p)
 {
     UNUSED(in_p);
 
@@ -311,10 +326,12 @@ int robot_cmd_sensors(int argc,
     return (0);
 }
 
-int robot_cmd_watchdog_kick(int argc,
-                            const char *argv[],
-                            void *out_p,
-                            void *in_p)
+static int command_watchdog_kick_cb(int argc,
+                                    const char *argv[],
+                                    chan_t *out_p,
+                                    chan_t *in_p,
+                                    void *arg_p,
+                                    void *call_arg_p)
 {
     return (robot_watchdog_kick(&robot));
 }
@@ -332,6 +349,54 @@ static int init()
     sys_start();
     uart_module_init();
     adc_module_init();
+
+    fs_command_init(&command_start,
+                    FSTR("/robot/start"),
+                    command_start_cb,
+                    NULL);
+    fs_command_register(&command_start);
+
+    fs_command_init(&command_stop,
+                    FSTR("/robot/stop"),
+                    command_stop_cb,
+                    NULL);
+    fs_command_register(&command_stop);
+
+    fs_command_init(&command_status,
+                    FSTR("/robot/status"),
+                    command_status_cb,
+                    NULL);
+    fs_command_register(&command_status);
+
+    fs_command_init(&command_mode_set,
+                    FSTR("/robot/mode/set"),
+                    command_mode_set_cb,
+                    NULL);
+    fs_command_register(&command_mode_set);
+
+    fs_command_init(&command_manual_movement_set,
+                    FSTR("/robot/manual/movement/set"),
+                    command_manual_movement_set_cb,
+                    NULL);
+    fs_command_register(&command_manual_movement_set);
+
+    fs_command_init(&command_sensors,
+                    FSTR("/robot/sensors"),
+                    command_sensors_cb,
+                    NULL);
+    fs_command_register(&command_sensors);
+
+    fs_command_init(&command_watchdog_kick,
+                    FSTR("/robot/watchdog/kick"),
+                    command_watchdog_kick_cb,
+                    NULL);
+    fs_command_register(&command_watchdog_kick);
+
+    fs_command_init(&command_shell_set_password,
+                    FSTR("/robot/shell/set_password"),
+                    command_shell_set_password_cb,
+                    NULL);
+    fs_command_register(&command_shell_set_password);
 
     /* Setup UART. */
     uart_init(&uart, &uart_device[0], 38400, qinbuf, sizeof(qinbuf));
@@ -351,6 +416,7 @@ static int init()
 
     event_init(&event_periodic);
 
+    robot_module_init();
     robot_init(&robot);
 
     self_p = thrd_self();

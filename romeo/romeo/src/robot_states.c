@@ -28,26 +28,28 @@
 #define FOLLOW_KD 0.5f
 
 /* Counters. */
-FS_COUNTER_DEFINE("/robot/counters/state_idle", robot_state_idle);
-FS_COUNTER_DEFINE("/robot/counters/state_starting", robot_state_starting);
-FS_COUNTER_DEFINE("/robot/counters/state_cutting", robot_state_cutting);
-FS_COUNTER_DEFINE("/robot/counters/state_searching_for_base_station", robot_state_searching_for_base_station);
-FS_COUNTER_DEFINE("/robot/counters/state_in_base_station", robot_state_in_base_station);
+static struct fs_counter_t counter_state_idle;
+static struct fs_counter_t counter_state_starting;
+static struct fs_counter_t counter_state_cutting;
+static struct fs_counter_t counter_state_searching_for_base_station;
+static struct fs_counter_t counter_state_in_base_station;
 
-FS_COUNTER_DEFINE("/robot/counters/cutting_state_forward", robot_cutting_state_forward);
-FS_COUNTER_DEFINE("/robot/counters/cutting_state_backwards", robot_cutting_state_backwards);
-FS_COUNTER_DEFINE("/robot/counters/cutting_state_rotating", robot_cutting_state_rotating);
+static struct fs_counter_t counter_cutting_state_forward;
+static struct fs_counter_t counter_cutting_state_backwards;
+static struct fs_counter_t counter_cutting_state_rotating;
 
-FS_COUNTER_DEFINE("/robot/counters/odometer", robot_odometer);
+static struct fs_counter_t counter_odometer;
 
-FS_COUNTER_DEFINE("/robot/counters/is_stuck", robot_is_stuck);
+static struct fs_counter_t counter_is_stuck;
 
-FS_COUNTER_DEFINE("/robot/counters/is_inside_perimeter_wire", robot_is_inside_perimeter_wire);
-FS_COUNTER_DEFINE("/robot/counters/is_outside_perimeter_wire", robot_is_outside_perimeter_wire);
+static struct fs_counter_t counter_is_inside_perimeter_wire;
+static struct fs_counter_t counter_is_outside_perimeter_wire;
 
 /* Parameters. */
-FS_PARAMETER_DEFINE("/robot/parameters/charging", robot_parameter_charging, int, 0);
-FS_PARAMETER_DEFINE("/robot/parameters/search_for_the_base_station", robot_parameter_search_for_the_base_station, int, -1);
+int parameter_charging_value = 0;
+static struct fs_parameter_t parameter_charging;
+static int parameter_search_for_the_base_station_value = -1;
+static struct fs_parameter_t parameter_search_for_the_base_station;
 
 /**
  * @return true(1) if the robot should start searching for the base
@@ -55,11 +57,8 @@ FS_PARAMETER_DEFINE("/robot/parameters/search_for_the_base_station", robot_param
  */
 static int is_time_to_search_for_base_station(struct robot_t *robot_p)
 {
-    int search_for_the_base_station =
-        FS_PARAMETER(robot_parameter_search_for_the_base_station);
-
-    if (search_for_the_base_station != -1) {
-        return (search_for_the_base_station != 0);
+    if (parameter_search_for_the_base_station_value != -1) {
+        return (parameter_search_for_the_base_station_value != 0);
     }
 
     return (battery_get_stored_energy_level(&robot_p->battery) <= 20);
@@ -70,9 +69,9 @@ static int is_inside_perimeter_wire(float signal)
     int is_inside = (signal >= 3.0f);
 
     if (is_inside == 1) {
-        FS_COUNTER_INC(robot_is_inside_perimeter_wire, 1);
+        fs_counter_increment(&counter_is_inside_perimeter_wire, 1);
     } else {
-        FS_COUNTER_INC(robot_is_outside_perimeter_wire, 1);
+        fs_counter_increment(&counter_is_outside_perimeter_wire, 1);
     }
 
     return (is_inside);
@@ -87,7 +86,7 @@ static int is_stuck(struct robot_t *robot_p)
     right_current = motor_get_current(&robot_p->right_motor);
 
     if ((left_current > 500) || (right_current > 500)) {
-        FS_COUNTER_INC(robot_is_stuck, 1);
+        fs_counter_increment(&counter_is_stuck, 1);
         return (1);
     }
 
@@ -96,7 +95,7 @@ static int is_stuck(struct robot_t *robot_p)
 
 static int is_charging(struct robot_t *robot_p)
 {
-    return (FS_PARAMETER(robot_parameter_charging));
+    return (parameter_charging_value);
 }
 
 static int is_arriving_to_base_station(struct robot_t *robot_p)
@@ -188,7 +187,7 @@ static int cutting_automatic(struct robot_t *robot_p,
         switch (cutting_p->state) {
 
         case CUTTING_STATE_FORWARD:
-            FS_COUNTER_INC(robot_cutting_state_forward, 1);
+            fs_counter_increment(&counter_cutting_state_forward, 1);
 
             if (is_inside_perimeter_wire(signal)) {
                 /* Just continue forward. */
@@ -202,7 +201,7 @@ static int cutting_automatic(struct robot_t *robot_p,
             break;
 
         case CUTTING_STATE_BACKWARDS:
-            FS_COUNTER_INC(robot_cutting_state_backwards, 1);
+            fs_counter_increment(&counter_cutting_state_backwards, 1);
 
             *speed_p = -0.1f;
             *omega_p = 0.0f;
@@ -217,7 +216,7 @@ static int cutting_automatic(struct robot_t *robot_p,
             break;
 
         case CUTTING_STATE_ROTATING:
-            FS_COUNTER_INC(robot_cutting_state_rotating, 1);
+            fs_counter_increment(&counter_cutting_state_rotating, 1);
 
             *speed_p = 0.0f;
             *omega_p = 0.4f;
@@ -238,12 +237,91 @@ static int cutting_automatic(struct robot_t *robot_p,
     return (0);
 }
 
+int robot_states_module_init(void)
+{
+    /* Counters. */
+    fs_counter_init(&counter_state_idle,
+                    FSTR("/robot/counters/state_idle"),
+                    0);
+    fs_counter_register(&counter_state_idle);
+    
+    fs_counter_init(&counter_state_starting,
+                    FSTR("/robot/counters/state_starting"),
+                    0);
+    fs_counter_register(&counter_state_starting);
+
+    fs_counter_init(&counter_state_cutting,
+                    FSTR("/robot/counters/state_cutting"),
+                    0);
+    fs_counter_register(&counter_state_cutting);
+
+    fs_counter_init(&counter_state_searching_for_base_station,
+                    FSTR("/robot/counters/state_searching_for_base_station"),
+                    0);
+    fs_counter_register(&counter_state_searching_for_base_station);
+
+    fs_counter_init(&counter_state_in_base_station,
+                    FSTR("/robot/counters/state_in_base_station"),
+                    0);
+    fs_counter_register(&counter_state_in_base_station);
+
+    fs_counter_init(&counter_cutting_state_forward,
+                    FSTR("/robot/counters/cutting_state_forward"),
+                    0);
+    fs_counter_register(&counter_cutting_state_forward);
+
+    fs_counter_init(&counter_cutting_state_backwards,
+                    FSTR("/robot/counters/cutting_state_backwards"),
+                    0);
+    fs_counter_register(&counter_cutting_state_backwards);
+
+    fs_counter_init(&counter_cutting_state_rotating,
+                    FSTR("/robot/counters/cutting_state_rotating"),
+                    0);
+    fs_counter_register(&counter_cutting_state_rotating);
+
+    fs_counter_init(&counter_odometer,
+                    FSTR("/robot/counters/odometer"),
+                    0);
+    fs_counter_register(&counter_odometer);
+
+    fs_counter_init(&counter_is_stuck,
+                    FSTR("/robot/counters/is_stuck"),
+                    0);
+    fs_counter_register(&counter_is_stuck);
+
+    fs_counter_init(&counter_is_inside_perimeter_wire,
+                    FSTR("/robot/counters/is_inside_perimeter_wire"),
+                    0);
+    fs_counter_register(&counter_is_inside_perimeter_wire);
+
+    fs_counter_init(&counter_is_outside_perimeter_wire,
+                    FSTR("/robot/counters/is_outside_perimeter_wire"),
+                    0);
+    fs_counter_register(&counter_is_outside_perimeter_wire);
+
+    /* Parameters. */
+    fs_parameter_init(&parameter_charging,
+                      FSTR("/robot/parameters/charging"),
+                      fs_cmd_parameter_int,
+                      &parameter_charging_value);
+    fs_parameter_register(&parameter_charging);
+
+    fs_parameter_init(&parameter_search_for_the_base_station,
+                      FSTR("/robot/parameters/search_for_the_base_station"),
+                      fs_cmd_parameter_int,
+                      &parameter_search_for_the_base_station_value);
+    fs_parameter_register(&parameter_search_for_the_base_station);
+
+    return (0);
+}
+
 int robot_state_idle(struct robot_t *robot_p)
 {
     float left_wheel_omega;
     float right_wheel_omega;
 
-    FS_COUNTER_INC(robot_state_idle, 1);
+    fs_counter_increment(&counter_state_idle, 1);
 
     /* Robot standing still in idle state. */
     left_wheel_omega = 0.0f;
@@ -257,7 +335,7 @@ int robot_state_idle(struct robot_t *robot_p)
 
 int robot_state_starting(struct robot_t *robot_p)
 {
-    FS_COUNTER_INC(robot_state_starting, 1);
+    fs_counter_increment(&counter_state_starting, 1);
 
     robot_p->state.next = ROBOT_STATE_CUTTING;
 
@@ -271,7 +349,7 @@ int robot_state_cutting(struct robot_t *robot_p)
     float speed;
     float omega;
 
-    FS_COUNTER_INC(robot_state_cutting, 1);
+    fs_counter_increment(&counter_state_cutting, 1);
 
     /* Calculate new robot speeds. */
     if (robot_p->mode == ROBOT_MODE_MANUAL) {
@@ -293,7 +371,7 @@ int robot_state_cutting(struct robot_t *robot_p)
 
     /* Only measure when driving forwards. */
     if (speed > 0.0f) {
-        FS_COUNTER_INC(robot_odometer, speed * PROCESS_PERIOD_MS);
+        fs_counter_increment(&counter_odometer, speed * PROCESS_PERIOD_MS);
     }
 
     return (0);
@@ -314,7 +392,7 @@ int robot_state_searching_for_base_station(struct robot_t *robot_p)
 
     signal = perimeter_wire_rx_get_signal(&robot_p->perimeter);
 
-    FS_COUNTER_INC(robot_state_searching_for_base_station, 1);
+    fs_counter_increment(&counter_state_searching_for_base_station, 1);
 
     if (searching_p->state == SEARCHING_STATE_SEARCHING_FOR_PERIMETER_WIRE) {
         /* No movement if the robot is stuck. */
@@ -387,7 +465,7 @@ int robot_state_searching_for_base_station(struct robot_t *robot_p)
 
 int robot_state_in_base_station(struct robot_t *robot_p)
 {
-    FS_COUNTER_INC(robot_state_in_base_station, 1);
+    fs_counter_increment(&counter_state_in_base_station, 1);
 
     /* Wait until plenty of energy is available. */
     if (battery_get_stored_energy_level(&robot_p->battery)
