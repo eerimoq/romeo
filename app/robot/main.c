@@ -402,6 +402,7 @@ static int init()
     uart_init(&uart, &uart_device[0], 38400, qinbuf, sizeof(qinbuf));
     uart_start(&uart);
     sys_set_stdout(&uart.chout);
+    log_set_default_handler_output_channel(sys_get_stdout());
 
     uart_init(&uart3, &uart_device[3], 38400, qinbuf3, sizeof(qinbuf3));
     uart_start(&uart3);

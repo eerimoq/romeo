@@ -29,25 +29,33 @@
 #define PROCESS_PERIOD_NS (PROCESS_PERIOD_MS * 1000000L)
 
 /* Robot modes. */
-#define ROBOT_MODE_MANUAL    0
-#define ROBOT_MODE_AUTOMATIC 1
+enum robot_mode_t {
+    ROBOT_MODE_MANUAL = 0,
+    ROBOT_MODE_AUTOMATIC
+};
 
 /* Robot states. */
-#define ROBOT_STATE_IDLE                       0
-#define ROBOT_STATE_STARTING                   1
-#define ROBOT_STATE_CUTTING                    2
-#define ROBOT_STATE_SEARCHING_FOR_BASE_STATION 3
-#define ROBOT_STATE_IN_BASE_STATION            4
+enum e_robot_state_t {
+    ROBOT_STATE_IDLE = 0,
+    ROBOT_STATE_STARTING,
+    ROBOT_STATE_CUTTING,
+    ROBOT_STATE_SEARCHING_FOR_BASE_STATION,
+    ROBOT_STATE_IN_BASE_STATION
+};
 
 /* Cutting states. */
-#define CUTTING_STATE_FORWARD   0
-#define CUTTING_STATE_BACKWARDS 1
-#define CUTTING_STATE_ROTATING  2
+enum e_cutting_state_t {
+    CUTTING_STATE_FORWARD = 0,
+    CUTTING_STATE_BACKWARDS,
+    CUTTING_STATE_ROTATING
+};
 
 /* Searching for base station states. */
-#define SEARCHING_STATE_SEARCHING_FOR_PERIMETER_WIRE 0
-#define SEARCHING_STATE_ALIGNING_WITH_WIRE           1
-#define SEARCHING_STATE_FOLLOWING_PERIMETER_WIRE     2
+enum e_searching_state_t {
+    SEARCHING_STATE_SEARCHING_FOR_PERIMETER_WIRE = 0,
+    SEARCHING_STATE_ALIGNING_WITH_WIRE,
+    SEARCHING_STATE_FOLLOWING_PERIMETER_WIRE
+};
 
 /* Drive backwards a number of ticks. */
 #ifndef CUTTING_STATE_BACKWARDS_TICKS

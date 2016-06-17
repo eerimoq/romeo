@@ -33,6 +33,14 @@ static struct fs_parameter_t parameter_watchdog_enabled;
 static struct fs_counter_t counter_tick;
 static struct fs_counter_t counter_number_of_state_transitions;
 
+static const char *state_fmt[] = {
+    "idle",
+    "starting",
+    "cutting",
+    "searching_for_base_station",
+    "in_base_station"
+};
+
 /**
  * Handle state transition.
  * @return zero(0) or negative error code
@@ -126,9 +134,9 @@ static int handle_state_transition(struct robot_t *robot_p)
 
     log_object_print(NULL,
                      LOG_NOTICE,
-                     FSTR("state transistion %d -> %d\r\n"),
-                     current,
-                     next);
+                     FSTR("state transistion %s -> %s\r\n"),
+                     state_fmt[current],
+                     state_fmt[next]);
 
     /* Call the transition callback. */
     state_callback = callback(robot_p);
